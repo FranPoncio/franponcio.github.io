@@ -1,0 +1,19 @@
+# Build
+franponcio/dist/
+franponcio/.astro/
+
+# Dependencias
+node_modules/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Logs y entorno
+*.log
+.env
+
+# Sistema operativo / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

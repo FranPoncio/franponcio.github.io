@@ -1,0 +1,85 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import KpiGrid from '../../components/KpiGrid.astro';
+import { conBase } from '../../lib/url';
+
+export const getStaticPaths = (async () => {
+  const proyectos = await getCollection('proyectos');
+  return proyectos.map((proyecto) => ({ params: { id: proyecto.id }, props: { proyecto } }));
+}) satisfies GetStaticPaths;
+
+const { proyecto } = Astro.props;
+const { titulo, resumen, categoria, periodo, rol, stack, kpis, enlace, borrador } = proyecto.data;
+const { Content } = await render(proyecto);
+
+const acento = {
+  datos: 'text-datos',
+  gestion: 'text-gestion',
+  herramienta: 'text-herramienta',
+}[categoria];
+---
+
+<Base titulo={`${titulo} · Francisco Poncio`} descripcion={resumen}>
+  {
+    borrador && (
+      <p class="bg-acento px-6 py-2.5 text-center font-mono text-xs font-semibold text-fondo">
+        BORRADOR — completá este archivo y sacá `borrador: true` del frontmatter.
+      </p>
+    )
+  }
+
+  <header class="border-b border-borde">
+    <div class="mx-auto max-w-3xl px-6 py-16">
+      <a href={conBase("")} class="font-mono text-xs text-tenue transition-colors hover:text-acento">
+        ← volver al panel
+      </a>
+
+      <p class:list={['mt-8 font-mono text-xs uppercase tracking-[0.16em]', acento]}>{categoria}</p>
+      <h1 class="mt-4 text-3xl font-bold leading-tight tracking-tight sm:text-5xl">{titulo}</h1>
+      <p class="mt-5 text-lg leading-relaxed text-tenue">{resumen}</p>
+
+      <dl class="mt-9 flex flex-wrap gap-x-10 gap-y-4 font-mono text-sm">
+        <div>
+          <dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Período</dt>
+          <dd class="mt-1">{periodo}</dd>
+        </div>
+        <div>
+          <dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Rol</dt>
+          <dd class="mt-1">{rol}</dd>
+        </div>
+      </dl>
+
+      {
+        stack.length > 0 && (
+          <div class="mt-7 flex flex-wrap gap-2">
+            {stack.map((t) => (
+              <span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">
+                {t}
+              </span>
+            ))}
+          </div>
+        )
+      }
+
+      {
+        enlace && (
+          <a
+            href={enlace.url}
+            class="mt-8 inline-block rounded border border-acento/50 px-4 py-2 font-mono text-xs text-acento transition-colors hover:bg-acento hover:text-fondo"
+          >
+            {enlace.label} →
+          </a>
+        )
+      }
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-3xl px-6 py-14">
+    <KpiGrid kpis={kpis} />
+    <div class:list={['prosa', kpis.length > 0 && 'mt-14']}>
+      <Content />
+    </div>
+  </main>
+</Base>

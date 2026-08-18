@@ -1,0 +1,82 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import ProyectoCard from '../components/ProyectoCard.astro';
+
+// Los borradores aparecen igual, pero marcados: es preferible ver el hueco a
+// que un proyecto a medio escribir desaparezca sin que te enteres.
+const proyectos = (await getCollection('proyectos')).sort((a, b) => a.data.orden - b.data.orden);
+
+const grupos = [
+  { id: 'datos' as const, titulo: 'Datos y BI', bajada: 'Indicadores, tableros y reporting sobre operación real.' },
+  { id: 'gestion' as const, titulo: 'Gestión y normas', bajada: 'Sistemas de gestión, auditoría y certificación.' },
+  { id: 'herramienta' as const, titulo: 'Herramientas', bajada: 'Software que escribí para resolver un problema concreto.' },
+].map((g) => ({ ...g, items: proyectos.filter((p) => p.data.categoria === g.id) }));
+
+---
+
+<Base
+  titulo="Francisco Poncio · Ingeniería industrial y datos"
+  descripcion="Convierto datos de operación en información con la que se puede decidir. Infraestructura de gas, Power BI, control de proyectos y las herramientas que escribo."
+>
+  <header class="border-b border-borde">
+    <div class="mx-auto max-w-5xl px-6 py-20 sm:py-28">
+      <p class="font-mono text-xs uppercase tracking-[0.2em] text-acento">
+        Ingeniería industrial × Datos
+      </p>
+      <h1 class="mt-5 text-4xl font-bold leading-[1.1] tracking-tight sm:text-6xl">
+        Francisco Poncio
+      </h1>
+      <p class="mt-6 max-w-2xl text-lg leading-relaxed text-tenue">
+        Convierto datos de operación en información con la que se puede decidir. Casi diez años
+        en infraestructura pública de gas en Córdoba, armando los indicadores y el reporting
+        detrás de la obra. Programo desde que las herramientas que necesitaba no existían.
+      </p>
+
+      <dl class="mt-12 flex flex-wrap gap-x-12 gap-y-5 font-mono text-sm">
+        <div>
+          <dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Gasoductos</dt>
+          <dd class="mt-1 text-xl font-semibold tabular-nums">12.000 km</dd>
+        </div>
+        <div>
+          <dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Estaciones</dt>
+          <dd class="mt-1 text-xl font-semibold tabular-nums">150</dd>
+        </div>
+        <div>
+          <dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Conexiones ind.</dt>
+          <dd class="mt-1 text-xl font-semibold tabular-nums">500</dd>
+        </div>
+        <div>
+          <dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Años</dt>
+          <dd class="mt-1 text-xl font-semibold tabular-nums">~10</dd>
+        </div>
+      </dl>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-6">
+    {
+      grupos.map(
+        (grupo) =>
+          grupo.items.length > 0 && (
+            <section class="mt-20" id={grupo.id}>
+              <div class="flex items-baseline gap-4">
+                <h2 class="text-2xl font-semibold tracking-tight">{grupo.titulo}</h2>
+                <span class="font-mono text-xs tabular-nums text-tenue">
+                  {String(grupo.items.length).padStart(2, '0')}
+                </span>
+              </div>
+              <p class="mt-1.5 text-sm text-tenue">{grupo.bajada}</p>
+
+              <div class="mt-7 grid gap-5 md:grid-cols-2">
+                {grupo.items.map((proyecto) => (
+                  <ProyectoCard proyecto={proyecto} />
+                ))}
+              </div>
+            </section>
+          ),
+      )
+    }
+
+  </main>
+</Base>
