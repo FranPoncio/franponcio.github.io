@@ -1,0 +1,80 @@
+@import 'tailwindcss';
+
+/*
+ * Tokens del portfolio. Tailwind 4 genera las utilidades desde acá:
+ * --color-panel -> bg-panel / border-panel · --font-mono -> font-mono
+ * La paleta acompaña a PMI-Toolbox para que todo se lea como la misma marca.
+ */
+@theme {
+  --color-fondo: #0b0f14;
+  --color-panel: #121820;
+  --color-panel-alto: #1a222d;
+  --color-borde: #243040;
+  --color-borde-vivo: #33445a;
+  --color-texto: #e8eef5;
+  --color-tenue: #8ba0b6;
+  --color-acento: #ff9f43;
+
+  /* Un color por categoría: la misma señal en la tarjeta y en el caso. */
+  --color-datos: #38bdf8;
+  --color-gestion: #4ade80;
+  --color-herramienta: #a78bfa;
+
+  --font-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+}
+
+html { scroll-behavior: smooth; color-scheme: dark; }
+body {
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Trama fina de fondo — el "panel" de sala de control. */
+.trama {
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.028) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.028) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* Prosa de los casos. El Markdown sale sin clases: se estila acá una vez. */
+.prosa { line-height: 1.75; }
+.prosa > * + * { margin-top: 1.15rem; }
+.prosa h2 {
+  font-size: 1.35rem; font-weight: 600; letter-spacing: -0.01em;
+  margin-top: 2.75rem; padding-top: 1.5rem; border-top: 1px solid var(--color-borde);
+}
+.prosa h3 { font-size: 1.08rem; font-weight: 600; margin-top: 2rem; color: var(--color-acento); }
+.prosa p, .prosa li { color: #c6d4e3; }
+.prosa strong { color: var(--color-texto); font-weight: 600; }
+.prosa a { color: var(--color-acento); text-decoration: underline; text-underline-offset: 3px; }
+.prosa ul, .prosa ol { padding-left: 1.3rem; }
+.prosa ul { list-style: disc; }
+.prosa ol { list-style: decimal; }
+.prosa li + li { margin-top: 0.45rem; }
+.prosa code {
+  font-family: var(--font-mono); font-size: 0.87em;
+  background: var(--color-panel-alto); border: 1px solid var(--color-borde);
+  border-radius: 4px; padding: 0.12em 0.4em;
+}
+.prosa blockquote {
+  border-left: 3px solid var(--color-acento);
+  padding: 0.35rem 0 0.35rem 1.1rem; color: var(--color-tenue);
+}
+.prosa table {
+  width: 100%; border-collapse: collapse; font-size: 0.93rem;
+  display: block; overflow-x: auto;
+}
+.prosa th, .prosa td { border: 1px solid var(--color-borde); padding: 0.55rem 0.8rem; text-align: left; }
+.prosa th { background: var(--color-panel-alto); font-weight: 600; }
+.prosa img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--color-borde); }
+
+/* Los componentes React embebidos en .mdx caen dentro de .prosa y heredarían
+   viñetas y márgenes de prosa. `.isla` corta esa herencia. */
+.prosa .isla ul, .prosa .isla ol { list-style: none; padding-left: 0; }
+.prosa .isla li + li, .prosa .isla > * + * { margin-top: 0; }
+.prosa .isla p, .prosa .isla li { color: inherit; }
+.prosa .isla a { text-decoration: none; }

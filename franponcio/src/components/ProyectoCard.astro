@@ -1,0 +1,82 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { conBase } from '../lib/url';
+
+interface Props {
+  proyecto: CollectionEntry<'proyectos'>;
+}
+
+const { proyecto } = Astro.props;
+const { titulo, resumen, categoria, periodo, rol, stack, kpis, borrador } = proyecto.data;
+
+// Tailwind necesita ver las clases enteras para generarlas, así que el mapa
+// guarda strings completos en vez de armarlos con `border-${categoria}`.
+const acento = {
+  datos: { borde: 'group-hover:border-datos/60', texto: 'text-datos', punto: 'bg-datos' },
+  gestion: { borde: 'group-hover:border-gestion/60', texto: 'text-gestion', punto: 'bg-gestion' },
+  herramienta: {
+    borde: 'group-hover:border-herramienta/60',
+    texto: 'text-herramienta',
+    punto: 'bg-herramienta',
+  },
+}[categoria];
+
+const destacado = kpis[0];
+---
+
+<a
+  href={conBase(`proyectos/${proyecto.id}/`)}
+  class:list={[
+    'group flex flex-col rounded-lg border border-borde bg-panel p-6 transition-colors hover:bg-panel-alto',
+    acento.borde,
+  ]}
+>
+  <div class="flex items-center gap-2.5">
+    <span class:list={['size-1.5 rounded-full', acento.punto]}></span>
+    <span class:list={['font-mono text-[0.68rem] uppercase tracking-[0.14em]', acento.texto]}>
+      {categoria}
+    </span>
+    <span class="ml-auto font-mono text-[0.68rem] text-tenue">{periodo}</span>
+  </div>
+
+  <h3 class="mt-4 text-xl font-semibold leading-snug tracking-tight">
+    {titulo}
+    {
+      borrador && (
+        <span class="ml-2 align-middle rounded bg-acento/15 px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider text-acento">
+          borrador
+        </span>
+      )
+    }
+  </h3>
+  <p class="mt-2 text-sm leading-relaxed text-tenue">{resumen}</p>
+
+  {
+    destacado && (
+      <p class="mt-5 font-mono text-sm">
+        <span class="text-2xl font-semibold tabular-nums">{destacado.valor}</span>
+        <span class="ml-2 text-tenue">{destacado.label}</span>
+      </p>
+    )
+  }
+
+  <div class="mt-auto pt-5 flex flex-wrap items-center gap-x-3 gap-y-2">
+    {
+      stack.slice(0, 3).map((t) => (
+        <span class="rounded border border-borde px-2 py-0.5 font-mono text-[0.68rem] text-tenue">
+          {t}
+        </span>
+      ))
+    }
+    <span
+      class:list={[
+        'ml-auto font-mono text-xs opacity-0 transition-opacity group-hover:opacity-100',
+        acento.texto,
+      ]}
+    >
+      ver caso →
+    </span>
+  </div>
+
+  <span class="sr-only">Rol: {rol}</span>
+</a>
