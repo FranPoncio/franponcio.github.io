@@ -11,8 +11,13 @@ franponcio.github.io/
 ├── proyectos/      El contenido. Una carpeta por proyecto.
 ├── formacion/      Certificados y cursos. Un archivo por curso.
 ├── testing/        Pruebas y cursos. No se publica.
+├── .vscode/        Extensiones y tareas recomendadas.
 └── .github/        El workflow que buildea y despliega.
 ```
+
+> ⚠ **Los ocho proyectos tienen texto de relleno inventado**, puesto para ver la
+> estructura completa. Todos están en `borrador: true`, así que muestran una
+> banda de aviso. **Reemplazá el texto antes de sacar esa línea.**
 
 La idea: **el sitio y el contenido están separados.** Para agregar un proyecto
 no hace falta entrar a `franponcio/` ni saber nada de Astro — se crea una
@@ -123,6 +128,30 @@ npm run dev      # localhost:4321
 npm run build
 npm run check    # errores de tipos y de contenido
 ```
+
+### Desde VS Code
+
+```bash
+git clone https://github.com/FranPoncio/franponcio.github.io
+code franponcio.github.io
+cd franponcio.github.io/franponcio && npm install
+```
+
+Al abrirlo, VS Code ofrece instalar las extensiones de `.vscode/extensions.json`
+— aceptá. La de **Astro** da resaltado y autocompletado en los `.astro`; la de
+**Tailwind** sugiere las clases.
+
+**Para levantar el sitio:** `Ctrl+Shift+P` → *Run Task* → **dev**. Abrí
+`localhost:4321` y dejalo abierto: cada vez que guardás un `.md`, el navegador
+se actualiza solo.
+
+**Antes de pushear:** *Run Task* → **check**. Te dice si a algún proyecto le
+falta un campo obligatorio, que es lo único que puede romper el deploy.
+
+**Para publicar:** pestaña de *Source Control* (`Ctrl+Shift+G`), escribís el
+mensaje, **Commit** y **Sync Changes**. En ~35 segundos está online.
+
+El único momento en que hace falta la terminal es el `npm install` inicial.
 
 ## Deploy
 
