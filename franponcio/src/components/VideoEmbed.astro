@@ -1,0 +1,57 @@
+---
+interface Props {
+  url: string;
+  titulo: string;
+}
+
+const { url, titulo } = Astro.props;
+
+/**
+ * Convierte una URL normal de YouTube o Vimeo en su URL de embed.
+ * Acepta youtube.com/watch?v=, youtu.be/ y vimeo.com/.
+ * Si no reconoce el formato devuelve null y el componente muestra un link.
+ */
+function aEmbed(u: string): string | null {
+  try {
+    const { hostname, pathname, searchParams } = new URL(u);
+    if (hostname.includes('youtube.com')) {
+      const v = searchParams.get('v');
+      return v ? `https://www.youtube-nocookie.com/embed/${v}` : null;
+    }
+    if (hostname === 'youtu.be') {
+      return `https://www.youtube-nocookie.com/embed${pathname}`;
+    }
+    if (hostname.includes('vimeo.com')) {
+      return `https://player.vimeo.com/video${pathname}`;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+const embed = aEmbed(url);
+---
+
+{
+  embed ? (
+    <div class="overflow-hidden rounded-lg border border-borde bg-panel">
+      {/* aspect-video mantiene 16:9 sin JavaScript ni padding hacks */}
+      <iframe
+        class="aspect-video w-full"
+        src={embed}
+        title={titulo}
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+      />
+    </div>
+  ) : (
+    <a
+      href={url}
+      class="block rounded-lg border border-borde bg-panel p-4 font-mono text-sm text-acento"
+    >
+      Ver el video →
+    </a>
+  )
+}

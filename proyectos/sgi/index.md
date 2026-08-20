@@ -44,5 +44,6 @@ El estado final y qué sostiene el sistema hoy.
 
 ---
 
-Los PDFs van en `public/proyectos/sgi/`. **Cuidado:** procedimientos y
+Los PDFs van en `franponcio/public/proyectos/sgi/` (los PDF no pasan por el
+optimizador de imágenes) y se linkean como `/proyectos/sgi/archivo.pdf`. **Cuidado:** procedimientos y
 certificados suelen ser propiedad del cliente. Ante la duda, un extracto.

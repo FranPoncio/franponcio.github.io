@@ -19,6 +19,25 @@ kpis:
   - label: Estándar
     valor: 'BID / IFC'
     nota: 'reporting a organismos'
+
+# ── Lo visual ────────────────────────────────────────────────────────────
+# Las imágenes viven en ESTA misma carpeta, al lado del index.md.
+# Astro las optimiza y les pone hash: no se sirven en tamaño original.
+portada:
+  src: ./portada.png
+  alt: '[Describí la foto: p. ej. traza del gasoducto sobre la ruta provincial]'
+
+# Video opcional — pegá la URL normal de YouTube o Vimeo, se convierte a embed:
+# video: https://www.youtube.com/watch?v=XXXXXXXXXXX
+
+galeria:
+  - src: ./traza.png
+    alt: '[Descripción de la imagen]'
+    pie: '[Pie de foto — qué se ve y por qué importa]'
+  - src: ./estacion.png
+    alt: '[Descripción de la imagen]'
+    pie: '[Pie de foto]'
+
 borrador: true
 ---
 
@@ -86,5 +105,6 @@ mostrar sin problema.
 Un caso bien escrito sin un solo dato real vale más que uno con datos que no
 podés mostrar.
 
-Las imágenes van en `franponcio/public/proyectos/gasoductos/` y se referencian
-como `/proyectos/gasoductos/archivo.png`.
+Las imágenes van en **esta misma carpeta**, al lado del `index.md`, y se
+declaran en el frontmatter (`portada` y `galeria`). Astro las optimiza y les
+pone hash automáticamente — una foto de 4 MB no se sirve en tamaño original.

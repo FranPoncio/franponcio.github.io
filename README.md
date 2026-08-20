@@ -9,6 +9,7 @@ Publicado en **https://franponcio.github.io**
 franponcio.github.io/
 ├── franponcio/     El sitio (Astro). Layout, estilos y config.
 ├── proyectos/      El contenido. Una carpeta por proyecto.
+├── formacion/      Certificados y cursos. Un archivo por curso.
 ├── testing/        Pruebas y cursos. No se publica.
 └── .github/        El workflow que buildea y despliega.
 ```
@@ -55,6 +56,49 @@ propósito: mejor que rompa antes de publicar que después.
 
 > El nombre de la carpeta se pasa a minúsculas en la URL:
 > `proyectos/RutasArgentinas/` → `/proyectos/rutasargentinas/`.
+
+### Imágenes y video
+
+Las imágenes van **en la misma carpeta del proyecto**, al lado del `index.md`.
+Astro las optimiza (WebP, varios tamaños, hash) — no se sirven en tamaño
+original:
+
+```md
+---
+portada:
+  src: ./portada.jpg
+  alt: Traza del gasoducto sobre la ruta provincial   # obligatorio
+video: https://www.youtube.com/watch?v=XXXXXXXXXXX     # o Vimeo
+galeria:
+  - src: ./traza.jpg
+    alt: Descripción de la imagen
+    pie: Pie de foto opcional
+---
+```
+
+**Una portada sin `alt` rompe el build a propósito.** Una imagen sin descripción
+es invisible para quien usa lector de pantalla, y para Google.
+
+Los PDFs son distintos: van en `franponcio/public/proyectos/<nombre>/` porque no
+pasan por el optimizador de imágenes.
+
+## Agregar un curso o certificado
+
+Creá `formacion/<curso>.md`. Sólo frontmatter, no necesita cuerpo:
+
+```md
+---
+titulo: IBM Data Science Professional Certificate
+entidad: IBM · Coursera
+estado: cursando          # cursando | completado | planificado
+periodo: '2025 — 2026'
+orden: 1
+credencial: https://...   # opcional, link a la credencial verificable
+nota: Una línea sobre qué cubre.   # opcional
+---
+```
+
+Aparece en la banda **Formación** del home, en la columna de su `estado`.
 
 ## Los proyectos de hoy
 
