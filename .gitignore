@@ -15,5 +15,11 @@ node_modules/
 # Sistema operativo / editores
 .DS_Store
 Thumbs.db
-.vscode/
 .idea/
+
+# VS Code: la config compartida del proyecto SÍ se versiona (extensiones
+# recomendadas y tareas), lo personal de cada uno no.
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json

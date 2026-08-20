@@ -1,0 +1,9 @@
+{
+  // VS Code sugiere estas al abrir el repo por primera vez.
+  "recommendations": [
+    "astro-build.astro-vscode",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "yzhang.markdown-all-in-one"
+  ]
+}
