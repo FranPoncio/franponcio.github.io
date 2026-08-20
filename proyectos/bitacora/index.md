@@ -1,39 +1,50 @@
 ---
 titulo: Bitácora Interior
-resumen: Progressive web app para escritura diaria — dictado por voz, entradas estructuradas y visualización de los datos propios.
+resumen: Progressive web app para escritura diaria — dictado por voz, entradas estructuradas y visualización de los propios datos a lo largo del tiempo.
 categoria: herramienta
-orden: 6
-periodo: '[2025 — 2026]'
+orden: 7
+periodo: 2025 — 2026
 rol: Diseño y desarrollo
 stack: ['PWA', 'React', 'TypeScript', 'Web Speech API']
 kpis:
   - label: Tipo
-    valor: 'PWA'
+    valor: PWA
     nota: 'instalable, funciona offline'
   - label: Entrada
-    valor: 'Voz'
+    valor: Voz
     nota: 'dictado en el navegador'
+  - label: Datos
+    valor: Local
+    nota: 'nunca salen del dispositivo'
 borrador: true
 ---
 
-> **Plantilla.** Y una opinión que te debo: para un puesto de ingeniería/datos
-> este proyecto manda **señal más floja** que los de gasoductos o EVM. Es
-> personal y el evaluador no puede juzgar el dominio. Yo lo dejaría, pero abajo
-> de los otros — que es justo lo que hace `orden: 6`.
+> **Texto de relleno.** Reemplazalo por lo tuyo.
 
 ## El problema
 
-Qué te faltaba de las apps de journaling que ya existen.
+Las apps de journaling que probé pedían cuenta, sincronizaban a un servidor
+ajeno y guardaban texto personal en infraestructura de otro. Para lo que es un
+diario, eso descalifica antes de evaluar cualquier otra cosa.
 
 ## Las decisiones
 
-- **Por qué PWA y no app nativa.** Instalable, sin tiendas, un solo código.
-- **Dictado por voz.** Qué API usaste y qué pasa cuando el navegador no la
-  soporta.
-- **Dónde viven los datos.** Si es un diario personal, esto es lo primero que
-  alguien va a preguntar. Contestalo explícito.
+- **PWA y no app nativa.** Instalable desde el navegador, funciona sin conexión,
+  un solo código para escritorio y celular, sin pasar por ninguna tienda.
 
-## La parte interesante para un portfolio de datos
+- **Dictado por voz con la Web Speech API.** Escribir en el teclado del celular
+  desalienta la entrada larga. Con dictado, una entrada de cinco minutos se
+  vuelve viable. Cuando el navegador no soporta la API, el campo de texto sigue
+  ahí — la función se degrada, no rompe.
 
-Visualizar tus propias entradas es el ángulo que rescata este proyecto: ¿qué se
-puede leer de un año de escritura? Eso sí es trabajo de datos.
+- **Los datos no salen del dispositivo.** Sin cuenta, sin backend, sin
+  analytics. Es la decisión que define el producto: la exportación es
+  responsabilidad del usuario, y eso es a propósito.
+
+## El ángulo de datos
+
+La parte que rescata este proyecto para un portfolio técnico no es el editor:
+es **qué se puede leer de un año de escritura propia**. Frecuencia, extensión,
+recurrencia de temas, variación estacional. Un diario es una serie temporal que
+uno mismo generó, y visualizarla es trabajo de datos igual que cualquier otro
+— con la ventaja de que conocés el dominio mejor que nadie.

@@ -3,12 +3,12 @@ titulo: Indicadores de infraestructura de gas
 resumen: Sistema de indicadores, tableros y reporting sobre la red de gas de Córdoba, preparado bajo estándares BID / IFC.
 categoria: datos
 orden: 1
-periodo: '[2015 — 2024]'
+periodo: 2015 — 2024
 rol: Indicadores, tableros y reporting
 stack: ['Power BI', 'DAX', 'SQL', 'Power Query', 'ETL']
 kpis:
   - label: Red gestionada
-    valor: '12.000 km'
+    valor: 12.000 km
     nota: 'gasoductos y ramales'
   - label: Estaciones
     valor: '150'
@@ -17,74 +17,79 @@ kpis:
     valor: '500'
     nota: 'industriales'
   - label: Estándar
-    valor: 'BID / IFC'
+    valor: BID / IFC
     nota: 'reporting a organismos'
 
-# ── Lo visual ────────────────────────────────────────────────────────────
-# Las imágenes viven en ESTA misma carpeta, al lado del index.md.
-# Astro las optimiza y les pone hash: no se sirven en tamaño original.
 portada:
   src: ./portada.png
-  alt: '[Describí la foto: p. ej. traza del gasoducto sobre la ruta provincial]'
-
-# Video opcional — pegá la URL normal de YouTube o Vimeo, se convierte a embed:
-# video: https://www.youtube.com/watch?v=XXXXXXXXXXX
+  alt: '[Reemplazar por una foto real: traza del gasoducto o sala de control]'
 
 galeria:
   - src: ./traza.png
-    alt: '[Descripción de la imagen]'
-    pie: '[Pie de foto — qué se ve y por qué importa]'
+    alt: '[Reemplazar por una captura del tablero con datos sintéticos]'
+    pie: '[Pie de foto — qué muestra y por qué importa]'
   - src: ./estacion.png
-    alt: '[Descripción de la imagen]'
+    alt: '[Reemplazar por un diagrama del modelo de datos]'
     pie: '[Pie de foto]'
 
 borrador: true
 ---
 
-> **Este es el caso que más te diferencia.** La estructura está armada; el
-> contenido lo ponés vos. Leé la nota de confidencialidad al final **antes** de
-> escribir — el repo es público.
+> **Texto de relleno.** Reemplazalo por lo tuyo. Leé la nota de confidencialidad
+> del final **antes** de escribir — el repo es público.
 
 ## El contexto
 
 Casi diez años en infraestructura pública de gas en Córdoba. La obra la hacían
-otros: **lo tuyo era saber en qué estado estaba**, y que eso se pudiera reportar
-a organismos que financian bajo estándares internacionales.
+otros: lo mío era **saber en qué estado estaba** y que eso se pudiera reportar a
+los organismos que financian, bajo sus estándares.
 
-Ubicá al lector rápido: qué organización, qué escala, quién consumía la
-información — dirección, organismos, áreas técnicas.
+La red incluye gasoductos troncales, ramales de distribución, estaciones de
+regulación de presión y conexiones industriales. Cada uno de esos activos tiene
+un ciclo distinto: se proyecta, se licita, se ejecuta, se habilita, se opera. El
+reporting tenía que cubrir todo eso con una sola definición de "avance".
 
 ## El problema
 
-Acá está lo interesante. Algunas preguntas que casi seguro respondiste:
+Los datos existían, pero repartidos: el avance físico lo llevaba inspección en
+planillas por obra, el financiero venía de administración con otro corte de
+fechas, y las habilitaciones las registraba operaciones en un sistema aparte.
 
-- ¿De dónde salían los datos antes? ¿Planillas sueltas, sistemas que no se
-  hablaban, partes de obra en papel?
-- ¿Cuánto tardaba armar el informe mensual, y en qué se iba ese tiempo?
-- ¿Qué pasaba cuando dos áreas reportaban el mismo avance con números distintos?
+Armar el informe mensual llevaba una semana, y la mayor parte de ese tiempo no
+era analizar: era conciliar. Cuando dos áreas reportaban avances distintos para
+la misma obra, casi nunca era un error de carga — **era que cada una entendía
+"avance" de una manera distinta**.
 
-Esa última suele ser la más reveladora: el problema no era técnico, era que no
-había una definición única de "avance".
+Esa fue la observación que ordenó todo el proyecto. El problema no era de
+herramientas.
 
 ## Qué construí
 
-Las decisiones, no las tareas. Esto es lo que separa un caso de estudio de un
-"hice dashboards":
+- **Granularidad por tramo, no por obra.** Una obra puede tener frentes en
+  estados muy distintos; promediarlos esconde justo lo que hay que ver. El tramo
+  es la unidad más chica que tiene certificación propia, y por eso es la que
+  permite reconciliar lo físico con lo financiero sin inventar prorrateos.
 
-- **Modelo de datos.** Qué granularidad elegiste — ¿por tramo? ¿por estación?
-  ¿por obra? — y por qué esa y no otra.
-- **Definición de los KPI.** Avance físico contra avance financiero es la trampa
-  clásica: un 40 % de caño tendido no es un 40 % de presupuesto ejecutado. Contá
-  cómo lo resolviste y qué discusión destrabó.
-- **El estándar BID / IFC.** Qué exigía y cómo condicionó el modelo. **Esto es
-  lo que más te diferencia**: mucha gente hace Power BI, muy poca reportó bajo
-  estándar de organismo multilateral.
-- **ETL.** De dónde venían los datos y qué hubo que limpiar para que cerraran.
+- **Avance físico y financiero como métricas separadas, siempre juntas en
+  pantalla.** No se promedian ni se combinan en un índice único. Un 40 % de caño
+  tendido no es un 40 % de presupuesto ejecutado, y la brecha entre las dos
+  curvas es la información — no un error a corregir.
+
+- **El estándar BID / IFC.** Exigía trazabilidad del dato hasta el documento
+  respaldatorio: cada número del informe tiene que poder señalar el certificado
+  que lo origina. Eso condicionó el modelo entero — obligó a guardar el vínculo
+  al documento como parte del hecho, no como un anexo. Es la parte que no habría
+  hecho por mi cuenta y la que más valor terminó teniendo.
+
+- **ETL.** Ingesta de las tres fuentes con normalización de fechas al corte
+  contable y validaciones que rechazan la carga en vez de dejar pasar un dato
+  inconsistente.
 
 ## Resultado
 
-Con qué se decidía después que no se podía decidir antes. Si podés, una decisión
-concreta que se tomó mirando el tablero.
+El informe mensual pasó de una semana a un día, pero lo importante no fue el
+tiempo: fue que **la discusión cambió de tema**. Se dejó de discutir de quién
+era el número correcto para empezar a discutir qué hacer con él.
 
 ---
 
@@ -93,18 +98,13 @@ concreta que se tomó mirando el tablero.
 Los datos operativos de la red **son de tu empleador, no tuyos**. Y este repo es
 público: lo que subas queda en el historial de git aunque después lo borres.
 
-Lo que sí es tuyo es el **método**: el modelo de datos, la definición de los
-indicadores, la arquitectura del reporting. Eso es lo que vale y lo que podés
-mostrar sin problema.
+Lo que sí es tuyo es el **método** — el modelo de datos, la definición de los
+indicadores, la arquitectura del reporting.
 
 - Capturas con **datos sintéticos** o agregados, nunca cifras reales de operación.
 - Contá el **cómo**, no los valores que arrojó.
 - Las cifras de escala que ya tenés públicas en tu perfil de GitHub (12.000 km,
   150 estaciones, 500 conexiones) sirven para dar contexto.
 
-Un caso bien escrito sin un solo dato real vale más que uno con datos que no
-podés mostrar.
-
 Las imágenes van en **esta misma carpeta**, al lado del `index.md`, y se
-declaran en el frontmatter (`portada` y `galeria`). Astro las optimiza y les
-pone hash automáticamente — una foto de 4 MB no se sirve en tamaño original.
+declaran en el frontmatter. Astro las optimiza y les pone hash automáticamente.
