@@ -1,0 +1,86 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  cursos: CollectionEntry<'formacion'>[];
+}
+
+const { cursos } = Astro.props;
+
+// Orden deliberado: primero lo que estoy haciendo (es lo más vivo), después lo
+// terminado (lo que respalda), y al final lo que viene (muestra dirección).
+const grupos = [
+  { estado: 'cursando' as const, titulo: 'Cursando', punto: 'bg-acento', texto: 'text-acento' },
+  { estado: 'completado' as const, titulo: 'Completado', punto: 'bg-gestion', texto: 'text-gestion' },
+  { estado: 'planificado' as const, titulo: 'En planificación', punto: 'bg-tenue', texto: 'text-tenue' },
+].map((g) => ({
+  ...g,
+  items: cursos
+    .filter((c) => c.data.estado === g.estado)
+    .sort((a, b) => a.data.orden - b.data.orden),
+}));
+---
+
+<section class="border-b border-borde bg-panel/40" id="formacion">
+  <div class="mx-auto max-w-5xl px-6 py-14">
+    <div class="flex items-baseline gap-4">
+      <h2 class="text-2xl font-semibold tracking-tight">Formación</h2>
+      <span class="font-mono text-xs tabular-nums text-tenue">
+        {String(cursos.length).padStart(2, '0')}
+      </span>
+    </div>
+    <p class="mt-1.5 text-sm text-tenue">Certificaciones y cursos — lo hecho, lo en curso y lo que viene.</p>
+
+    <div class="mt-8 grid gap-px overflow-hidden rounded-lg border border-borde bg-borde md:grid-cols-3">
+      {
+        grupos.map((grupo) => (
+          <div class="bg-panel p-5">
+            <p class="flex items-center gap-2">
+              <span class:list={['size-1.5 rounded-full', grupo.punto]} />
+              <span
+                class:list={[
+                  'font-mono text-[0.68rem] uppercase tracking-[0.14em]',
+                  grupo.texto,
+                ]}
+              >
+                {grupo.titulo}
+              </span>
+              <span class="ml-auto font-mono text-[0.68rem] tabular-nums text-tenue">
+                {grupo.items.length}
+              </span>
+            </p>
+
+            {grupo.items.length === 0 ? (
+              <p class="mt-4 text-sm text-tenue/60">—</p>
+            ) : (
+              <ul class="mt-4 space-y-4">
+                {grupo.items.map((curso) => (
+                  <li>
+                    <p class="text-sm font-medium leading-snug">
+                      {curso.data.credencial ? (
+                        <a
+                          href={curso.data.credencial}
+                          class="underline decoration-borde-vivo underline-offset-4 transition-colors hover:text-acento"
+                        >
+                          {curso.data.titulo}
+                        </a>
+                      ) : (
+                        curso.data.titulo
+                      )}
+                    </p>
+                    <p class="mt-0.5 font-mono text-[0.68rem] text-tenue">
+                      {curso.data.entidad} · {curso.data.periodo}
+                    </p>
+                    {curso.data.nota && (
+                      <p class="mt-1 text-xs leading-snug text-tenue">{curso.data.nota}</p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

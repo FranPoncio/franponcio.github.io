@@ -2,10 +2,12 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import ProyectoCard from '../components/ProyectoCard.astro';
+import Formacion from '../components/Formacion.astro';
 
 // Los borradores aparecen igual, pero marcados: es preferible ver el hueco a
 // que un proyecto a medio escribir desaparezca sin que te enteres.
 const proyectos = (await getCollection('proyectos')).sort((a, b) => a.data.orden - b.data.orden);
+const cursos = await getCollection('formacion');
 
 const grupos = [
   { id: 'datos' as const, titulo: 'Datos y BI', bajada: 'Indicadores, tableros y reporting sobre operación real.' },
@@ -53,6 +55,8 @@ const grupos = [
       </dl>
     </div>
   </header>
+
+  <Formacion cursos={cursos} />
 
   <main class="mx-auto max-w-5xl px-6">
     {

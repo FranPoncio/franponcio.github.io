@@ -73,5 +73,6 @@ contexto y no por costumbre.
 
 ---
 
-Las capturas van en `franponcio/public/proyectos/evm-powerbi/` y se referencian
-como `/proyectos/evm-powerbi/curva-s.png`.
+Las imágenes van en **esta misma carpeta**, al lado del `index.md`, y se
+declaran en el frontmatter (`portada` y `galeria`). Astro las optimiza y les
+pone hash automáticamente — una foto de 4 MB no se sirve en tamaño original.
