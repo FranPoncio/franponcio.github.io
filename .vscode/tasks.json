@@ -6,7 +6,7 @@
       "label": "dev",
       "type": "shell",
       "command": "npm run dev",
-      "options": { "cwd": "${workspaceFolder}/franponcio" },
+      "options": { "cwd": "${workspaceFolder}/franponcioPage" },
       "isBackground": true,
       "problemMatcher": []
     },
@@ -14,7 +14,7 @@
       "label": "build",
       "type": "shell",
       "command": "npm run build",
-      "options": { "cwd": "${workspaceFolder}/franponcio" },
+      "options": { "cwd": "${workspaceFolder}/franponcioPage" },
       "group": "build",
       "problemMatcher": []
     },
@@ -23,7 +23,7 @@
       "label": "check",
       "type": "shell",
       "command": "npm run check",
-      "options": { "cwd": "${workspaceFolder}/franponcio" },
+      "options": { "cwd": "${workspaceFolder}/franponcioPage" },
       "problemMatcher": []
     }
   ]

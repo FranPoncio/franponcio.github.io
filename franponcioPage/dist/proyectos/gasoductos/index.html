@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Indicadores de infraestructura de gas · Francisco Poncio</title><meta name="description" content="Sistema de indicadores, tableros y reporting sobre la red de gas de Córdoba, preparado bajo estándares BID / IFC."><meta property="og:title" content="Indicadores de infraestructura de gas · Francisco Poncio"><meta property="og:description" content="Sistema de indicadores, tableros y reporting sobre la red de gas de Córdoba, preparado bajo estándares BID / IFC."><meta property="og:type" content="website"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/_astro_assets.w-byGBKm.css"></head><body class="trama min-h-screen"><p class="bg-acento px-6 py-2.5 text-center font-mono text-xs font-semibold text-fondo">BORRADOR — completá este archivo y sacá `borrador: true` del frontmatter.</p><header class="border-b border-borde"><div class="mx-auto max-w-3xl px-6 py-16"><a href="/" class="font-mono text-xs text-tenue transition-colors hover:text-acento">← volver al panel</a><p class="mt-8 font-mono text-xs uppercase tracking-[0.16em] text-datos">datos</p><h1 class="mt-4 text-3xl font-bold leading-tight tracking-tight sm:text-5xl">Indicadores de infraestructura de gas</h1><p class="mt-5 text-lg leading-relaxed text-tenue">Sistema de indicadores, tableros y reporting sobre la red de gas de Córdoba, preparado bajo estándares BID / IFC.</p><dl class="mt-9 flex flex-wrap gap-x-10 gap-y-4 font-mono text-sm"><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Período</dt><dd class="mt-1">2015 — 2024</dd></div><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Rol</dt><dd class="mt-1">Indicadores, tableros y reporting</dd></div></dl><div class="mt-7 flex flex-wrap gap-2"><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Power BI</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">DAX</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">SQL</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Power Query</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">ETL</span></div></div></header><div class="border-b border-borde"><img src="/_astro/portada.BkeVEMMr_ZtxUH8.webp" srcset="/_astro/portada.BkeVEMMr_yCLPI.webp 640w, /_astro/portada.BkeVEMMr_1Cv7YT.webp 1024w, /_astro/portada.BkeVEMMr_ZtxUH8.webp 1600w" alt="[Reemplazar por una foto real: traza del gasoducto o sala de control]" sizes="100vw" loading="eager" decoding="async" width="1600" height="900" class="h-[38vh] w-full object-cover sm:h-[46vh]"></div><main class="mx-auto max-w-3xl px-6 py-14"><dl class="grid gap-px bg-borde border border-borde rounded-lg overflow-hidden sm:grid-cols-2 lg:grid-cols-4"><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Red gestionada</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">12.000 km</dd><p class="mt-1 text-xs text-tenue leading-snug">gasoductos y ramales</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Estaciones</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">150</dd><p class="mt-1 text-xs text-tenue leading-snug">de regulación de presión</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Conexiones</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">500</dd><p class="mt-1 text-xs text-tenue leading-snug">industriales</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Estándar</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">BID / IFC</dd><p class="mt-1 text-xs text-tenue leading-snug">reporting a organismos</p></div></dl><div class="prosa mt-14"><blockquote>
+<p><strong>Texto de relleno.</strong> Reemplazalo por lo tuyo. Leé la nota de confidencialidad
+del final <strong>antes</strong> de escribir — el repo es público.</p>
+</blockquote>
+<h2 id="el-contexto">El contexto</h2>
+<p>Casi diez años en infraestructura pública de gas en Córdoba. La obra la hacían
+otros: lo mío era <strong>saber en qué estado estaba</strong> y que eso se pudiera reportar a
+los organismos que financian, bajo sus estándares.</p>
+<p>La red incluye gasoductos troncales, ramales de distribución, estaciones de
+regulación de presión y conexiones industriales. Cada uno de esos activos tiene
+un ciclo distinto: se proyecta, se licita, se ejecuta, se habilita, se opera. El
+reporting tenía que cubrir todo eso con una sola definición de “avance”.</p>
+<h2 id="el-problema">El problema</h2>
+<p>Los datos existían, pero repartidos: el avance físico lo llevaba inspección en
+planillas por obra, el financiero venía de administración con otro corte de
+fechas, y las habilitaciones las registraba operaciones en un sistema aparte.</p>
+<p>Armar el informe mensual llevaba una semana, y la mayor parte de ese tiempo no
+era analizar: era conciliar. Cuando dos áreas reportaban avances distintos para
+la misma obra, casi nunca era un error de carga — <strong>era que cada una entendía
+“avance” de una manera distinta</strong>.</p>
+<p>Esa fue la observación que ordenó todo el proyecto. El problema no era de
+herramientas.</p>
+<h2 id="qué-construí">Qué construí</h2>
+<ul>
+<li>
+<p><strong>Granularidad por tramo, no por obra.</strong> Una obra puede tener frentes en
+estados muy distintos; promediarlos esconde justo lo que hay que ver. El tramo
+es la unidad más chica que tiene certificación propia, y por eso es la que
+permite reconciliar lo físico con lo financiero sin inventar prorrateos.</p>
+</li>
+<li>
+<p><strong>Avance físico y financiero como métricas separadas, siempre juntas en
+pantalla.</strong> No se promedian ni se combinan en un índice único. Un 40 % de caño
+tendido no es un 40 % de presupuesto ejecutado, y la brecha entre las dos
+curvas es la información — no un error a corregir.</p>
+</li>
+<li>
+<p><strong>El estándar BID / IFC.</strong> Exigía trazabilidad del dato hasta el documento
+respaldatorio: cada número del informe tiene que poder señalar el certificado
+que lo origina. Eso condicionó el modelo entero — obligó a guardar el vínculo
+al documento como parte del hecho, no como un anexo. Es la parte que no habría
+hecho por mi cuenta y la que más valor terminó teniendo.</p>
+</li>
+<li>
+<p><strong>ETL.</strong> Ingesta de las tres fuentes con normalización de fechas al corte
+contable y validaciones que rechazan la carga en vez de dejar pasar un dato
+inconsistente.</p>
+</li>
+</ul>
+<h2 id="resultado">Resultado</h2>
+<p>El informe mensual pasó de una semana a un día, pero lo importante no fue el
+tiempo: fue que <strong>la discusión cambió de tema</strong>. Se dejó de discutir de quién
+era el número correcto para empezar a discutir qué hacer con él.</p>
+<hr>
+<h3 id="-antes-de-publicar-confidencialidad">⚠ Antes de publicar: confidencialidad</h3>
+<p>Los datos operativos de la red <strong>son de tu empleador, no tuyos</strong>. Y este repo es
+público: lo que subas queda en el historial de git aunque después lo borres.</p>
+<p>Lo que sí es tuyo es el <strong>método</strong> — el modelo de datos, la definición de los
+indicadores, la arquitectura del reporting.</p>
+<ul>
+<li>Capturas con <strong>datos sintéticos</strong> o agregados, nunca cifras reales de operación.</li>
+<li>Contá el <strong>cómo</strong>, no los valores que arrojó.</li>
+<li>Las cifras de escala que ya tenés públicas en tu perfil de GitHub (12.000 km,
+150 estaciones, 500 conexiones) sirven para dar contexto.</li>
+</ul>
+<p>Las imágenes van en <strong>esta misma carpeta</strong>, al lado del <code>index.md</code>, y se
+declaran en el frontmatter. Astro las optimiza y les pone hash automáticamente.</p>
+</div><section class="mt-16"><h2 class="border-t border-borde pt-6 text-xl font-semibold tracking-tight">Registro</h2><div class="mt-6 grid gap-5 sm:grid-cols-2"><figure class="overflow-hidden rounded-lg border border-borde bg-panel"><img src="/_astro/traza.Dw_jthgr_Z1iKPAQ.webp" srcset="/_astro/traza.Dw_jthgr_Z1DFkY9.webp 400w, /_astro/traza.Dw_jthgr_ZsOPPI.webp 800w, /_astro/traza.Dw_jthgr_Z1iKPAQ.webp 1200w" alt="[Reemplazar por una captura del tablero con datos sintéticos]" sizes="(min-width: 640px) 45vw, 90vw" loading="lazy" decoding="async" width="1200" height="800" class="w-full"><figcaption class="border-t border-borde px-4 py-2.5 text-xs leading-snug text-tenue">[Pie de foto — qué muestra y por qué importa]</figcaption></figure><figure class="overflow-hidden rounded-lg border border-borde bg-panel"><img src="/_astro/estacion.C-wsQxoD_ZN8rcP.webp" srcset="/_astro/estacion.C-wsQxoD_Z1uzURG.webp 400w, /_astro/estacion.C-wsQxoD_Z2uOAdc.webp 800w, /_astro/estacion.C-wsQxoD_ZN8rcP.webp 1200w" alt="[Reemplazar por un diagrama del modelo de datos]" sizes="(min-width: 640px) 45vw, 90vw" loading="lazy" decoding="async" width="1200" height="800" class="w-full"><figcaption class="border-t border-borde px-4 py-2.5 text-xs leading-snug text-tenue">[Pie de foto]</figcaption></figure></div></section></main><footer class="border-t border-borde mt-24"><div class="mx-auto max-w-5xl px-6 py-10 flex flex-wrap gap-4 items-center justify-between text-sm text-tenue"><p class="font-mono">Francisco Poncio · Córdoba, Argentina · 2026</p><nav class="flex gap-5"><a class="hover:text-acento transition-colors" href="https://github.com/FranPoncio">GitHub</a><a class="hover:text-acento transition-colors" href="mailto:franponcioo@gmail.com">Email</a></nav></div></footer></body></html>

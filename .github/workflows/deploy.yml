@@ -1,8 +1,8 @@
 name: Deploy a GitHub Pages
 
-# El sitio Astro vive en franponcio/ y el contenido en proyectos/.
+# El sitio Astro vive en franponcioPage/ y el contenido en proyectos/.
 # Pages por sí solo sólo puede servir desde la raíz o desde /docs, pero acá
-# deployamos con Actions: el build corre dentro de franponcio/ y se publica
+# deployamos con Actions: el build corre dentro de franponcioPage/ y se publica
 # su dist/, así que el sitio puede vivir en la subcarpeta sin problema.
 
 on:
@@ -34,10 +34,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: franponcio/package-lock.json
+          cache-dependency-path: franponcioPage/package-lock.json
 
       - name: Instalar dependencias
-        working-directory: franponcio
+        working-directory: franponcioPage
         run: npm ci
 
       - name: Configurar Pages (y habilitarlo si hace falta)
@@ -46,13 +46,13 @@ jobs:
           enablement: true
 
       - name: Build
-        working-directory: franponcio
+        working-directory: franponcioPage
         run: npm run build
 
       - name: Subir el sitio como artefacto
         uses: actions/upload-pages-artifact@v3
         with:
-          path: franponcio/dist
+          path: franponcioPage/dist
 
       - name: Desplegar en Pages
         id: deployment
