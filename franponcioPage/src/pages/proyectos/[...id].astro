@@ -6,14 +6,21 @@ import Base from '../../layouts/Base.astro';
 import KpiGrid from '../../components/KpiGrid.astro';
 import Galeria from '../../components/Galeria.astro';
 import VideoEmbed from '../../components/VideoEmbed.astro';
+import Nav from '../../components/Nav.astro';
+import NavCasos from '../../components/NavCasos.astro';
 import { conBase } from '../../lib/url';
 
 export const getStaticPaths = (async () => {
-  const proyectos = await getCollection('proyectos');
-  return proyectos.map((proyecto) => ({ params: { id: proyecto.id }, props: { proyecto } }));
+  const proyectos = (await getCollection('proyectos')).sort((a, b) => a.data.orden - b.data.orden);
+  // Los vecinos se calculan acá, en el mismo orden que el home, para que
+  // "anterior / siguiente" siga el recorrido que el visitante ya vio.
+  return proyectos.map((proyecto, i) => ({
+    params: { id: proyecto.id },
+    props: { proyecto, anterior: proyectos[i - 1], siguiente: proyectos[i + 1] },
+  }));
 }) satisfies GetStaticPaths;
 
-const { proyecto } = Astro.props;
+const { proyecto, anterior, siguiente } = Astro.props;
 const { titulo, resumen, categoria, periodo, rol, stack, kpis, enlace, borrador } = proyecto.data;
 const { portada, video, galeria } = proyecto.data;
 const { Content } = await render(proyecto);
@@ -26,6 +33,8 @@ const acento = {
 ---
 
 <Base titulo={`${titulo} · Francisco Poncio`} descripcion={resumen}>
+  <Nav />
+
   {
     borrador && (
       <p class="bg-acento px-6 py-2.5 text-center font-mono text-xs font-semibold text-fondo">
@@ -108,5 +117,6 @@ const acento = {
     </div>
 
     <Galeria imagenes={galeria} />
+    <NavCasos anterior={anterior} siguiente={siguiente} />
   </main>
 </Base>
