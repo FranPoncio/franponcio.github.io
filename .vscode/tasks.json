@@ -1,0 +1,30 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // Ctrl+Shift+P -> "Run Task" -> "dev". Levanta localhost:4321.
+      "label": "dev",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/franponcio" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "npm run build",
+      "options": { "cwd": "${workspaceFolder}/franponcio" },
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      // Corrélo antes de pushear: te dice si a algún proyecto le falta un campo.
+      "label": "check",
+      "type": "shell",
+      "command": "npm run check",
+      "options": { "cwd": "${workspaceFolder}/franponcio" },
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  // Los .astro los formatea la extensión de Astro, no Prettier.
+  "[astro]": { "editor.defaultFormatter": "astro-build.astro-vscode" },
+  "[markdown]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "editor.formatOnSave": true,
+
+  // Autocompletado de clases Tailwind dentro de class:list={[...]} de Astro.
+  "tailwindCSS.includeLanguages": { "astro": "html" },
+
+  // Ruido que no aporta al navegar el repo.
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.astro": true
+  },
+
+  // Las capturas y fotos de los proyectos no se indexan en la búsqueda.
+  "search.exclude": {
+    "**/package-lock.json": true,
+    "proyectos/**/*.png": true,
+    "proyectos/**/*.jpg": true
+  }
+}
