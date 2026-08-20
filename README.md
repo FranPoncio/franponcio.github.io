@@ -7,7 +7,7 @@ Publicado en **https://franponcio.github.io**
 
 ```
 franponcio.github.io/
-├── franponcio/     El sitio (Astro). Layout, estilos y config.
+├── franponcioPage/     El sitio (Astro). Layout, estilos y config.
 ├── proyectos/      El contenido. Una carpeta por proyecto.
 ├── formacion/      Certificados y cursos. Un archivo por curso.
 ├── testing/        Pruebas y cursos. No se publica.
@@ -20,7 +20,7 @@ franponcio.github.io/
 > banda de aviso. **Reemplazá el texto antes de sacar esa línea.**
 
 La idea: **el sitio y el contenido están separados.** Para agregar un proyecto
-no hace falta entrar a `franponcio/` ni saber nada de Astro — se crea una
+no hace falta entrar a `franponcioPage/` ni saber nada de Astro — se crea una
 carpeta en `proyectos/` con un archivo de texto adentro.
 
 ## Agregar un proyecto
@@ -84,7 +84,7 @@ galeria:
 **Una portada sin `alt` rompe el build a propósito.** Una imagen sin descripción
 es invisible para quien usa lector de pantalla, y para Google.
 
-Los PDFs son distintos: van en `franponcio/public/proyectos/<nombre>/` porque no
+Los PDFs son distintos: van en `franponcioPage/public/proyectos/<nombre>/` porque no
 pasan por el optimizador de imágenes.
 
 ## Agregar un curso o certificado
@@ -122,7 +122,7 @@ banda de aviso en su página, hasta que saques esa línea.
 ## Trabajar en el sitio
 
 ```bash
-cd franponcio
+cd franponcioPage
 npm install
 npm run dev      # localhost:4321
 npm run build
@@ -134,7 +134,7 @@ npm run check    # errores de tipos y de contenido
 ```bash
 git clone https://github.com/FranPoncio/franponcio.github.io
 code franponcio.github.io
-cd franponcio.github.io/franponcio && npm install
+cd franponcio.github.io/franponcioPage && npm install
 ```
 
 Al abrirlo, VS Code ofrece instalar las extensiones de `.vscode/extensions.json`
@@ -156,4 +156,4 @@ El único momento en que hace falta la terminal es el `npm install` inicial.
 ## Deploy
 
 Cada push a `main` dispara `.github/workflows/deploy.yml`: buildea dentro de
-`franponcio/` y publica su `dist/`. No hay que tocar nada a mano.
+`franponcioPage/` y publica su `dist/`. No hay que tocar nada a mano.

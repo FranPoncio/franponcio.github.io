@@ -1,0 +1,32 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Bitácora Interior · Francisco Poncio</title><meta name="description" content="Progressive web app para escritura diaria — dictado por voz, entradas estructuradas y visualización de los propios datos a lo largo del tiempo."><meta property="og:title" content="Bitácora Interior · Francisco Poncio"><meta property="og:description" content="Progressive web app para escritura diaria — dictado por voz, entradas estructuradas y visualización de los propios datos a lo largo del tiempo."><meta property="og:type" content="website"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/_astro_assets.w-byGBKm.css"></head><body class="trama min-h-screen"><p class="bg-acento px-6 py-2.5 text-center font-mono text-xs font-semibold text-fondo">BORRADOR — completá este archivo y sacá `borrador: true` del frontmatter.</p><header class="border-b border-borde"><div class="mx-auto max-w-3xl px-6 py-16"><a href="/" class="font-mono text-xs text-tenue transition-colors hover:text-acento">← volver al panel</a><p class="mt-8 font-mono text-xs uppercase tracking-[0.16em] text-herramienta">herramienta</p><h1 class="mt-4 text-3xl font-bold leading-tight tracking-tight sm:text-5xl">Bitácora Interior</h1><p class="mt-5 text-lg leading-relaxed text-tenue">Progressive web app para escritura diaria — dictado por voz, entradas estructuradas y visualización de los propios datos a lo largo del tiempo.</p><dl class="mt-9 flex flex-wrap gap-x-10 gap-y-4 font-mono text-sm"><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Período</dt><dd class="mt-1">2025 — 2026</dd></div><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Rol</dt><dd class="mt-1">Diseño y desarrollo</dd></div></dl><div class="mt-7 flex flex-wrap gap-2"><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">PWA</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">React</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">TypeScript</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Web Speech API</span></div></div></header><main class="mx-auto max-w-3xl px-6 py-14"><dl class="grid gap-px bg-borde border border-borde rounded-lg overflow-hidden sm:grid-cols-2 lg:grid-cols-3"><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Tipo</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">PWA</dd><p class="mt-1 text-xs text-tenue leading-snug">instalable, funciona offline</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Entrada</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">Voz</dd><p class="mt-1 text-xs text-tenue leading-snug">dictado en el navegador</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Datos</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">Local</dd><p class="mt-1 text-xs text-tenue leading-snug">nunca salen del dispositivo</p></div></dl><div class="prosa mt-14"><blockquote>
+<p><strong>Texto de relleno.</strong> Reemplazalo por lo tuyo.</p>
+</blockquote>
+<h2 id="el-problema">El problema</h2>
+<p>Las apps de journaling que probé pedían cuenta, sincronizaban a un servidor
+ajeno y guardaban texto personal en infraestructura de otro. Para lo que es un
+diario, eso descalifica antes de evaluar cualquier otra cosa.</p>
+<h2 id="las-decisiones">Las decisiones</h2>
+<ul>
+<li>
+<p><strong>PWA y no app nativa.</strong> Instalable desde el navegador, funciona sin conexión,
+un solo código para escritorio y celular, sin pasar por ninguna tienda.</p>
+</li>
+<li>
+<p><strong>Dictado por voz con la Web Speech API.</strong> Escribir en el teclado del celular
+desalienta la entrada larga. Con dictado, una entrada de cinco minutos se
+vuelve viable. Cuando el navegador no soporta la API, el campo de texto sigue
+ahí — la función se degrada, no rompe.</p>
+</li>
+<li>
+<p><strong>Los datos no salen del dispositivo.</strong> Sin cuenta, sin backend, sin
+analytics. Es la decisión que define el producto: la exportación es
+responsabilidad del usuario, y eso es a propósito.</p>
+</li>
+</ul>
+<h2 id="el-ángulo-de-datos">El ángulo de datos</h2>
+<p>La parte que rescata este proyecto para un portfolio técnico no es el editor:
+es <strong>qué se puede leer de un año de escritura propia</strong>. Frecuencia, extensión,
+recurrencia de temas, variación estacional. Un diario es una serie temporal que
+uno mismo generó, y visualizarla es trabajo de datos igual que cualquier otro
+— con la ventaja de que conocés el dominio mejor que nadie.</p>
+</div></main><footer class="border-t border-borde mt-24"><div class="mx-auto max-w-5xl px-6 py-10 flex flex-wrap gap-4 items-center justify-between text-sm text-tenue"><p class="font-mono">Francisco Poncio · Córdoba, Argentina · 2026</p><nav class="flex gap-5"><a class="hover:text-acento transition-colors" href="https://github.com/FranPoncio">GitHub</a><a class="hover:text-acento transition-colors" href="mailto:franponcioo@gmail.com">Email</a></nav></div></footer></body></html>

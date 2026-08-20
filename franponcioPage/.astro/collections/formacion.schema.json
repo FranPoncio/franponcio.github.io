@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "titulo": {
+      "type": "string"
+    },
+    "entidad": {
+      "type": "string"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "completado",
+        "cursando",
+        "planificado"
+      ]
+    },
+    "periodo": {
+      "type": "string"
+    },
+    "orden": {
+      "default": 99,
+      "type": "number"
+    },
+    "credencial": {
+      "type": "string",
+      "format": "uri"
+    },
+    "nota": {
+      "type": "string"
+    },
+    "$schema": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "titulo",
+    "entidad",
+    "estado",
+    "periodo"
+  ]
+}

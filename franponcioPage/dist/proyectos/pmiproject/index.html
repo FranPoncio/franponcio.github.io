@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>PMI Toolbox · Francisco Poncio</title><meta name="description" content="App de control de proyectos con un motor completo de Earned Value Management — línea base congelada, earned schedule, WBS jerárquica y log de auditoría."><meta property="og:title" content="PMI Toolbox · Francisco Poncio"><meta property="og:description" content="App de control de proyectos con un motor completo de Earned Value Management — línea base congelada, earned schedule, WBS jerárquica y log de auditoría."><meta property="og:type" content="website"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/_astro_assets.w-byGBKm.css"></head><body class="trama min-h-screen"><p class="bg-acento px-6 py-2.5 text-center font-mono text-xs font-semibold text-fondo">BORRADOR — completá este archivo y sacá `borrador: true` del frontmatter.</p><header class="border-b border-borde"><div class="mx-auto max-w-3xl px-6 py-16"><a href="/" class="font-mono text-xs text-tenue transition-colors hover:text-acento">← volver al panel</a><p class="mt-8 font-mono text-xs uppercase tracking-[0.16em] text-herramienta">herramienta</p><h1 class="mt-4 text-3xl font-bold leading-tight tracking-tight sm:text-5xl">PMI Toolbox</h1><p class="mt-5 text-lg leading-relaxed text-tenue">App de control de proyectos con un motor completo de Earned Value Management — línea base congelada, earned schedule, WBS jerárquica y log de auditoría.</p><dl class="mt-9 flex flex-wrap gap-x-10 gap-y-4 font-mono text-sm"><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Período</dt><dd class="mt-1">2025 — 2026</dd></div><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Rol</dt><dd class="mt-1">Diseño y desarrollo</dd></div></dl><div class="mt-7 flex flex-wrap gap-2"><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">React</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">TypeScript</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Dexie</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Vitest</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Tailwind</span></div><a href="https://franponcio.github.io/PMI-Toolbox/" class="mt-8 inline-block rounded border border-acento/50 px-4 py-2 font-mono text-xs text-acento transition-colors hover:bg-acento hover:text-fondo">Abrir la app →</a></div></header><main class="mx-auto max-w-3xl px-6 py-14"><dl class="grid gap-px bg-borde border border-borde rounded-lg overflow-hidden sm:grid-cols-2 lg:grid-cols-3"><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Motor</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">EVM</dd><p class="mt-1 text-xs text-tenue leading-snug">SPI, CPI, EAC, ETC, VAC, TCPI</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Tests</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">Vitest</dd><p class="mt-1 text-xs text-tenue leading-snug">suite sobre el core</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Persistencia</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">IndexedDB</dd><p class="mt-1 text-xs text-tenue leading-snug">todo local, sin backend</p></div></dl><div class="prosa mt-14"><blockquote>
+<p><strong>Texto de relleno.</strong> Acá va el <strong>caso de estudio</strong>, no el código: la app vive
+en <a href="https://github.com/FranPoncio/PMI-Toolbox">su propio repo</a>. Ver la nota
+del final.</p>
+</blockquote>
+<h2 id="el-problema">El problema</h2>
+<p>Las herramientas de control de proyectos que había a mano se dividían en dos
+grupos: las que hacían EVM de verdad y costaban una licencia por usuario, y las
+gratuitas que llamaban “avance” al porcentaje que uno escribía a mano.</p>
+<p>Ninguna servía para lo que necesitaba: cargar una obra, congelar una línea base
+y ver cómo se despega la ejecución del plan, sin subir datos de proyecto a un
+servidor ajeno.</p>
+<h2 id="las-decisiones-que-importan">Las decisiones que importan</h2>
+<ul>
+<li>
+<p><strong>El core no sabe que existe React.</strong> Toda la lógica de EVM vive en
+<code>src/core/</code> como funciones puras. Se testea sola, corre en milisegundos y no
+se rompe cuando cambia el diseño. La UI es una capa encima, reemplazable.</p>
+</li>
+<li>
+<p><strong><code>null</code> en vez de <code>Infinity</code>.</strong> Un CPI con AC = 0 no es infinito: es “sin
+información suficiente todavía”. Decidirlo temprano evitó que la interfaz
+tuviera que limpiar basura después, y es la clase de detalle que define si un
+indicador se puede mostrar a un director sin aclaración.</p>
+</li>
+<li>
+<p><strong>Línea base congelada.</strong> El refactor de <code>WorkPackage</code> a <code>PlannedItem</code> fue
+exactamente para esto: separar el plan vivo del plan de referencia. Sin esa
+separación, comparar contra “el plan” no significa nada porque el plan se
+mueve.</p>
+</li>
+<li>
+<p><strong>Todo local.</strong> IndexedDB vía Dexie: sin cuenta, sin backend, sin subir datos
+de obra a ningún lado. Para el caso de uso —datos de proyecto de un cliente—
+eso no es una limitación, es el requisito.</p>
+</li>
+</ul>
+<h2 id="relación-con-el-tablero-de-power-bi">Relación con el tablero de Power BI</h2>
+<p>Este proyecto y el <a href="/proyectos/evm-powerbi/">tablero EVM</a> resuelven el mismo
+problema por dos caminos. Contar por qué existen los dos dice más que cualquiera
+de los dos por separado.</p>
+<hr>
+<h3 id="por-qué-el-código-no-está-en-esta-carpeta">Por qué el código no está en esta carpeta</h3>
+<p><code>PMI-Toolbox</code> tiene noventa y siete archivos, dependencias, tests y su propio
+CI. Copiarlo acá adentro genera <strong>dos copias que se desincronizan</strong> — que es
+exactamente lo que pasó con <code>pmtool/</code> dentro del repo <code>Data</code>, donde la copia
+vieja se quedó atrás sin que nadie se enterara.</p>
+<p>La carpeta se queda con el caso escrito y las capturas; el botón “Abrir la app”
+lleva al deploy real.</p>
+</div></main><footer class="border-t border-borde mt-24"><div class="mx-auto max-w-5xl px-6 py-10 flex flex-wrap gap-4 items-center justify-between text-sm text-tenue"><p class="font-mono">Francisco Poncio · Córdoba, Argentina · 2026</p><nav class="flex gap-5"><a class="hover:text-acento transition-colors" href="https://github.com/FranPoncio">GitHub</a><a class="hover:text-acento transition-colors" href="mailto:franponcioo@gmail.com">Email</a></nav></div></footer></body></html>
