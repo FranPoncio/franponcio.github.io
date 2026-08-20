@@ -13,11 +13,14 @@ const { titulo, resumen, categoria, periodo, rol, stack, kpis, borrador, portada
 
 // Tailwind necesita ver las clases enteras para generarlas, así que el mapa
 // guarda strings completos en vez de armarlos con `border-${categoria}`.
+// Tailwind necesita ver las clases enteras, por eso van escritas completas.
+// El realce va por box-shadow y no por border: así la tarjeta no cambia de
+// tamaño en hover ni empuja a las vecinas.
 const acento = {
-  datos: { borde: 'group-hover:border-datos/60', texto: 'text-datos', punto: 'bg-datos' },
-  gestion: { borde: 'group-hover:border-gestion/60', texto: 'text-gestion', punto: 'bg-gestion' },
+  datos: { brillo: 'hover:shadow-[0_0_0_1px_var(--color-datos)]', texto: 'text-datos', punto: 'bg-datos' },
+  gestion: { brillo: 'hover:shadow-[0_0_0_1px_var(--color-gestion)]', texto: 'text-gestion', punto: 'bg-gestion' },
   herramienta: {
-    borde: 'group-hover:border-herramienta/60',
+    brillo: 'hover:shadow-[0_0_0_1px_var(--color-herramienta)]',
     texto: 'text-herramienta',
     punto: 'bg-herramienta',
   },
@@ -29,12 +32,12 @@ const destacado = kpis[0];
 <a
   href={conBase(`proyectos/${proyecto.id}/`)}
   class:list={[
-    'group flex flex-col overflow-hidden rounded-lg border border-borde bg-panel transition-colors hover:bg-panel-alto',
-    acento.borde,
+    'tarjeta group flex flex-col overflow-hidden rounded-xl border border-borde bg-panel hover:bg-panel-alto',
+    acento.brillo,
   ]}
 >
   {
-    portada && (
+    portada ? (
       <Image
         src={portada.src}
         alt={portada.alt}
@@ -43,6 +46,8 @@ const destacado = kpis[0];
         class="h-40 w-full object-cover"
         loading="lazy"
       />
+    ) : (
+      <div class="sin-portada h-24 w-full" />
     )
   }
 

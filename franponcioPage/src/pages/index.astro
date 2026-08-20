@@ -1,78 +1,166 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
 import ProyectoCard from '../components/ProyectoCard.astro';
 import Formacion from '../components/Formacion.astro';
+import { conBase } from '../lib/url';
 
 // Los borradores aparecen igual, pero marcados: es preferible ver el hueco a
 // que un proyecto a medio escribir desaparezca sin que te enteres.
 const proyectos = (await getCollection('proyectos')).sort((a, b) => a.data.orden - b.data.orden);
 const cursos = await getCollection('formacion');
 
-const grupos = [
-  { id: 'datos' as const, titulo: 'Datos y BI', bajada: 'Indicadores, tableros y reporting sobre operación real.' },
-  { id: 'gestion' as const, titulo: 'Gestión y normas', bajada: 'Sistemas de gestión, auditoría y certificación.' },
-  { id: 'herramienta' as const, titulo: 'Herramientas', bajada: 'Software que escribí para resolver un problema concreto.' },
-].map((g) => ({ ...g, items: proyectos.filter((p) => p.data.categoria === g.id) }));
+// El primero de la lista se muestra en grande: es la puerta de entrada al
+// portfolio y merece más aire que el resto.
+const [destacado, ...resto] = proyectos;
 
+const grupos = [
+  { id: 'datos', titulo: 'Datos y BI', bajada: 'Indicadores, tableros y reporting sobre operación real.' },
+  { id: 'gestion', titulo: 'Gestión y normas', bajada: 'Sistemas de gestión, auditoría y certificación.' },
+  { id: 'herramienta', titulo: 'Herramientas', bajada: 'Software que escribí para resolver un problema concreto.' },
+].map((g, i) => ({
+  ...g,
+  indice: String(i + 2).padStart(2, '0'),
+  items: resto.filter((p) => p.data.categoria === g.id),
+}));
+
+const secciones = [
+  { id: 'formacion', titulo: 'Formación' },
+  ...grupos.filter((g) => g.items.length > 0).map((g) => ({ id: g.id, titulo: g.titulo })),
+];
+
+const cifras = [
+  { label: 'Gasoductos', valor: '12.000 km' },
+  { label: 'Estaciones', valor: '150' },
+  { label: 'Conexiones ind.', valor: '500' },
+  { label: 'Años', valor: '~10' },
+];
 ---
 
 <Base
   titulo="Francisco Poncio · Ingeniería industrial y datos"
   descripcion="Convierto datos de operación en información con la que se puede decidir. Infraestructura de gas, Power BI, control de proyectos y las herramientas que escribo."
 >
-  <header class="border-b border-borde">
-    <div class="mx-auto max-w-5xl px-6 py-20 sm:py-28">
+  <Nav secciones={secciones} />
+
+  <header class="halo relative overflow-hidden border-b border-borde">
+    <div class="relative mx-auto max-w-5xl px-6 py-20 sm:py-28">
       <p class="font-mono text-xs uppercase tracking-[0.2em] text-acento">
         Ingeniería industrial × Datos
       </p>
-      <h1 class="mt-5 text-4xl font-bold leading-[1.1] tracking-tight sm:text-6xl">
-        Francisco Poncio
+      <h1
+        class="mt-5 text-[2.75rem] font-bold leading-[1.03] tracking-[-0.03em] sm:text-6xl lg:text-7xl"
+      >
+        Francisco<br class="hidden sm:block" /> Poncio
       </h1>
-      <p class="mt-6 max-w-2xl text-lg leading-relaxed text-tenue">
+      <p class="mt-7 max-w-2xl text-lg leading-relaxed text-tenue sm:text-xl">
         Convierto datos de operación en información con la que se puede decidir. Casi diez años
         en infraestructura pública de gas en Córdoba, armando los indicadores y el reporting
-        detrás de la obra. Programo desde que las herramientas que necesitaba no existían.
+        detrás de la obra.
       </p>
 
-      <dl class="mt-12 flex flex-wrap gap-x-12 gap-y-5 font-mono text-sm">
-        <div>
-          <dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Gasoductos</dt>
-          <dd class="mt-1 text-xl font-semibold tabular-nums">12.000 km</dd>
-        </div>
-        <div>
-          <dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Estaciones</dt>
-          <dd class="mt-1 text-xl font-semibold tabular-nums">150</dd>
-        </div>
-        <div>
-          <dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Conexiones ind.</dt>
-          <dd class="mt-1 text-xl font-semibold tabular-nums">500</dd>
-        </div>
-        <div>
-          <dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Años</dt>
-          <dd class="mt-1 text-xl font-semibold tabular-nums">~10</dd>
-        </div>
+      <dl
+        class="mt-12 grid grid-cols-2 gap-x-8 gap-y-6 font-mono sm:flex sm:flex-wrap sm:gap-x-12"
+      >
+        {
+          cifras.map((c) => (
+            <div>
+              <dt class="text-[0.65rem] uppercase tracking-[0.14em] text-tenue">{c.label}</dt>
+              <dd class="mt-1 text-xl font-semibold tabular-nums sm:text-2xl">{c.valor}</dd>
+            </div>
+          ))
+        }
       </dl>
     </div>
   </header>
 
-  <Formacion cursos={cursos} />
+  <Formacion cursos={cursos} indice="01" />
 
   <main class="mx-auto max-w-5xl px-6">
+    {
+      destacado && (
+        <section class="revelar mt-20">
+          <a
+            href={conBase(`proyectos/${destacado.id}/`)}
+            class="tarjeta group grid overflow-hidden rounded-xl border border-borde bg-panel hover:bg-panel-alto hover:shadow-[0_0_0_1px_var(--color-datos)] lg:grid-cols-5"
+          >
+            <div class="lg:col-span-2">
+              {destacado.data.portada ? (
+                <Image
+                  src={destacado.data.portada.src}
+                  alt={destacado.data.portada.alt}
+                  widths={[400, 800]}
+                  sizes="(min-width: 1024px) 40vw, 100vw"
+                  class="h-48 w-full object-cover lg:h-full"
+                  loading="eager"
+                />
+              ) : (
+                <div class="sin-portada h-48 w-full lg:h-full" />
+              )}
+            </div>
+
+            <div class="flex flex-col p-7 lg:col-span-3 lg:p-9">
+              <p class="flex items-center gap-2.5">
+                <span class="size-1.5 rounded-full bg-datos" />
+                <span class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-datos">
+                  Proyecto destacado
+                </span>
+              </p>
+
+              <h2 class="mt-4 text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+                {destacado.data.titulo}
+                {destacado.data.borrador && (
+                  <span class="ml-2 align-middle rounded bg-acento/15 px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider text-acento">
+                    borrador
+                  </span>
+                )}
+              </h2>
+              <p class="mt-3 leading-relaxed text-tenue">{destacado.data.resumen}</p>
+
+              {destacado.data.kpis.length > 0 && (
+                <dl class="mt-7 flex flex-wrap gap-x-8 gap-y-4 font-mono">
+                  {destacado.data.kpis.slice(0, 3).map((k) => (
+                    <div>
+                      <dt class="text-[0.65rem] uppercase tracking-[0.12em] text-tenue">
+                        {k.label}
+                      </dt>
+                      <dd class="mt-0.5 text-lg font-semibold tabular-nums">{k.valor}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+
+              <span class="mt-auto pt-7 font-mono text-xs text-datos">ver el caso →</span>
+            </div>
+          </a>
+        </section>
+      )
+    }
+
     {
       grupos.map(
         (grupo) =>
           grupo.items.length > 0 && (
-            <section class="mt-20" id={grupo.id}>
-              <div class="flex items-baseline gap-4">
-                <h2 class="text-2xl font-semibold tracking-tight">{grupo.titulo}</h2>
+            <section class="revelar mt-24 scroll-mt-24" id={grupo.id}>
+              <p class="indice">{grupo.indice}</p>
+              <div class="mt-2 flex items-baseline gap-4">
+                <h2 class="text-2xl font-semibold tracking-tight sm:text-3xl">{grupo.titulo}</h2>
                 <span class="font-mono text-xs tabular-nums text-tenue">
                   {String(grupo.items.length).padStart(2, '0')}
                 </span>
               </div>
               <p class="mt-1.5 text-sm text-tenue">{grupo.bajada}</p>
 
-              <div class="mt-7 grid gap-5 md:grid-cols-2">
+              {/* Con un solo proyecto la grilla de dos columnas deja un hueco
+                  raro al costado: en ese caso va a ancho completo. */}
+              <div
+                class:list={[
+                  'mt-8 grid gap-5',
+                  grupo.items.length > 1 && 'md:grid-cols-2',
+                ]}
+              >
                 {grupo.items.map((proyecto) => (
                   <ProyectoCard proyecto={proyecto} />
                 ))}
@@ -81,6 +169,5 @@ const grupos = [
           ),
       )
     }
-
   </main>
 </Base>

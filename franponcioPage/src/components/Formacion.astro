@@ -3,9 +3,11 @@ import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   cursos: CollectionEntry<'formacion'>[];
+  /** Número de sección que se muestra arriba del título. */
+  indice: string;
 }
 
-const { cursos } = Astro.props;
+const { cursos, indice } = Astro.props;
 
 // Orden deliberado: primero lo que estoy haciendo (es lo más vivo), después lo
 // terminado (lo que respalda), y al final lo que viene (muestra dirección).
@@ -21,10 +23,11 @@ const grupos = [
 }));
 ---
 
-<section class="border-b border-borde bg-panel/40" id="formacion">
-  <div class="mx-auto max-w-5xl px-6 py-14">
-    <div class="flex items-baseline gap-4">
-      <h2 class="text-2xl font-semibold tracking-tight">Formación</h2>
+<section class="revelar scroll-mt-24 border-b border-borde bg-panel/40" id="formacion">
+  <div class="mx-auto max-w-5xl px-6 py-16">
+    <p class="indice">{indice}</p>
+    <div class="mt-2 flex items-baseline gap-4">
+      <h2 class="text-2xl font-semibold tracking-tight sm:text-3xl">Formación</h2>
       <span class="font-mono text-xs tabular-nums text-tenue">
         {String(cursos.length).padStart(2, '0')}
       </span>
@@ -56,23 +59,30 @@ const grupos = [
               <ul class="mt-4 space-y-4">
                 {grupo.items.map((curso) => (
                   <li>
-                    <p class="text-sm font-medium leading-snug">
-                      {curso.data.credencial ? (
-                        <a
-                          href={curso.data.credencial}
-                          class="underline decoration-borde-vivo underline-offset-4 transition-colors hover:text-acento"
-                        >
-                          {curso.data.titulo}
-                        </a>
-                      ) : (
-                        curso.data.titulo
-                      )}
-                    </p>
+                    <p class="text-sm font-medium leading-snug">{curso.data.titulo}</p>
                     <p class="mt-0.5 font-mono text-[0.68rem] text-tenue">
                       {curso.data.entidad} · {curso.data.periodo}
                     </p>
                     {curso.data.nota && (
                       <p class="mt-1 text-xs leading-snug text-tenue">{curso.data.nota}</p>
+                    )}
+                    {curso.data.credencial && (
+                      <a
+                        href={curso.data.credencial}
+                        class="mt-2 inline-flex items-center gap-1.5 rounded border border-borde px-2 py-1 font-mono text-[0.62rem] text-tenue transition-colors hover:border-acento hover:text-acento"
+                      >
+                        <svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true">
+                          <path
+                            d="M2.5 6.2l2.2 2.2 4.8-4.8"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.6"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
+                        </svg>
+                        Ver credencial
+                      </a>
                     )}
                   </li>
                 ))}
