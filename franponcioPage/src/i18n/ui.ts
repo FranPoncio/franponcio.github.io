@@ -34,6 +34,8 @@ export const ui = {
     'formacion.completado': 'Completado',
     'formacion.planificado': 'En planificación',
     'formacion.credencial': 'Ver credencial',
+    'formacion.certificado': 'Certificado',
+    'formacion.verCertificado': 'ver certificado ↗',
 
     'grupo.datos': 'Datos y BI',
     'grupo.datos.bajada': 'Indicadores, tableros y reporting sobre operación real.',
@@ -74,6 +76,8 @@ export const ui = {
     'formacion.completado': 'Completed',
     'formacion.planificado': 'Planned',
     'formacion.credencial': 'View credential',
+    'formacion.certificado': 'Certificate',
+    'formacion.verCertificado': 'view certificate ↗',
 
     'grupo.datos': 'Data & BI',
     'grupo.datos.bajada': 'Indicators, dashboards and reporting on real operations.',

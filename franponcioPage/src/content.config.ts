@@ -56,13 +56,25 @@ const proyectosEn = defineCollection({
 });
 
 /**
- * FORMACIÓN — un archivo por curso en formacion/.
- * Los títulos de curso no se traducen (son nombres propios), así que hay una
+ * FORMACIÓN — una CARPETA por curso, con su certificado adentro:
+ *
+ *   formacion/ibm-data-science/index.md         ← los datos
+ *   formacion/ibm-data-science/certificado.jpg  ← el certificado
+ *
+ * Así el certificado viaja junto al curso y no queda suelto en otro lado.
+ * Astro lo optimiza igual que las fotos de los proyectos.
+ *
+ * Los nombres de curso no se traducen (son nombres propios), así que hay una
  * sola colección; lo único traducible es la nota.
  */
 const formacion = defineCollection({
-  loader: glob({ pattern: '*.md', base: '../formacion' }),
-  schema: z.object({
+  loader: glob({
+    pattern: '**/index.md',
+    base: '../formacion',
+    generateId: ({ entry }) => entry.replace(/\/index\.md$/, ''),
+  }),
+  schema: ({ image }) =>
+    z.object({
     titulo: z.string(),
     entidad: z.string(),
     estado: z.enum(['completado', 'cursando', 'planificado']),
@@ -72,6 +84,18 @@ const formacion = defineCollection({
     nota: z.string().optional(),
     /** Traducción de la nota al inglés. Si falta, se usa la española. */
     notaEn: z.string().optional(),
+
+    /**
+     * El certificado, en la misma carpeta del curso: `./certificado.jpg`.
+     * Sirve jpg, png, webp y svg. Para un PDF usá `certificadoPdf`.
+     */
+    certificado: image().optional(),
+    /**
+     * Certificado en PDF. Va en franponcioPage/public/certificados/ porque los
+     * PDF no pasan por el optimizador de imágenes, y acá se pone la ruta:
+     * `/certificados/archivo.pdf`.
+     */
+    certificadoPdf: z.string().optional(),
   }),
 });
 
