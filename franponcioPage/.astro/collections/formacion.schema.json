@@ -33,6 +33,10 @@
     "notaEn": {
       "type": "string"
     },
+    "oculto": {
+      "default": false,
+      "type": "boolean"
+    },
     "certificado": {
       "type": "string"
     },

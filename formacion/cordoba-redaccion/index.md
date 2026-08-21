@@ -7,4 +7,5 @@ orden: 8
 nota: 12 horas.
 notaEn: 12 hours.
 certificado: ./certificado.jpg
+oculto: true
 ---

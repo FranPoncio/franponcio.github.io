@@ -17,7 +17,7 @@ const { lang } = Astro.props;
 const t = usarTraduccion(lang);
 
 const resueltos = await obtenerProyectos(lang);
-const cursos = await getCollection('formacion');
+const cursos = (await getCollection('formacion')).filter((c) => !c.data.oculto);
 const rutaCaso = lang === 'es' ? 'proyectos' : 'en/projects';
 
 // El primero de la lista se muestra en grande: es la puerta de entrada y
