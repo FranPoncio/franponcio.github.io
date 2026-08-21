@@ -1,0 +1,161 @@
+---
+import { filaDatos, filaGestion, type Ficha } from '../lib/herramientas';
+import { usarTraduccion, type Idioma } from '../i18n/ui';
+
+/**
+ * Cinta de herramientas: dos filas que corren en sentidos opuestos.
+ *
+ * Cada fila lleva su contenido DUPLICADO y se desplaza exactamente un 50 %:
+ * cuando termina la primera copia, la segunda está justo donde arrancó la
+ * primera, así que el ciclo se reinicia sin salto. Es la única forma de que
+ * una cinta infinita no pegue un tirón al volver.
+ *
+ * Se frena sola al pasar el mouse: si algo te llamó la atención, tenés que
+ * poder leerlo.
+ */
+
+interface Props {
+  lang: Idioma;
+  indice: string;
+}
+
+const { lang, indice } = Astro.props;
+const t = usarTraduccion(lang);
+
+const filas: { items: Ficha[]; sentido: string }[] = [
+  { items: filaDatos, sentido: 'izquierda' },
+  { items: filaGestion, sentido: 'derecha' },
+];
+---
+
+<section class="revelar relative scroll-mt-24 border-y border-borde bg-panel/60" id="herramientas">
+  <div class="mx-auto max-w-5xl px-6 pt-14">
+    <p class="indice">{indice}</p>
+    <h2 class="mt-2 text-lg font-semibold sm:text-xl">{t('herramientas.titulo')}</h2>
+    <p class="mt-1.5 max-w-2xl text-sm text-tenue">{t('herramientas.bajada')}</p>
+  </div>
+
+  <div class="cinta-marco mt-9 pb-14">
+    {
+      filas.map((fila) => (
+        <div class:list={['cinta', fila.sentido]}>
+          {/* Dos copias: la segunda es la que hace que el ciclo cierre. */}
+          {[0, 1].map((copia) => (
+            <div class="tanda" aria-hidden={copia === 1 ? 'true' : undefined}>
+              {fila.items.map((f) => (
+                <span class="ficha">
+                  {f.path ? (
+                    <svg viewBox="0 0 24 24" role="presentation" aria-hidden="true">
+                      <path d={f.path} fill="currentColor" />
+                    </svg>
+                  ) : (
+                    <span class="sigla">{f.nombre}</span>
+                  )}
+                  {f.path && <span class="pie">{f.nombre}</span>}
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  /* Las puntas se desvanecen: la cinta entra y sale, no empieza ni termina. */
+  .cinta-marco {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  .cinta {
+    display: flex;
+    width: max-content;
+    animation: correr 46s linear infinite;
+  }
+  .cinta + .cinta {
+    margin-top: 0.9rem;
+  }
+  .derecha {
+    animation-direction: reverse;
+    animation-duration: 58s;
+  }
+  .cinta-marco:hover .cinta {
+    animation-play-state: paused;
+  }
+
+  @keyframes correr {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      /* Justo una copia: la segunda queda donde arrancó la primera. */
+      transform: translateX(-50%);
+    }
+  }
+
+  .tanda {
+    display: flex;
+    gap: 0.55rem;
+    padding-right: 0.55rem;
+  }
+
+  .ficha {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: none;
+    height: 2.9rem;
+    padding: 0 0.95rem;
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    background: var(--color-panel);
+    color: var(--color-tenue);
+    transition:
+      color 0.25s ease,
+      border-color 0.25s ease;
+  }
+  .ficha:hover {
+    color: var(--color-acento);
+    border-color: var(--color-acento);
+  }
+
+  .ficha svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: none;
+    color: var(--color-texto);
+    opacity: 0.75;
+  }
+  .ficha:hover svg {
+    color: inherit;
+    opacity: 1;
+  }
+
+  .pie,
+  .sigla {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: -0.045em;
+    white-space: nowrap;
+  }
+  /* Las que no tienen logo se escriben más marcadas: la ficha no puede
+     quedar más flaca sólo porque la marca no exista. */
+  .sigla {
+    color: var(--color-texto);
+    font-weight: 600;
+  }
+
+  /* Sin movimiento la cinta se queda quieta y se puede scrollear con el dedo. */
+  @media (prefers-reduced-motion: reduce) {
+    .cinta {
+      animation: none;
+    }
+    .cinta-marco {
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+  }
+</style>

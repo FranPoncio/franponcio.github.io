@@ -5,6 +5,16 @@ import { logosDelStack } from '../lib/logos';
 import { usarTraduccion, type Idioma } from '../i18n/ui';
 import type { Proyecto } from '../lib/proyectos';
 
+/**
+ * Un proyecto en la fila. SIN recuadro: la tarjeta encajonada pesaba más que
+ * lo que contenía. Queda la imagen, el título y el dato — el bloque se separa
+ * del de al lado por el aire, no por una caja.
+ *
+ * Al pasar el mouse se arma una secuencia corta: sube, la imagen se acerca, el
+ * caño de la izquierda se llena de arriba abajo y el "ver el caso" entra desde
+ * la izquierda. Es el mismo gesto que hace el troncal de la página, en chico.
+ */
+
 interface Props {
   proyecto: Proyecto;
   lang: Idioma;
@@ -13,195 +23,265 @@ interface Props {
 const { proyecto, lang } = Astro.props;
 const t = usarTraduccion(lang);
 const base = lang === 'es' ? 'proyectos' : 'en/projects';
-const { titulo, resumen, categoria, periodo, rol, stack, kpis, borrador, portada } =
-  proyecto.data;
-
-// Tailwind necesita ver las clases enteras para generarlas, así que el mapa
-// guarda strings completos en vez de armarlos con `border-${categoria}`.
-// Tailwind necesita ver las clases enteras, por eso van escritas completas.
-// El realce va por box-shadow y no por border: así la tarjeta no cambia de
-// tamaño en hover ni empuja a las vecinas.
-const acento = {
-  datos: { brillo: 'hover:shadow-[0_0_0_1px_var(--color-datos)]', texto: 'text-datos', punto: 'bg-datos' },
-  gestion: { brillo: 'hover:shadow-[0_0_0_1px_var(--color-gestion)]', texto: 'text-gestion', punto: 'bg-gestion' },
-  herramienta: {
-    brillo: 'hover:shadow-[0_0_0_1px_var(--color-herramienta)]',
-    texto: 'text-herramienta',
-    punto: 'bg-herramienta',
-  },
-}[categoria];
+const { titulo, resumen, categoria, periodo, stack, kpis, borrador, portada } = proyecto.data;
 
 const destacado = kpis[0];
-
-// Marca de agua: los logos de las herramientas del proyecto. Los SVG vienen de
-// simple-icons, incrustados durante el build — cero pedidos de red.
-// Power BI y Tableau NO están en el paquete: Microsoft y Salesforce pidieron
-// que los saquen. Esos casos quedan sin marca, que es lo correcto — dibujar
-// una aproximación de una marca ajena es peor que no ponerla.
 const marcas = logosDelStack(stack, 3);
 ---
 
 <a
   href={conBase(`${base}/${proyecto.id}/`)}
-  class:list={[
-    'tarjeta group relative flex flex-col overflow-hidden rounded-xl border border-borde bg-panel hover:bg-panel-alto',
-    acento.brillo,
-  ]}
+  class:list={['pieza group', `cat-${categoria}`]}
+  style={`--cat: var(--color-${categoria})`}
 >
-  {
-    portada && marcas.length > 0 && (
-      <span class="marcas" aria-hidden="true">
-        {marcas.map((m) => (
-          <svg viewBox="0 0 24 24" role="presentation">
-            <path d={m.path} fill="currentColor" />
-          </svg>
-        ))}
-      </span>
-    )
-  }
-
-  {
-    portada ? (
-      <Image
-        src={portada.src}
-        alt={portada.alt}
-        widths={[400, 800]}
-        sizes="(min-width: 768px) 45vw, 90vw"
-        class="h-28 w-full object-cover"
-        loading="lazy"
-      />
-    ) : marcas.length > 0 ? (
-      /* Sin foto, el arte de la tarjeta son las herramientas: los mismos
-         logos, en grande. Es el hueco resuelto con algo que además informa. */
-      <div class="portada-marcas h-28 w-full" aria-hidden="true">
-        {marcas.map((m) => (
-          <svg viewBox="0 0 24 24" role="presentation">
-            <path d={m.path} fill="currentColor" />
-          </svg>
-        ))}
-      </div>
-    ) : (
-      <div class="sin-portada h-28 w-full" />
-    )
-  }
-
-  <div class="flex flex-1 flex-col p-4">
-  <div class="flex items-center gap-2.5">
-    <span class:list={['size-1.5 rounded-full', acento.punto]}></span>
-    <span class:list={['font-mono text-[0.68rem] uppercase tracking-[0.14em]', acento.texto]}>
-      {categoria}
-    </span>
-    <span class="ml-auto font-mono text-[0.68rem] text-tenue">{periodo}</span>
-  </div>
-
-  <h3 class="mt-4 text-base font-semibold leading-snug">
-    {titulo}
+  <span class="marco">
     {
-      borrador && (
-        <span class="ml-2 align-middle rounded bg-acento/15 px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider text-acento">
-          {t('proyecto.borrador')}
+      portada ? (
+        <Image
+          src={portada.src}
+          alt={portada.alt}
+          widths={[300, 600]}
+          sizes="270px"
+          class="lienzo"
+          loading="lazy"
+        />
+      ) : (
+        <span class="lienzo lienzo-marcas" aria-hidden="true">
+          {marcas.map((m) => (
+            <svg viewBox="0 0 24 24" role="presentation">
+              <path d={m.path} fill="currentColor" />
+            </svg>
+          ))}
         </span>
       )
     }
-  </h3>
-  <p class="resumen mt-2 text-[0.82rem] leading-relaxed text-tenue">{resumen}</p>
+    <span class="velo"></span>
+  </span>
 
-  {
-    destacado && (
-      <p class="mt-5 font-mono text-sm">
-        <span class="text-2xl font-semibold tabular-nums">{destacado.valor}</span>
-        <span class="ml-2 text-tenue">{destacado.label}</span>
-      </p>
-    )
-  }
-
-  <div class="mt-auto pt-5 flex flex-wrap items-center gap-x-3 gap-y-2">
-    {
-      stack.slice(0, 3).map((t) => (
-        <span class="rounded border border-borde px-2 py-0.5 font-mono text-[0.68rem] text-tenue">
-          {t}
-        </span>
-      ))
-    }
-    <span
-      class:list={[
-        'ml-auto font-mono text-xs opacity-0 transition-opacity group-hover:opacity-100',
-        acento.texto,
-      ]}
-    >
-      {t('proyecto.ver')}
+  <span class="cuerpo">
+    <span class="encabezado">
+      <span class="rubro">{categoria}</span>
+      <span class="periodo">{periodo}</span>
     </span>
-  </div>
 
-  <span class="sr-only">{t('proyecto.rol')}: {rol}</span>
-  </div>
+    <span class="titulo">
+      {titulo}
+      {borrador && <span class="sello">{t('proyecto.borrador')}</span>}
+    </span>
+
+    <span class="resumen">{resumen}</span>
+
+    {
+      destacado && (
+        <span class="dato">
+          <b>{destacado.valor}</b>
+          <i>{destacado.label}</i>
+        </span>
+      )
+    }
+
+    <span class="pie">
+      <span class="tags">{stack.slice(0, 2).join(' · ')}</span>
+      <span class="ir">{t('proyecto.ver')}</span>
+    </span>
+  </span>
 </a>
 
 <style>
-  /* El resumen se corta a tres líneas: si no, una tarjeta con texto largo
-     estira a todas las de la fila y el carrusel queda desparejo. */
+  .pieza {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding-left: 0.9rem;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* El caño de la izquierda: el mismo gesto del troncal de la página, en
+     chico. Vacío en reposo, se llena de arriba abajo en hover. */
+  .pieza::before,
+  .pieza::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    border-radius: 2px;
+  }
+  .pieza::before {
+    background: var(--color-borde);
+  }
+  .pieza::after {
+    background: var(--cat);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .marco {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-radius: 6px;
+    background: var(--color-panel-alto);
+  }
+
+  .lienzo {
+    display: block;
+    width: 100%;
+    height: 6.5rem;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .lienzo-marcas {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.15rem;
+    color: var(--color-texto);
+    background: repeating-linear-gradient(
+      45deg,
+      var(--color-panel-alto),
+      var(--color-panel-alto) 9px,
+      var(--color-panel) 9px,
+      var(--color-panel) 18px
+    );
+  }
+  .lienzo-marcas svg {
+    width: 1.9rem;
+    height: 1.9rem;
+    flex: none;
+    opacity: 0.38;
+    transition: opacity 0.4s ease;
+  }
+
+  /* Un baño del color de la categoría que entra desde abajo. */
+  .velo {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, color-mix(in srgb, var(--cat) 26%, transparent), transparent 62%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .encabezado {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+  .rubro { color: var(--cat); }
+  .periodo { color: var(--color-tenue); letter-spacing: -0.02em; }
+
+  .titulo {
+    font-family: var(--font-titulo);
+    font-weight: 700;
+    font-size: 0.92rem;
+    line-height: 1.35;
+    letter-spacing: -0.07em;
+  }
+  .sello {
+    display: inline-block;
+    margin-left: 0.35rem;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--color-acento) 15%, transparent);
+    color: var(--color-acento);
+    font-size: 0.52rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    vertical-align: middle;
+  }
+
   .resumen {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
     line-clamp: 3;
     overflow: hidden;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    color: var(--color-tenue);
   }
 
-  .portada-marcas {
+  .dato {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1.15rem;
-    border-bottom: 1px solid var(--color-borde);
-    background:
-      repeating-linear-gradient(
-        45deg,
-        var(--color-panel-alto),
-        var(--color-panel-alto) 9px,
-        var(--color-panel) 9px,
-        var(--color-panel) 18px
-      );
-    color: var(--color-texto);
+    align-items: baseline;
+    gap: 0.45rem;
+    margin-top: 0.15rem;
   }
-  .portada-marcas svg {
-    width: 2.1rem;
-    height: 2.1rem;
-    flex: none;
-    opacity: 0.34;
-    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  .dato b {
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.08em;
+    font-variant-numeric: tabular-nums;
   }
-  .group:hover .portada-marcas svg { opacity: 0.55; transform: translateY(-2px); }
-  @media (prefers-reduced-motion: reduce) {
-    .portada-marcas svg { transition: none; }
-    .group:hover .portada-marcas svg { transform: none; }
+  .dato i {
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-tenue);
   }
 
-  /* Los logos viven detrás del texto, apenas visibles. Se despiertan un poco
-     al pasar el mouse: es el único momento en que tiene sentido mirarlos. */
-  .marcas {
-    position: absolute;
-    right: 0.9rem;
-    bottom: 0.9rem;
-    z-index: 0;
+  .pie {
     display: flex;
-    gap: 0.55rem;
-    pointer-events: none;
-    color: var(--color-texto);
-    opacity: 0.07;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-top: 0.35rem;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: -0.03em;
+    color: var(--color-tenue);
+  }
+  .ir {
+    color: var(--cat);
+    opacity: 0;
+    translate: -0.5rem 0;
     transition:
-      opacity 0.25s ease,
-      transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity 0.35s ease,
+      translate 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .marcas svg { width: 3.1rem; height: 3.1rem; flex: none; }
 
-  .group:hover .marcas { opacity: 0.12; transform: translateY(-0.35rem); }
-
-  /* El contenido va por encima de la marca de agua. */
-  .group > :global(div) { position: relative; z-index: 1; }
+  /* ── La secuencia del hover ─────────────────────────────────────────── */
+  @media (hover: hover) {
+    .pieza:hover { transform: translateY(-5px); }
+    .pieza:hover::after { transform: scaleY(1); }
+    .pieza:hover .lienzo { transform: scale(1.07); }
+    .pieza:hover .lienzo-marcas svg { opacity: 0.72; }
+    .pieza:hover .velo { opacity: 1; }
+    .pieza:hover .ir { opacity: 1; translate: 0 0; }
+    .pieza:hover .tags { opacity: 0.5; }
+  }
+  .pieza:focus-visible {
+    outline: 2px solid var(--cat);
+    outline-offset: 6px;
+    border-radius: 4px;
+  }
 
   @media (prefers-reduced-motion: reduce) {
-    .marcas { transition: none; }
-    .group:hover .marcas { transform: none; }
+    .pieza,
+    .pieza::after,
+    .lienzo,
+    .velo,
+    .ir { transition: none; }
+    .pieza:hover { transform: none; }
+    .pieza:hover .lienzo { transform: none; }
   }
 </style>

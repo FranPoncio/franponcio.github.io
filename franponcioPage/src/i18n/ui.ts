@@ -38,6 +38,9 @@ export const ui = {
     'formacion.verCertificado': 'ver certificado ↗',
     'formacion.insignia': 'insignia generada — no es un certificado',
     'formacion.proximo': 'Lo que viene',
+    'herramientas.titulo': 'Stack',
+    'herramientas.bajada':
+      'Herramientas y métodos con los que trabajo: datos y visualización arriba, gestión y construcción abajo. Pasá el mouse para frenar la cinta.',
     'carrusel.anterior': 'Ver el anterior',
     'carrusel.siguiente': 'Ver el siguiente',
 
@@ -84,6 +87,9 @@ export const ui = {
     'formacion.verCertificado': 'view certificate ↗',
     'formacion.insignia': 'generated badge — not a certificate',
     'formacion.proximo': 'Coming up',
+    'herramientas.titulo': 'Stack',
+    'herramientas.bajada':
+      'Tools and methods I work with: data and visualisation on top, management and build below. Hover to stop the belt.',
     'carrusel.anterior': 'Previous',
     'carrusel.siguiente': 'Next',
 

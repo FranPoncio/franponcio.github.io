@@ -20,6 +20,7 @@
 <div class="troncal" aria-hidden="true">
   <div class="caño"></div>
   <div class="gas"></div>
+  <div class="flujo"></div>
   <div class="cabeza"><span class="cabeza-nucleo"></span></div>
 </div>
 
@@ -72,6 +73,33 @@
       var(--color-acento);
   }
 
+  /* El gas CORRIENDO por adentro. Es la parte que hace que el caño parezca
+     vivo y no un relleno pintado: pulsos claros que bajan sin parar por el
+     tramo ya lleno.
+
+     Sólo se anima background-position, que no toca layout. Y va recortado por
+     el mismo clip-path que el gas, así que nunca se ve correr por un tramo
+     todavía vacío. */
+  .flujo {
+    position: absolute;
+    inset: 1px;
+    clip-path: inset(0 0 calc((1 - var(--avance, 1)) * 100%) 0);
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0 26px,
+      color-mix(in srgb, #fff 62%, transparent) 26px 34px,
+      transparent 34px 60px
+    );
+    background-size: 100% 120px;
+    mix-blend-mode: overlay;
+    opacity: 0.85;
+    animation: bajar 2.6s linear infinite;
+  }
+  @keyframes bajar {
+    from { background-position: 0 0; }
+    to   { background-position: 0 120px; }
+  }
+
   /* El frente de avance: donde está llegando el gas ahora mismo. */
   .cabeza {
     position: absolute;
@@ -87,6 +115,23 @@
        y no se estire junto con el caño. */
     transform: scaleX(calc(1 / (0.19 + var(--avance, 1) * 0.81)));
   }
+  /* Un anillo que sale de la cabeza y se abre, como el golpe de presión
+     cuando el frente llega. */
+  .cabeza::before {
+    content: '';
+    position: absolute;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-acento);
+    animation: expandir 2.6s ease-out infinite;
+  }
+  @keyframes expandir {
+    0%   { transform: scale(1);   opacity: 0.55; }
+    70%  { transform: scale(2.6); opacity: 0; }
+    100% { transform: scale(2.6); opacity: 0; }
+  }
+
   .cabeza-nucleo {
     width: 13px;
     height: 13px;
@@ -123,6 +168,15 @@
     .gas,
     .cabeza-nucleo {
       box-shadow: none;
+    }
+    /* Nada que corra solo: se apagan el flujo y el anillo. */
+    .flujo {
+      animation: none;
+      opacity: 0.3;
+    }
+    .cabeza::before {
+      animation: none;
+      opacity: 0;
     }
   }
 </style>
