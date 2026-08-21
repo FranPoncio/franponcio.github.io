@@ -1,18 +1,23 @@
 ---
 import '../styles/global.css';
 import { conBase } from '../lib/url';
+import type { Idioma } from '../i18n/ui';
 
 interface Props {
   titulo: string;
   descripcion: string;
+  lang: Idioma;
+  /** Misma página en el otro idioma, para el <link alternate> y el selector. */
+  alterna: string;
 }
 
-const { titulo, descripcion } = Astro.props;
+const { titulo, descripcion, lang, alterna } = Astro.props;
 const anio = new Date().getFullYear();
+const otro = lang === 'es' ? 'en' : 'es';
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -21,6 +26,9 @@ const anio = new Date().getFullYear();
     <meta property="og:title" content={titulo} />
     <meta property="og:description" content={descripcion} />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content={lang === 'es' ? 'es_AR' : 'en_US'} />
+    {/* Le dice a Google que son la misma página en dos idiomas. */}
+    <link rel="alternate" hreflang={otro} href={conBase(alterna)} />
     <link rel="icon" href={conBase("favicon.svg")} type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

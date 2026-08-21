@@ -30,6 +30,9 @@
     "nota": {
       "type": "string"
     },
+    "notaEn": {
+      "type": "string"
+    },
     "$schema": {
       "type": "string"
     }

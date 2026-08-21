@@ -1,21 +1,24 @@
 ---
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { usarTraduccion, type Idioma } from '../i18n/ui';
 
 interface Props {
   imagenes: { src: ImageMetadata; alt: string; pie?: string }[];
+  lang: Idioma;
 }
 
-const { imagenes } = Astro.props;
+const { imagenes, lang } = Astro.props;
+const t = usarTraduccion(lang);
 ---
 
 {
   imagenes.length > 0 && (
     <section class="mt-16">
       <div class="flex items-baseline justify-between border-t border-borde pt-6">
-        <h2 class="text-xl font-semibold tracking-tight">Registro</h2>
+        <h2 class="text-xl font-semibold tracking-tight">{t('proyecto.registro')}</h2>
         {imagenes.length > 1 && (
-          <p class="font-mono text-[0.68rem] text-tenue">deslizá para ver las {imagenes.length} →</p>
+          <p class="font-mono text-[0.68rem] text-tenue">{t('proyecto.deslizar')} {imagenes.length} →</p>
         )}
       </div>
 
@@ -28,7 +31,7 @@ const { imagenes } = Astro.props;
         class="carrusel -mx-6 mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4"
         tabindex="0"
         role="region"
-        aria-label="Galería del proyecto"
+        aria-label={t('proyecto.registro')}
       >
         {imagenes.map((img) => (
           <figure class="w-[85%] shrink-0 snap-start overflow-hidden rounded-xl border border-borde bg-panel sm:w-[62%]">

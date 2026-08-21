@@ -23,6 +23,28 @@ La idea: **el sitio y el contenido están separados.** Para agregar un proyecto
 no hace falta entrar a `franponcioPage/` ni saber nada de Astro — se crea una
 carpeta en `proyectos/` con un archivo de texto adentro.
 
+## Bilingüe
+
+El sitio está en español e inglés. El español vive en la raíz (`/`) y el inglés
+bajo `/en/`. El selector del menú es un link a la misma página traducida — sin
+JavaScript, e indexable por Google.
+
+Cada proyecto tiene un archivo por idioma dentro de su carpeta:
+
+```
+proyectos/gasoductos/
+├── index.es.md    ← obligatorio
+├── index.en.md    ← opcional
+└── portada.jpg    ← las imágenes son compartidas
+```
+
+**Si falta el `.en.md`, la página en inglés muestra el español con un aviso.**
+Así se traduce de a poco sin que quede ningún hueco ni ningún 404.
+
+Los textos de la interfaz (títulos de sección, botones) están en
+`franponcioPage/src/i18n/ui.ts`. Si agregás una clave en `es` y te olvidás en
+`en`, TypeScript te lo marca antes de publicar.
+
 ## Agregar un proyecto
 
 ```bash

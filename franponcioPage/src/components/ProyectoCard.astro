@@ -1,13 +1,17 @@
 ---
-import type { CollectionEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import { conBase } from '../lib/url';
+import { usarTraduccion, type Idioma } from '../i18n/ui';
+import type { Proyecto } from '../lib/proyectos';
 
 interface Props {
-  proyecto: CollectionEntry<'proyectos'>;
+  proyecto: Proyecto;
+  lang: Idioma;
 }
 
-const { proyecto } = Astro.props;
+const { proyecto, lang } = Astro.props;
+const t = usarTraduccion(lang);
+const base = lang === 'es' ? 'proyectos' : 'en/projects';
 const { titulo, resumen, categoria, periodo, rol, stack, kpis, borrador, portada } =
   proyecto.data;
 
@@ -30,7 +34,7 @@ const destacado = kpis[0];
 ---
 
 <a
-  href={conBase(`proyectos/${proyecto.id}/`)}
+  href={conBase(`${base}/${proyecto.id}/`)}
   class:list={[
     'tarjeta group flex flex-col overflow-hidden rounded-xl border border-borde bg-panel hover:bg-panel-alto',
     acento.brillo,
@@ -65,7 +69,7 @@ const destacado = kpis[0];
     {
       borrador && (
         <span class="ml-2 align-middle rounded bg-acento/15 px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider text-acento">
-          borrador
+          {t('proyecto.borrador')}
         </span>
       )
     }
@@ -95,10 +99,10 @@ const destacado = kpis[0];
         acento.texto,
       ]}
     >
-      ver caso →
+      {t('proyecto.ver')}
     </span>
   </div>
 
-  <span class="sr-only">Rol: {rol}</span>
+  <span class="sr-only">{t('proyecto.rol')}: {rol}</span>
   </div>
 </a>

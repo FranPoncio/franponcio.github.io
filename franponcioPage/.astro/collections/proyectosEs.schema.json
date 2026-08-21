@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "titulo": {
+      "type": "string"
+    },
+    "resumen": {
+      "type": "string"
+    },
+    "categoria": {
+      "type": "string",
+      "enum": [
+        "datos",
+        "gestion",
+        "herramienta"
+      ]
+    },
+    "orden": {
+      "default": 99,
+      "type": "number"
+    },
+    "periodo": {
+      "type": "string"
+    },
+    "rol": {
+      "type": "string"
+    },
+    "stack": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "kpis": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "valor": {
+            "type": "string"
+          },
+          "nota": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "valor"
+        ]
+      }
+    },
+    "enlace": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "label",
+        "url"
+      ]
+    },
+    "portada": {
+      "type": "object",
+      "properties": {
+        "src": {
+          "type": "string"
+        },
+        "alt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "src",
+        "alt"
+      ]
+    },
+    "video": {
+      "type": "string",
+      "format": "uri"
+    },
+    "galeria": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "src": {
+            "type": "string"
+          },
+          "alt": {
+            "type": "string"
+          },
+          "pie": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "src",
+          "alt"
+        ]
+      }
+    },
+    "borrador": {
+      "default": false,
+      "type": "boolean"
+    },
+    "$schema": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "titulo",
+    "resumen",
+    "categoria",
+    "periodo",
+    "rol"
+  ]
+}
