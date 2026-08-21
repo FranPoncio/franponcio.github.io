@@ -33,6 +33,12 @@
     "notaEn": {
       "type": "string"
     },
+    "certificado": {
+      "type": "string"
+    },
+    "certificadoPdf": {
+      "type": "string"
+    },
     "$schema": {
       "type": "string"
     }

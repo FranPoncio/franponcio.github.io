@@ -111,7 +111,16 @@ pasan por el optimizador de imágenes.
 
 ## Agregar un curso o certificado
 
-Creá `formacion/<curso>.md`. Sólo frontmatter, no necesita cuerpo:
+Cada curso es una **carpeta con su certificado adentro**, para que no queden
+sueltos por ahí:
+
+```
+formacion/ibm-data-science/
+├── index.md          ← los datos del curso
+└── certificado.jpg   ← el certificado, al lado
+```
+
+En el frontmatter apuntás al archivo con `./`:
 
 ```md
 ---
@@ -122,10 +131,18 @@ periodo: '2025 — 2026'
 orden: 1
 credencial: https://...   # opcional, link a la credencial verificable
 nota: Una línea sobre qué cubre.   # opcional
+notaEn: One line in English.       # opcional
+certificado: ./certificado.jpg     # opcional — jpg, png, webp o svg
 ---
 ```
 
-Aparece en la banda **Formación** del home, en la columna de su `estado`.
+Aparece en la banda **Formación** del home, en la columna de su `estado`. Si hay
+certificado, se muestra una miniatura que abre la imagen en grande; Astro la
+optimiza igual que las fotos de los proyectos.
+
+**¿Y si el certificado es un PDF?** Los PDF no pasan por el optimizador de
+imágenes. Ponelo en `franponcioPage/public/certificados/` y en el frontmatter
+usá `certificadoPdf: /certificados/archivo.pdf`.
 
 ## Los proyectos de hoy
 
