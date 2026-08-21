@@ -89,7 +89,9 @@ en la infraestructura de gas, arrancó acá, en 2013**.
 - **Cero accidentes durante dos años consecutivos.** En una operación de depósito
   —montacargas, altura, movimiento constante— eso no sale de un cartel: sale de
   que el procedimiento y la práctica coinciden.
-- **Reclamos de clientes reducidos un 40 % interanual.**
+- **Reclamos de clientes reducidos un 40 % interanual**, sobre una operación que
+  ya despachaba con **menos del 5 % de pedidos con reclamo o scrap**. El 40 % es
+  cuánto bajó; el 5 % es dónde estaba parado.
 - Certificación y recertificación de las tres normas superadas.
 
 ## Lo que me llevé

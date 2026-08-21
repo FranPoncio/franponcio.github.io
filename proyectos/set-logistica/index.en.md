@@ -88,7 +88,9 @@ begin in gas infrastructure, it began here, in 2013**.
 - **Zero accidents across two consecutive years.** In a warehouse operation —
   forklifts, working at height, constant movement — that doesn't come from a
   poster on the wall. It comes from procedure and practice actually matching.
-- **Customer complaints down 40% year over year.**
+- **Customer complaints down 40% year over year**, on an operation already
+  dispatching with **under 5% of orders drawing a claim or ending as scrap**. The
+  40% is how far it fell; the 5% is where it stood.
 - Certification and recertification of all three standards passed.
 
 ## What I took from it
