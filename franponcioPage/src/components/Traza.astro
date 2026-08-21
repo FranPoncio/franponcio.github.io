@@ -1,0 +1,322 @@
+---
+import { conBase } from '../lib/url';
+import { logosDelStack } from '../lib/logos';
+import { usarTraduccion, type Idioma } from '../i18n/ui';
+import type { Proyecto } from '../lib/proyectos';
+
+/**
+ * LA TRAZA — el recorrido completo, de 2013 a hoy, leído de izquierda a
+ * derecha sobre un caño horizontal.
+ *
+ * Cómo se mueve: NO se secuestra la rueda del mouse. El bloque mide varias
+ * pantallas de alto y adentro hay un panel `sticky`; el scroll vertical normal
+ * —rueda, trackpad, teclado, barra— se traduce a desplazamiento horizontal de
+ * la pista. Así funciona igual con cualquier forma de scrollear y no se rompe
+ * la navegación por teclado.
+ *
+ * En celular no hay nada que ganar con el gesto: el bloque se desarma y las
+ * estaciones caen en una columna vertical común.
+ */
+
+interface Props {
+  proyectos: Proyecto[];
+  lang: Idioma;
+}
+
+const { proyectos, lang } = Astro.props;
+const t = usarTraduccion(lang);
+const base = lang === 'es' ? 'proyectos' : 'en/projects';
+
+const estaciones = proyectos.map((p, i) => ({
+  p,
+  arriba: i % 2 === 0,
+  marcas: logosDelStack(p.data.stack, 3),
+}));
+---
+
+<section class="marco" id="traza" style={`--paradas:${estaciones.length}`}>
+  <div class="pega">
+    <div class="via" aria-hidden="true"></div>
+
+    <ol class="pista">
+      {
+        estaciones.map(({ p, arriba, marcas }) => (
+          <li class:list={['parada', arriba ? 'arriba' : 'abajo']} style={`--c: var(--color-${p.data.categoria})`}>
+            <span class="nodo" aria-hidden="true" />
+            <span class="anio">{p.data.periodo}</span>
+
+            <a href={conBase(`${base}/${p.id}/`)} class="ficha group">
+              <span class="rubro">{p.data.categoria}</span>
+              <h3>{p.data.titulo}</h3>
+              <p>{p.data.resumen}</p>
+
+              {p.data.kpis[0] && (
+                <span class="dato">
+                  <b class="tabular-nums">{p.data.kpis[0].valor}</b>
+                  <i>{p.data.kpis[0].label}</i>
+                </span>
+              )}
+
+              <span class="pie">
+                <span class="marcas" aria-hidden="true">
+                  {marcas.map((m) => (
+                    <svg viewBox="0 0 24 24" role="presentation">
+                      <path d={m.path} fill="currentColor" />
+                    </svg>
+                  ))}
+                </span>
+                <span class="ir">{t('proyecto.ver')}</span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  /* Cada parada consume ~50vh de scroll vertical. Más alto = se recorre más
+     despacio. El +100vh es la pantalla que el panel se queda pegado al final. */
+  .marco {
+    height: calc(var(--paradas) * 50vh + 100vh);
+  }
+  .pega {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* El caño, con sus juntas. */
+  .via {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 9px;
+    margin-top: -4.5px;
+    border-radius: 5px;
+    border-top: 1px solid var(--color-borde);
+    border-bottom: 1px solid var(--color-borde);
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0 96px,
+      var(--color-borde) 96px 98px
+    );
+  }
+  /* El gas: se llena a medida que avanzás por la traza. */
+  .via::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    left: 0;
+    right: 0;
+    border-radius: 4px;
+    transform: scaleX(var(--avance, 1));
+    transform-origin: left center;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        transparent 0 95px,
+        color-mix(in srgb, #fff 55%, transparent) 95px 98px
+      ),
+      linear-gradient(90deg, var(--color-acento), color-mix(in srgb, var(--color-acento) 55%, transparent));
+    box-shadow: 0 0 16px -6px var(--color-acento);
+  }
+
+  .pista {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: stretch;
+    padding-left: 4vw;
+    margin: 0;
+    list-style: none;
+    will-change: transform;
+  }
+
+  .parada {
+    position: relative;
+    flex: 0 0 clamp(300px, 25vw, 350px);
+  }
+
+  .nodo {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    z-index: 2;
+    width: 17px;
+    height: 17px;
+    margin-top: -8.5px;
+    margin-left: -8.5px;
+    border-radius: 50%;
+    border: 2.5px solid var(--c);
+    background: var(--color-fondo);
+    box-shadow: 0 0 0 4px var(--color-fondo);
+  }
+
+  .anio {
+    position: absolute;
+    left: 20px;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    color: var(--color-tenue);
+  }
+  .arriba .anio { top: calc(50% + 13px); }
+  .abajo .anio { top: calc(50% - 26px); }
+
+  .ficha {
+    display: block;
+    position: absolute;
+    left: 0;
+    width: clamp(272px, 22vw, 300px);
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    background: var(--color-panel);
+    box-shadow:
+      0 1px 2px rgba(14, 23, 20, 0.05),
+      0 10px 30px -18px rgba(14, 23, 20, 0.35);
+    transition:
+      transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+  .arriba .ficha { bottom: calc(50% + 40px); }
+  .abajo .ficha { top: calc(50% + 40px); }
+
+  @media (hover: hover) {
+    .ficha:hover {
+      transform: translateY(-6px);
+      border-color: var(--c);
+      box-shadow:
+        0 2px 4px rgba(14, 23, 20, 0.06),
+        0 18px 40px -20px color-mix(in srgb, var(--c) 55%, transparent);
+    }
+  }
+  .ficha:focus-visible { outline: 2px solid var(--c); outline-offset: 4px; }
+
+  .rubro {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--c);
+  }
+  .ficha h3 {
+    margin-top: 0.5rem;
+    font-size: 0.98rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .ficha p {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: var(--color-tenue);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+  }
+
+  .dato {
+    margin-top: 0.85rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+  }
+  .dato b {
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.08em;
+  }
+  .dato i {
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-size: 0.52rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-tenue);
+  }
+
+  .pie {
+    margin-top: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .marcas { display: flex; gap: 0.45rem; color: var(--color-texto); }
+  .marcas svg { width: 0.95rem; height: 0.95rem; opacity: 0.3; }
+  .ir {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: -0.03em;
+    color: var(--c);
+    opacity: 0;
+    translate: -0.4rem 0;
+    transition: opacity 0.3s ease, translate 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @media (hover: hover) {
+    .ficha:hover .ir { opacity: 1; translate: 0 0; }
+    .ficha:hover .marcas svg { opacity: 0.55; }
+  }
+
+  /* ── Celular: el gesto no aporta, se desarma en columna ───────────────── */
+  @media (max-width: 900px) {
+    .marco { height: auto; }
+    .pega { position: static; height: auto; overflow: visible; }
+    .via { display: none; }
+    .pista {
+      position: static;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 0 1.25rem;
+      transform: none !important;
+    }
+    .parada { flex: none; padding-left: 1.1rem; padding-bottom: 0.2rem; border-left: 2px solid var(--color-borde); }
+    .nodo { left: -1.5px; top: 1.4rem; margin: 0; }
+    .anio { position: static; display: block; margin-bottom: 0.35rem; }
+    .ficha { position: static; width: auto; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ficha, .ir { transition: none; }
+  }
+</style>
+
+<script>
+  const marco = document.querySelector<HTMLElement>('#traza');
+  const pista = marco?.querySelector<HTMLElement>('.pista');
+  const via = marco?.querySelector<HTMLElement>('.via');
+
+  if (marco && pista && via && matchMedia('(min-width: 901px)').matches) {
+    let pendiente = false;
+    const medir = () => {
+      pendiente = false;
+      const caja = marco.getBoundingClientRect();
+      // Lo que sobra del bloque por encima de la pantalla es el recorrido útil.
+      const recorrido = caja.height - window.innerHeight;
+      const avance = recorrido <= 0 ? 1 : Math.min(Math.max(-caja.top / recorrido, 0), 1);
+      // Cuánto tiene que correrse la pista para que su última ficha entre.
+      const sobra = Math.max(pista.scrollWidth - window.innerWidth, 0);
+      pista.style.transform = `translate3d(${(-sobra * avance).toFixed(1)}px,0,0)`;
+      via.style.setProperty('--avance', avance.toFixed(4));
+    };
+    const alScroll = () => {
+      if (pendiente) return;
+      pendiente = true;
+      requestAnimationFrame(medir);
+    };
+    addEventListener('scroll', alScroll, { passive: true });
+    addEventListener('resize', alScroll, { passive: true });
+    medir();
+  }
+</script>
