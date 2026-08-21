@@ -67,7 +67,7 @@ const titulo =
     <div class="relative mx-auto max-w-5xl px-6 py-20 sm:py-28">
       <p class="font-mono text-xs uppercase tracking-[0.2em] text-acento">{t('hero.rubro')}</p>
       <h1
-        class="mt-5 text-[2.75rem] font-bold leading-[1.03] tracking-[-0.03em] sm:text-6xl lg:text-7xl"
+        class="mt-5 text-[2rem] font-bold leading-[1.08] sm:text-[3.1rem] lg:text-[3.9rem]"
       >
         Francisco<br class="hidden sm:block" /> Poncio
       </h1>
@@ -122,7 +122,7 @@ const titulo =
                 </span>
               </p>
 
-              <h2 class="mt-4 text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+              <h2 class="mt-4 text-xl font-semibold leading-snug sm:text-2xl">
                 {destacado.entrada.data.titulo}
                 {destacado.entrada.data.borrador && (
                   <span class="ml-2 align-middle rounded bg-acento/15 px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider text-acento">
@@ -160,7 +160,7 @@ const titulo =
               <Estacion marca={grupo.indice} />
               <p class="indice">{grupo.indice}</p>
               <div class="mt-2 flex items-baseline gap-4">
-                <h2 class="text-2xl font-semibold tracking-tight sm:text-3xl">{grupo.titulo}</h2>
+                <h2 class="text-lg font-semibold sm:text-xl">{grupo.titulo}</h2>
                 <span class="font-mono text-xs tabular-nums text-tenue">
                   {String(grupo.items.length).padStart(2, '0')}
                 </span>

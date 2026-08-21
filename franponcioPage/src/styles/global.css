@@ -1,5 +1,18 @@
 @import 'tailwindcss';
 
+/* Las tipografías viajan en el repo (paquetes de Fontsource), no se bajan de
+   Google Fonts. Ventajas: no depende de un CDN externo, no hay salto de fuente
+   al cargar, y no se le cuenta a Google quién entra al sitio.
+   Cada subset trae su unicode-range: el navegador baja latin y sólo pide
+   latin-ext si aparece un carácter que lo necesite. */
+@import '@fontsource/martian-mono/latin-400.css';
+@import '@fontsource/martian-mono/latin-600.css';
+@import '@fontsource/martian-mono/latin-700.css';
+@import '@fontsource/martian-mono/latin-ext-400.css';
+@import '@fontsource/martian-mono/latin-ext-600.css';
+@import '@fontsource/martian-mono/latin-ext-700.css';
+@import '@fontsource-variable/chivo';
+
 /*
  * Tokens del portfolio. Tailwind 4 genera las utilidades desde acá:
  * --color-panel -> bg-panel / border-panel · --font-mono -> font-mono
@@ -27,8 +40,12 @@
   --color-gestion: #b45309;
   --color-herramienta: #7e22ce;
 
-  --font-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+  /* Los títulos y los datos hablan con la misma voz: una mono ancha y técnica.
+     El cuerpo lo lleva una grotesca neutra para que los casos se puedan leer
+     largo — la mono sirve para un titular, no para tres párrafos. */
+  --font-titulo: 'Martian Mono', ui-monospace, 'SF Mono', monospace;
+  --font-display: 'Chivo Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Martian Mono', ui-monospace, 'SF Mono', monospace;
 }
 
 html {
@@ -241,4 +258,20 @@ body {
 /* ── Cifras del hero: reservan su ancho para no saltar al contar ─────────── */
 .contador {
   font-variant-numeric: tabular-nums;
+}
+
+
+/* ── Tipografía ───────────────────────────────────────────────────────────
+   Martian Mono es MUY ancha: a tamaño normal un título ocupa el doble que en
+   una grotesca. El tracking negativo fuerte es lo que la vuelve usable en
+   titulares — sin eso no entra nada. */
+h1, h2, h3, .titular {
+  font-family: var(--font-titulo);
+  font-weight: 700;
+  letter-spacing: -0.075em;
+}
+/* Los rótulos en mayúscula van al revés: abiertos, para que se lean como
+   etiquetas de instrumento y no como una palabra apretada. */
+.font-mono {
+  letter-spacing: -0.055em;
 }
