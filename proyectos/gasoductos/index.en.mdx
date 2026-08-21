@@ -1,0 +1,105 @@
+---
+titulo: Gas infrastructure indicators
+resumen: Indicator system, dashboards and reporting over the Córdoba gas network, prepared to IDB / IFC standards.
+categoria: datos
+orden: 1
+periodo: 2016 — 2023
+rol: Business Analyst · Data Analyst
+stack: ['Power BI', 'DAX', 'SQL', 'Power Query', 'ETL']
+kpis:
+  - label: Network
+    valor: 12,000 km
+    nota: 'pipelines and branch lines'
+  - label: Stations
+    valor: '150'
+    nota: 'pressure regulating'
+  - label: Connections
+    valor: '500'
+    nota: 'industrial'
+  - label: Standard
+    valor: IDB / IFC
+    nota: 'multilateral reporting'
+
+portada:
+  src: ./portada.png
+  alt: '[Replace with a real photo: the pipeline route or the control room]'
+
+galeria:
+  - src: ./traza.png
+    alt: '[Replace with a dashboard screenshot using synthetic data]'
+    pie: '[Caption — what it shows and why it matters]'
+  - src: ./estacion.png
+    alt: '[Replace with a diagram of the data model]'
+    pie: '[Caption]'
+
+borrador: true
+---
+
+import TrazaGas from '../../franponcioPage/src/components/TrazaGas.astro';
+
+> **The outcome figures are yours to fill in.** What follows are the real
+> decisions; anything in `[brackets]` would be me making it up.
+
+## The context
+
+Seven years in public gas infrastructure in Córdoba. Other people built the works
+—that side is in [End-to-end works management](/en/projects/obra-gas/)—; **my job
+was knowing the state of everything and making it reportable** to the
+organisations financing it, under their standards.
+
+The network takes in trunk pipelines, distribution branch lines, pressure
+regulating stations and industrial connections. Every asset has its own cycle: it
+gets designed, tendered, built, commissioned, operated.
+
+<TrazaGas lang="en" />
+
+## The problem
+
+The data existed, but split across inspection, administration and operations —
+each area with its own cut-off dates and its own definition of progress.
+
+When two areas reported different progress for the same job, it was almost never
+a data-entry error. **It was that each one understood "progress" differently.**
+That observation set up everything else: the problem was not about tools.
+
+## What I built
+
+- **Data model and indicators.** Defining what gets measured, at what
+  granularity and against what baseline. `[To complete: the concrete decision you
+  made about the unit of measurement.]`
+
+- **Physical and financial progress, kept apart.** 40 % of pipe laid is not 40 %
+  of budget spent. The gap between the two curves is the information, not an
+  error to be corrected.
+
+- **The IDB / IFC standard.** Reporting under a multilateral organisation's
+  standard shapes the whole model: what gets recorded, with what supporting
+  evidence, and how it is demonstrated. **This is the part that sets you apart** —
+  plenty of people do Power BI, very few have reported under these rules.
+
+- **ETL and dashboards.** Ingestion from source systems with **SQL**, published
+  in **Power BI** and **Tableau**. It is the same craft I had been doing since
+  the warehouse in 2013, now over 12,000 km of network.
+
+## Outcome
+
+`[To complete: what could be decided afterwards that could not be decided before.
+If you have how long the monthly report took to assemble before and after, that
+is the number.]`
+
+---
+
+### ⚠ Before publishing: confidentiality
+
+The network's operational data **belongs to your employer, not to you**, and this
+repository is public: whatever you push stays in the git history even if you
+delete it later.
+
+What is yours is the **method** — the model, the indicator definitions, the
+reporting architecture.
+
+- Screenshots with **synthetic** or aggregated data, never real operational
+  figures.
+- Tell the **how**, not the values it produced.
+- The scale figures already public on your GitHub profile (12,000 km, 150
+  stations, 500 connections) are fine for context.
