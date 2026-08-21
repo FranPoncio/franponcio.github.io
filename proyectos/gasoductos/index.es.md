@@ -3,7 +3,7 @@ titulo: Indicadores de infraestructura de gas
 resumen: Sistema de indicadores, tableros y reporting sobre la red de gas de Córdoba, preparado bajo estándares BID / IFC.
 categoria: datos
 orden: 1
-periodo: 2015 — 2024
+periodo: 2016 — 2023
 rol: Indicadores, tableros y reporting
 stack: ['Power BI', 'DAX', 'SQL', 'Power Query', 'ETL']
 kpis:
@@ -40,7 +40,7 @@ borrador: true
 
 ## El contexto
 
-Casi diez años en infraestructura pública de gas en Córdoba. La obra la hacían
+Siete años en infraestructura pública de gas en Córdoba. La obra la hacían
 otros: lo mío era **saber en qué estado estaba** y que eso se pudiera reportar a
 los organismos que financian, bajo sus estándares.
 

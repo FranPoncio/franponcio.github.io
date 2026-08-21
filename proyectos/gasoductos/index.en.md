@@ -3,7 +3,7 @@ titulo: Gas infrastructure indicators
 resumen: Indicator system, dashboards and reporting for the Córdoba gas network, prepared to IDB / IFC standards.
 categoria: datos
 orden: 1
-periodo: 2015 — 2024
+periodo: 2016 — 2023
 rol: Indicators, dashboards and reporting
 stack: ['Power BI', 'DAX', 'SQL', 'Power Query', 'ETL']
 kpis:
@@ -40,7 +40,7 @@ borrador: true
 
 ## Context
 
-Nearly ten years in public gas infrastructure in Córdoba. Other people built the
+Seven years in public gas infrastructure in Córdoba. Other people built the
 works: my job was **knowing what state they were in**, and making that reportable
 to the organisations financing them, under their standards.
 
