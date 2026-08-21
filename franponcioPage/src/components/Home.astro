@@ -94,7 +94,7 @@ const titulo =
     {
       destacado && (
         <section class="revelar relative mt-20">
-          <Estacion marca="00" />
+          <Estacion marca="00" lectura={t('proyecto.destacado')} />
           <a
             href={conBase(`${rutaCaso}/${destacado.entrada.id}/`)}
             class="tarjeta group grid overflow-hidden rounded-xl border border-borde bg-panel hover:bg-panel-alto hover:shadow-[0_0_0_1px_var(--color-datos)] lg:grid-cols-5"
@@ -157,15 +157,10 @@ const titulo =
         (grupo) =>
           grupo.items.length > 0 && (
             <section class="revelar relative mt-24 scroll-mt-24" id={grupo.id}>
-              <Estacion marca={grupo.indice} />
+              <Estacion marca={String(grupo.items.length).padStart(2, '0')} lectura={grupo.titulo} />
               {/* El número ya lo muestra la estación sobre la línea; repetirlo
                   acá dejaba dos 01 seguidos. */}
-              <div class="flex items-baseline gap-4">
-                <h2 class="text-lg font-semibold sm:text-xl">{grupo.titulo}</h2>
-                <span class="font-mono text-xs tabular-nums text-tenue">
-                  {String(grupo.items.length).padStart(2, '0')}
-                </span>
-              </div>
+              <h2 class="text-lg font-semibold sm:text-xl">{grupo.titulo}</h2>
               <p class="mt-1.5 text-sm text-tenue">{grupo.bajada}</p>
 
               <div class="escalona mt-8">

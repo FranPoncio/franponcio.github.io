@@ -1,69 +1,157 @@
 ---
 /**
- * Una estación de la línea: el punto que marca dónde arranca cada sección.
- * Se enciende cuando la sección entra en pantalla (clase `visible`, la misma
- * que usa el revelado).
+ * Una estación sobre el troncal: la brida, dos ramales cortos y una lectura.
+ *
+ * Va en el HUECO que queda arriba de cada sección, no al costado del título:
+ * ahí el centro de la página está vacío y la cañería puede armarse sin
+ * pisarle el texto a nadie.
+ *
+ * Se arma sola cuando la sección entra en pantalla — la clase `visible` la
+ * pone el mismo IntersectionObserver que revela todo lo demás, así que no hay
+ * un segundo observador dando vueltas. Primero se abren los ramales, después
+ * aparece la lectura.
  */
+
 interface Props {
-  /** El año o etiqueta corta que va al costado del punto. */
+  /** El número de la sección: 01, 02… Va grande, es el dato. */
   marca?: string;
+  /** Qué se está midiendo. Dos o tres palabras como mucho. */
+  lectura?: string;
 }
-const { marca } = Astro.props;
+
+const { marca, lectura } = Astro.props;
 ---
 
 <span class="estacion" aria-hidden="true">
-  <span class="estacion-punto"></span>
-  {marca && <span class="estacion-marca">{marca}</span>}
+  <span class="ramal izq"></span>
+  <span class="ramal der"></span>
+  <span class="brida"></span>
+
+  {
+    (marca || lectura) && (
+      <span class="lectura">
+        {marca && <b>{marca}</b>}
+        {lectura && <i>{lectura}</i>}
+      </span>
+    )
+  }
 </span>
 
 <style>
   .estacion {
     position: absolute;
-    left: -3.75rem;
-    top: 0.4rem;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-  @media (max-width: 1100px) {
-    .estacion {
-      display: none;
-    }
+    left: 50%;
+    /* Arriba de la sección, en el hueco: ahí no hay texto que tapar. */
+    top: -3.2rem;
+    width: 0;
+    height: 0;
   }
 
-  .estacion-punto {
-    width: 10px;
-    height: 10px;
+  /* Los ramales salen del troncal para los dos lados y se abren cuando el gas
+     llega. `scaleX` con origen en el centro: no toca layout. */
+  .ramal {
+    position: absolute;
+    top: -1px;
+    width: 2.6rem;
+    height: 2px;
+    background: var(--color-borde-vivo);
+    transform: scaleX(0);
+    transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .izq {
+    right: 0;
+    transform-origin: right center;
+  }
+  .der {
+    left: 0;
+    transform-origin: left center;
+  }
+  :global(.revelar.visible) .ramal {
+    transform: scaleX(1);
+    background: var(--color-acento-tenue);
+  }
+
+  /* La brida: el anillo que marca la derivación sobre el troncal. */
+  .brida {
+    position: absolute;
+    left: -9px;
+    top: -9px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     border: 2px solid var(--color-borde-vivo);
     background: var(--color-fondo);
+    transform: scale(0.55);
     transition:
-      border-color 0.5s ease,
-      box-shadow 0.5s ease,
-      transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.55s ease,
+      box-shadow 0.55s ease;
   }
-
-  /* `:global` porque la clase `visible` la pone el script en la sección padre,
-     no este componente. */
-  :global(.revelar.visible) .estacion-punto {
+  :global(.revelar.visible) .brida {
+    transform: scale(1);
     border-color: var(--color-acento);
-    box-shadow: 0 0 10px -1px var(--color-acento);
-    transform: scale(1.15);
+    box-shadow: 0 0 12px -2px var(--color-acento);
   }
 
-  .estacion-marca {
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    letter-spacing: 0.1em;
-    color: var(--color-tenue);
+  /* La lectura del instrumento, colgada del ramal izquierdo. */
+  .lectura {
+    position: absolute;
+    right: 3.4rem;
+    top: 50%;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    white-space: nowrap;
+    transform: translateY(-50%);
     opacity: 0;
-    transform: translateX(-4px);
     transition:
-      opacity 0.5s ease,
-      transform 0.5s ease;
+      opacity 0.5s ease 0.25s,
+      translate 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
+    translate: 0.7rem 0;
   }
-  :global(.revelar.visible) .estacion-marca {
+  :global(.revelar.visible) .lectura {
     opacity: 1;
-    transform: none;
+    translate: 0 0;
+  }
+  .lectura b {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.07em;
+    color: var(--color-acento);
+    font-variant-numeric: tabular-nums;
+  }
+  .lectura i {
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-size: 0.58rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-tenue);
+  }
+
+  /* Abajo de 900 px el troncal se corre al margen izquierdo: el ramal
+     izquierdo y la lectura no entran, y quedan sólo la brida y el ramal
+     que apunta al contenido. */
+  @media (max-width: 900px) {
+    .estacion {
+      left: 0.9rem;
+      top: -2.4rem;
+    }
+    .izq,
+    .lectura {
+      display: none;
+    }
+    .der {
+      width: 1.6rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ramal,
+    .brida,
+    .lectura {
+      transition: none;
+    }
   }
 </style>

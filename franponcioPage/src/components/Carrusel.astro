@@ -38,6 +38,22 @@ const { etiqueta, anterior, siguiente } = Astro.props;
 <style>
   .carrusel { position: relative; }
 
+  /* Se desvanece el borde donde el carrusel sigue. Se apaga solo cuando ya no
+     hay a dónde ir, porque lo controla la clase que pone el script. */
+  .carrusel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0.6rem;
+    right: -0.25rem;
+    width: 3.5rem;
+    pointer-events: none;
+    background: linear-gradient(to left, var(--color-fondo), transparent);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .carrusel[data-mas]::after { opacity: 1; }
+
   .pista {
     display: flex;
     gap: 1.15rem;
@@ -46,18 +62,19 @@ const { etiqueta, anterior, siguiente } = Astro.props;
     scroll-behavior: smooth;
     /* Aire a los costados para que la primera y la última no queden pegadas
        al borde, y espacio abajo para la sombra del hover. */
-    padding: 0.35rem 0.25rem 1.1rem;
+    padding: 0.35rem 0.25rem 0.6rem;
     scroll-padding-inline: 0.25rem;
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-borde-vivo) transparent;
+    /* La barra de scroll se esconde: molesta a la vista y no hace falta —
+       están las flechas, el snap y el difuminado del borde para saber que
+       hay más. El carrusel sigue siendo scrolleable con dedo y rueda. */
+    scrollbar-width: none;
   }
-  .pista::-webkit-scrollbar { height: 6px; }
-  .pista::-webkit-scrollbar-thumb { background: var(--color-borde-vivo); border-radius: 3px; }
+  .pista::-webkit-scrollbar { display: none; }
   .pista:focus-visible { outline: 2px solid var(--color-acento); outline-offset: 4px; border-radius: 10px; }
 
   .pista > :global(*) {
     scroll-snap-align: start;
-    flex: 0 0 min(88vw, 340px);
+    flex: 0 0 min(78vw, 268px);
   }
 
   .flecha {
@@ -118,6 +135,8 @@ const { etiqueta, anterior, siguiente } = Astro.props;
       // Si entra todo, el carrusel no es un carrusel: no van flechas.
       const sobra = pista.scrollWidth > pista.clientWidth + 4;
       for (const f of flechas) f.hidden = !sobra;
+      // El difuminado sólo mientras quede algo a la derecha.
+      carrusel.toggleAttribute('data-mas', sobra && pista.scrollLeft < tope);
     };
 
     for (const f of flechas) {

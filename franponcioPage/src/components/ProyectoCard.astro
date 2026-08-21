@@ -67,13 +67,13 @@ const marcas = logosDelStack(stack, 3);
         alt={portada.alt}
         widths={[400, 800]}
         sizes="(min-width: 768px) 45vw, 90vw"
-        class="h-40 w-full object-cover"
+        class="h-28 w-full object-cover"
         loading="lazy"
       />
     ) : marcas.length > 0 ? (
       /* Sin foto, el arte de la tarjeta son las herramientas: los mismos
          logos, en grande. Es el hueco resuelto con algo que además informa. */
-      <div class="portada-marcas h-40 w-full" aria-hidden="true">
+      <div class="portada-marcas h-28 w-full" aria-hidden="true">
         {marcas.map((m) => (
           <svg viewBox="0 0 24 24" role="presentation">
             <path d={m.path} fill="currentColor" />
@@ -81,11 +81,11 @@ const marcas = logosDelStack(stack, 3);
         ))}
       </div>
     ) : (
-      <div class="sin-portada h-40 w-full" />
+      <div class="sin-portada h-28 w-full" />
     )
   }
 
-  <div class="flex flex-1 flex-col p-6">
+  <div class="flex flex-1 flex-col p-4">
   <div class="flex items-center gap-2.5">
     <span class:list={['size-1.5 rounded-full', acento.punto]}></span>
     <span class:list={['font-mono text-[0.68rem] uppercase tracking-[0.14em]', acento.texto]}>
@@ -104,7 +104,7 @@ const marcas = logosDelStack(stack, 3);
       )
     }
   </h3>
-  <p class="mt-2 text-sm leading-relaxed text-tenue">{resumen}</p>
+  <p class="resumen mt-2 text-[0.82rem] leading-relaxed text-tenue">{resumen}</p>
 
   {
     destacado && (
@@ -138,11 +138,21 @@ const marcas = logosDelStack(stack, 3);
 </a>
 
 <style>
+  /* El resumen se corta a tres líneas: si no, una tarjeta con texto largo
+     estira a todas las de la fila y el carrusel queda desparejo. */
+  .resumen {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+  }
+
   .portada-marcas {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1.5rem;
+    gap: 1.15rem;
     border-bottom: 1px solid var(--color-borde);
     background:
       repeating-linear-gradient(
@@ -155,8 +165,8 @@ const marcas = logosDelStack(stack, 3);
     color: var(--color-texto);
   }
   .portada-marcas svg {
-    width: 2.6rem;
-    height: 2.6rem;
+    width: 2.1rem;
+    height: 2.1rem;
     flex: none;
     opacity: 0.34;
     transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
