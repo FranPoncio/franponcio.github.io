@@ -6,22 +6,26 @@
  * La paleta acompaña a PMI-Toolbox para que todo se lea como la misma marca.
  */
 @theme {
-  /* Fondo apenas verdoso: da unidad sin que se note como "tema verde". */
-  --color-fondo: #080d0b;
-  --color-panel: #101815;
-  --color-panel-alto: #17211d;
-  --color-borde: #223029;
-  --color-borde-vivo: #35473d;
-  --color-texto: #e6f0ea;
-  --color-tenue: #8aa398;
-  --color-acento: #3ddc84;
-  --color-acento-tenue: #1e6b45;
+  /* Claro, apenas verdoso: da unidad sin que se note como "tema verde".
+     El verde sigue siendo la identidad, pero ahora oscuro sobre fondo claro
+     en vez de al revés. Todos los colores de texto pasan 4.5:1 sobre el fondo. */
+  --color-fondo: #f6f9f7;
+  --color-panel: #ffffff;
+  --color-panel-alto: #edf3ef;
+  --color-borde: #dde6e1;
+  --color-borde-vivo: #b6c7bd;
+  --color-texto: #0d1a13;
+  --color-tenue: #566b60;
+  --color-acento: #0c7a45;
+  /* Ojo: en el tema oscuro este era MÁS oscuro que el acento. En claro es al
+     revés — es el verde suave para trazos secundarios. */
+  --color-acento-tenue: #7cc4a1;
 
-  /* Un color por categoría. Se corrieron para no chocar con el verde del
-     acento: gestión pasó de verde a ámbar. */
-  --color-datos: #38bdf8;
-  --color-gestion: #fbbf24;
-  --color-herramienta: #c084fc;
+  /* Un color por categoría, en su version oscura: sobre fondo claro las
+     versiones brillantes del tema anterior no se leian. */
+  --color-datos: #0369a1;
+  --color-gestion: #b45309;
+  --color-herramienta: #7e22ce;
 
   --font-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
@@ -29,7 +33,7 @@
 
 html {
   scroll-behavior: smooth;
-  color-scheme: dark;
+  color-scheme: light;
   /* Que el ancla no quede tapada por el header pegajoso. */
   scroll-padding-top: 5rem;
 }
@@ -46,8 +50,8 @@ body {
 /* Trama fina de fondo — el "panel" de sala de control. */
 .trama {
   background-image:
-    linear-gradient(to right, rgba(255,255,255,0.028) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.028) 1px, transparent 1px);
+    linear-gradient(to right, rgba(13,26,19,0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(13,26,19,0.045) 1px, transparent 1px);
   background-size: 44px 44px;
 }
 
@@ -59,7 +63,7 @@ body {
   margin-top: 2.75rem; padding-top: 1.5rem; border-top: 1px solid var(--color-borde);
 }
 .prosa h3 { font-size: 1.08rem; font-weight: 600; margin-top: 2rem; color: var(--color-acento); }
-.prosa p, .prosa li { color: #c6d4e3; }
+.prosa p, .prosa li { color: #2b3a33; }
 .prosa strong { color: var(--color-texto); font-weight: 600; }
 .prosa a { color: var(--color-acento); text-decoration: underline; text-underline-offset: 3px; }
 .prosa ul, .prosa ol { padding-left: 1.3rem; }
@@ -92,7 +96,7 @@ body {
 
 
 /* ── Resplandor del hero ──────────────────────────────────────────────────
-   Un halo ámbar muy tenue detrás del nombre. Da profundidad sin competir
+   Un halo verde muy tenue detrás del nombre. Da profundidad sin competir
    con el texto. `pointer-events: none` para que no tape los links. */
 .halo::before {
   content: '';
@@ -103,7 +107,7 @@ body {
   pointer-events: none;
   background: radial-gradient(
     55% 50% at 30% 40%,
-    rgba(61, 220, 132, 0.16),
+    rgba(12, 122, 69, 0.13),
     transparent 70%
   );
   animation: respirar 9s ease-in-out infinite;
