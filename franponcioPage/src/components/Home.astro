@@ -5,6 +5,8 @@ import Base from '../layouts/Base.astro';
 import Nav from './Nav.astro';
 import ProyectoCard from './ProyectoCard.astro';
 import Formacion from './Formacion.astro';
+import Linea from './Linea.astro';
+import Estacion from './Estacion.astro';
 import { conBase } from '../lib/url';
 import { obtenerProyectos } from '../lib/proyectos';
 import { usarTraduccion, type Idioma } from '../i18n/ui';
@@ -57,6 +59,10 @@ const titulo =
 <Base titulo={titulo} descripcion={t('hero.bajada')} lang={lang} alterna={lang === 'es' ? 'en/' : ''}>
   <Nav lang={lang} alterna={lang === 'es' ? 'en/' : ''} secciones={secciones} />
 
+  {/* La línea recorre TODA la página, del hero al último proyecto. */}
+  <div class="relative">
+    <Linea />
+
   <header class="halo relative overflow-hidden border-b border-borde">
     <div class="relative mx-auto max-w-5xl px-6 py-20 sm:py-28">
       <p class="font-mono text-xs uppercase tracking-[0.2em] text-acento">{t('hero.rubro')}</p>
@@ -84,10 +90,11 @@ const titulo =
 
   <Formacion cursos={cursos} indice="01" lang={lang} />
 
-  <main class="mx-auto max-w-5xl px-6">
+  <main class="relative mx-auto max-w-5xl px-6">
     {
       destacado && (
-        <section class="revelar mt-20">
+        <section class="revelar relative mt-20">
+          <Estacion marca="00" />
           <a
             href={conBase(`${rutaCaso}/${destacado.entrada.id}/`)}
             class="tarjeta group grid overflow-hidden rounded-xl border border-borde bg-panel hover:bg-panel-alto hover:shadow-[0_0_0_1px_var(--color-datos)] lg:grid-cols-5"
@@ -149,7 +156,8 @@ const titulo =
       grupos.map(
         (grupo) =>
           grupo.items.length > 0 && (
-            <section class="revelar mt-24 scroll-mt-24" id={grupo.id}>
+            <section class="revelar relative mt-24 scroll-mt-24" id={grupo.id}>
+              <Estacion marca={grupo.indice} />
               <p class="indice">{grupo.indice}</p>
               <div class="mt-2 flex items-baseline gap-4">
                 <h2 class="text-2xl font-semibold tracking-tight sm:text-3xl">{grupo.titulo}</h2>
@@ -174,4 +182,5 @@ const titulo =
       )
     }
   </main>
+  </div>
 </Base>

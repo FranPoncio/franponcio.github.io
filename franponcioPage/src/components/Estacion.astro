@@ -1,0 +1,69 @@
+---
+/**
+ * Una estación de la línea: el punto que marca dónde arranca cada sección.
+ * Se enciende cuando la sección entra en pantalla (clase `visible`, la misma
+ * que usa el revelado).
+ */
+interface Props {
+  /** El año o etiqueta corta que va al costado del punto. */
+  marca?: string;
+}
+const { marca } = Astro.props;
+---
+
+<span class="estacion" aria-hidden="true">
+  <span class="estacion-punto"></span>
+  {marca && <span class="estacion-marca">{marca}</span>}
+</span>
+
+<style>
+  .estacion {
+    position: absolute;
+    left: -3.75rem;
+    top: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  @media (max-width: 1100px) {
+    .estacion {
+      display: none;
+    }
+  }
+
+  .estacion-punto {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--color-borde-vivo);
+    background: var(--color-fondo);
+    transition:
+      border-color 0.5s ease,
+      box-shadow 0.5s ease,
+      transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* `:global` porque la clase `visible` la pone el script en la sección padre,
+     no este componente. */
+  :global(.revelar.visible) .estacion-punto {
+    border-color: var(--color-acento);
+    box-shadow: 0 0 10px -1px var(--color-acento);
+    transform: scale(1.15);
+  }
+
+  .estacion-marca {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: var(--color-tenue);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
+  }
+  :global(.revelar.visible) .estacion-marca {
+    opacity: 1;
+    transform: none;
+  }
+</style>
