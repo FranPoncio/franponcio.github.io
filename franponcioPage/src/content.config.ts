@@ -4,72 +4,75 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 /**
- * PROYECTOS — viven en `proyectos/` en la raíz del repo, un nivel más arriba
- * que el sitio. Agregar uno = crear `proyectos/<nombre>/index.md`.
+ * El sitio es bilingüe. Cada proyecto vive en su carpeta y tiene un archivo
+ * por idioma:
  *
- * Las imágenes van en esa MISMA carpeta, al lado del index.md. Astro las
- * optimiza y les pone hash solo (`image()` en el schema), así que una foto de
- * obra de 4 MB no se sirve tal cual.
+ *   proyectos/gasoductos/index.es.md   ← obligatorio
+ *   proyectos/gasoductos/index.en.md   ← opcional
+ *   proyectos/gasoductos/portada.jpg   ← las imágenes son compartidas
+ *
+ * Si falta el .en.md, la página en inglés muestra el contenido en español con
+ * un aviso. Así se puede traducir de a poco sin romper nada.
  */
-const proyectos = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: '../proyectos' }),
-  schema: ({ image }) =>
-    z.object({
-      titulo: z.string(),
-      /** Una línea. Es lo que se lee en la tarjeta del home. */
-      resumen: z.string(),
-      categoria: z.enum(['datos', 'gestion', 'herramienta']),
-      /** Menor = aparece antes dentro de su categoría. */
-      orden: z.number().default(99),
-      periodo: z.string(),
-      rol: z.string(),
-      stack: z.array(z.string()).default([]),
-      kpis: z
-        .array(z.object({ label: z.string(), valor: z.string(), nota: z.string().optional() }))
-        .default([]),
-      /** Link externo opcional: app en vivo, repo, PDF. */
-      enlace: z.object({ label: z.string(), url: z.string() }).optional(),
 
-      // ── Lo visual ────────────────────────────────────────────────────────
-      /**
-       * Imagen de portada: encabeza el caso y aparece en la tarjeta del home.
-       * `alt` va adentro del objeto a propósito — así el tipo garantiza que una
-       * portada nunca puede quedar sin descripción.
-       */
-      portada: z.object({ src: image(), alt: z.string() }).optional(),
-      /** Video de YouTube o Vimeo. Pegá la URL normal; se convierte a embed. */
-      video: z.url().optional(),
-      /** Galería al pie del caso. */
-      galeria: z
-        .array(z.object({ src: image(), alt: z.string(), pie: z.string().optional() }))
-        .default([]),
+const camposProyecto = ({ image }: { image: () => any }) =>
+  z.object({
+    titulo: z.string(),
+    /** Una línea. Es lo que se lee en la tarjeta del home. */
+    resumen: z.string(),
+    categoria: z.enum(['datos', 'gestion', 'herramienta']),
+    /** Menor = aparece antes dentro de su categoría. */
+    orden: z.number().default(99),
+    periodo: z.string(),
+    rol: z.string(),
+    stack: z.array(z.string()).default([]),
+    kpis: z
+      .array(z.object({ label: z.string(), valor: z.string(), nota: z.string().optional() }))
+      .default([]),
+    enlace: z.object({ label: z.string(), url: z.url() }).optional(),
 
-      /** true = etiqueta en la tarjeta y banda arriba de la página. */
-      borrador: z.boolean().default(false),
-    }),
+    /** El `alt` va dentro del objeto: así el tipo garantiza que no falte. */
+    portada: z.object({ src: image(), alt: z.string() }).optional(),
+    video: z.url().optional(),
+    galeria: z
+      .array(z.object({ src: image(), alt: z.string(), pie: z.string().optional() }))
+      .default([]),
+
+    borrador: z.boolean().default(false),
+  });
+
+/** Saca `/index.es` o `/index.en` del id para que la URL quede limpia. */
+const idLimpio = ({ entry }: { entry: string }) =>
+  entry.replace(/\/index\.(es|en)\.mdx?$/, '').toLowerCase();
+
+const proyectosEs = defineCollection({
+  loader: glob({ pattern: '**/index.es.{md,mdx}', base: '../proyectos', generateId: idLimpio }),
+  schema: camposProyecto,
+});
+
+const proyectosEn = defineCollection({
+  loader: glob({ pattern: '**/index.en.{md,mdx}', base: '../proyectos', generateId: idLimpio }),
+  schema: camposProyecto,
 });
 
 /**
- * FORMACIÓN — certificados y cursos. Viven en `formacion/` en la raíz.
- * Un archivo por curso: `formacion/<curso>.md`. No generan página propia,
- * se listan en el home agrupados por estado.
+ * FORMACIÓN — un archivo por curso en formacion/.
+ * Los títulos de curso no se traducen (son nombres propios), así que hay una
+ * sola colección; lo único traducible es la nota.
  */
 const formacion = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: '../formacion' }),
+  loader: glob({ pattern: '*.md', base: '../formacion' }),
   schema: z.object({
     titulo: z.string(),
-    /** Quién lo dicta: IBM, UTN FRC, Coursera, Google… */
     entidad: z.string(),
     estado: z.enum(['completado', 'cursando', 'planificado']),
-    /** Año o rango. En planificados podés poner el año estimado. */
     periodo: z.string(),
-    /** Menor = aparece antes dentro de su estado. */
     orden: z.number().default(99),
-    /** Link a la credencial verificable, si la tenés. */
     credencial: z.url().optional(),
-    /** Una línea sobre qué cubre. Opcional. */
     nota: z.string().optional(),
+    /** Traducción de la nota al inglés. Si falta, se usa la española. */
+    notaEn: z.string().optional(),
   }),
 });
 
-export const collections = { proyectos, formacion };
+export const collections = { proyectosEs, proyectosEn, formacion };

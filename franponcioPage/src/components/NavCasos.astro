@@ -1,13 +1,17 @@
 ---
-import type { CollectionEntry } from 'astro:content';
 import { conBase } from '../lib/url';
+import { usarTraduccion, type Idioma } from '../i18n/ui';
+import type { Proyecto } from '../lib/proyectos';
 
 interface Props {
-  anterior?: CollectionEntry<'proyectos'>;
-  siguiente?: CollectionEntry<'proyectos'>;
+  anterior?: Proyecto;
+  siguiente?: Proyecto;
+  lang: Idioma;
 }
 
-const { anterior, siguiente } = Astro.props;
+const { anterior, siguiente, lang } = Astro.props;
+const t = usarTraduccion(lang);
+const base = lang === 'es' ? 'proyectos' : 'en/projects';
 ---
 
 {
@@ -15,10 +19,10 @@ const { anterior, siguiente } = Astro.props;
     <nav class="mt-20 grid gap-4 border-t border-borde pt-8 sm:grid-cols-2">
       {anterior ? (
         <a
-          href={conBase(`proyectos/${anterior.id}/`)}
+          href={conBase(`${base}/${anterior.id}/`)}
           class="tarjeta rounded-xl border border-borde bg-panel p-5 hover:bg-panel-alto"
         >
-          <p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-tenue">← Anterior</p>
+          <p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-tenue">{t('proyecto.anterior')}</p>
           <p class="mt-2 font-medium leading-snug">{anterior.data.titulo}</p>
         </a>
       ) : (
@@ -27,10 +31,10 @@ const { anterior, siguiente } = Astro.props;
 
       {siguiente && (
         <a
-          href={conBase(`proyectos/${siguiente.id}/`)}
+          href={conBase(`${base}/${siguiente.id}/`)}
           class="tarjeta rounded-xl border border-borde bg-panel p-5 text-right hover:bg-panel-alto"
         >
-          <p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-tenue">Siguiente →</p>
+          <p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-tenue">{t('proyecto.siguiente')}</p>
           <p class="mt-2 font-medium leading-snug">{siguiente.data.titulo}</p>
         </a>
       )}

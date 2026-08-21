@@ -1,20 +1,23 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { usarTraduccion, type Idioma } from '../i18n/ui';
 
 interface Props {
   cursos: CollectionEntry<'formacion'>[];
   /** Número de sección que se muestra arriba del título. */
   indice: string;
+  lang: Idioma;
 }
 
-const { cursos, indice } = Astro.props;
+const { cursos, indice, lang } = Astro.props;
+const t = usarTraduccion(lang);
 
 // Orden deliberado: primero lo que estoy haciendo (es lo más vivo), después lo
 // terminado (lo que respalda), y al final lo que viene (muestra dirección).
 const grupos = [
-  { estado: 'cursando' as const, titulo: 'Cursando', punto: 'bg-acento', texto: 'text-acento' },
-  { estado: 'completado' as const, titulo: 'Completado', punto: 'bg-gestion', texto: 'text-gestion' },
-  { estado: 'planificado' as const, titulo: 'En planificación', punto: 'bg-tenue', texto: 'text-tenue' },
+  { estado: 'cursando' as const, titulo: t('formacion.cursando'), punto: 'bg-acento', texto: 'text-acento' },
+  { estado: 'completado' as const, titulo: t('formacion.completado'), punto: 'bg-gestion', texto: 'text-gestion' },
+  { estado: 'planificado' as const, titulo: t('formacion.planificado'), punto: 'bg-tenue', texto: 'text-tenue' },
 ].map((g) => ({
   ...g,
   items: cursos
@@ -27,12 +30,12 @@ const grupos = [
   <div class="mx-auto max-w-5xl px-6 py-16">
     <p class="indice">{indice}</p>
     <div class="mt-2 flex items-baseline gap-4">
-      <h2 class="text-2xl font-semibold tracking-tight sm:text-3xl">Formación</h2>
+      <h2 class="text-2xl font-semibold tracking-tight sm:text-3xl">{t('formacion.titulo')}</h2>
       <span class="font-mono text-xs tabular-nums text-tenue">
         {String(cursos.length).padStart(2, '0')}
       </span>
     </div>
-    <p class="mt-1.5 text-sm text-tenue">Certificaciones y cursos — lo hecho, lo en curso y lo que viene.</p>
+    <p class="mt-1.5 text-sm text-tenue">{t('formacion.bajada')}</p>
 
     <div class="mt-8 grid gap-px overflow-hidden rounded-lg border border-borde bg-borde md:grid-cols-3">
       {
@@ -63,8 +66,10 @@ const grupos = [
                     <p class="mt-0.5 font-mono text-[0.68rem] text-tenue">
                       {curso.data.entidad} · {curso.data.periodo}
                     </p>
-                    {curso.data.nota && (
-                      <p class="mt-1 text-xs leading-snug text-tenue">{curso.data.nota}</p>
+                    {(lang === 'en' ? (curso.data.notaEn ?? curso.data.nota) : curso.data.nota) && (
+                      <p class="mt-1 text-xs leading-snug text-tenue">
+                        {lang === 'en' ? (curso.data.notaEn ?? curso.data.nota) : curso.data.nota}
+                      </p>
                     )}
                     {curso.data.credencial && (
                       <a
@@ -81,7 +86,7 @@ const grupos = [
                             stroke-linejoin="round"
                           />
                         </svg>
-                        Ver credencial
+                        {t('formacion.credencial')}
                       </a>
                     )}
                   </li>

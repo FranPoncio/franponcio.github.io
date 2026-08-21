@@ -1,27 +1,32 @@
 ---
 import { conBase } from '../lib/url';
+import { usarTraduccion, type Idioma } from '../i18n/ui';
 
 interface Props {
-  /** Secciones del home. En las páginas de caso va vacío. */
+  lang: Idioma;
+  /** La misma página en el otro idioma. */
+  alterna: string;
   secciones?: { id: string; titulo: string }[];
 }
 
-const { secciones = [] } = Astro.props;
+const { lang, alterna, secciones = [] } = Astro.props;
+const t = usarTraduccion(lang);
+const inicio = lang === 'es' ? '' : 'en/';
+const otro = lang === 'es' ? 'EN' : 'ES';
 ---
 
 <header
   class="sticky top-0 z-50 border-b border-borde/70 bg-fondo/85 backdrop-blur-md supports-[backdrop-filter]:bg-fondo/65"
 >
-  <nav class="mx-auto max-w-5xl px-6" aria-label="Navegación principal">
+  <nav class="mx-auto max-w-5xl px-6" aria-label={lang === 'es' ? 'Navegación' : 'Navigation'}>
     <div class="flex items-center gap-6 py-3.5">
       <a
-        href={conBase('')}
+        href={conBase(inicio)}
         class="font-mono text-sm font-semibold tracking-tight transition-colors hover:text-acento"
       >
         FP<span class="text-acento">.</span>
       </a>
 
-      {/* Escritorio */}
       {
         secciones.length > 0 && (
           <ul class="hidden gap-6 md:flex">
@@ -39,12 +44,23 @@ const { secciones = [] } = Astro.props;
         )
       }
 
-      <div class="ml-auto flex items-center gap-4">
+      <div class="ml-auto flex items-center gap-3">
+        {/* Selector de idioma: es un link a la misma página traducida, no un
+            botón con JavaScript. Funciona sin scripts y es indexable. */}
+        <a
+          href={conBase(alterna)}
+          hreflang={lang === 'es' ? 'en' : 'es'}
+          class="rounded border border-borde px-2 py-1 font-mono text-[0.68rem] text-tenue transition-colors hover:border-acento hover:text-acento"
+          aria-label={lang === 'es' ? 'Ver en inglés' : 'View in Spanish'}
+        >
+          {otro}
+        </a>
+
         <a
           href="mailto:franponcioo@gmail.com"
           class="hidden font-mono text-xs text-tenue transition-colors hover:text-acento sm:block"
         >
-          Contacto
+          {t('nav.contacto')}
         </a>
         <a
           href="https://github.com/FranPoncio"
@@ -53,13 +69,12 @@ const { secciones = [] } = Astro.props;
           GitHub ↗
         </a>
 
-        {/* Móvil: <details> hace el desplegable sin una línea de JavaScript */}
         {
           secciones.length > 0 && (
             <details class="menu-movil md:hidden">
               <summary
                 class="flex size-8 cursor-pointer list-none items-center justify-center rounded border border-borde text-tenue transition-colors hover:text-texto"
-                aria-label="Abrir menú"
+                aria-label={lang === 'es' ? 'Abrir menú' : 'Open menu'}
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
                   <path d="M1 3h12M1 7h12M1 11h12" stroke="currentColor" stroke-width="1.5" />
@@ -86,7 +101,6 @@ const { secciones = [] } = Astro.props;
 </header>
 
 <style>
-  /* Saca el triangulito del <summary> en Safari. */
   .menu-movil summary::-webkit-details-marker {
     display: none;
   }
