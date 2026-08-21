@@ -1,17 +1,20 @@
 ---
 import { getCollection } from 'astro:content';
-import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Nav from './Nav.astro';
-import ProyectoCard from './ProyectoCard.astro';
-import Formacion from './Formacion.astro';
+import Traza from './Traza.astro';
 import Herramientas from './Herramientas.astro';
-import Linea from './Linea.astro';
-import Carrusel from './Carrusel.astro';
-import Estacion from './Estacion.astro';
-import { conBase } from '../lib/url';
+import Formacion from './Formacion.astro';
 import { obtenerProyectos } from '../lib/proyectos';
 import { usarTraduccion, type Idioma } from '../i18n/ui';
+
+/**
+ * El home es LA TRAZA: el recorrido completo de 2013 a hoy, leído de izquierda
+ * a derecha sobre un caño horizontal. Los casos no están agrupados por
+ * categoría sino puestos en el tiempo, que es como se entiende una carrera.
+ *
+ * Después de la traza siguen, ya en vertical, el stack y la formación.
+ */
 
 interface Props {
   lang: Idioma;
@@ -20,37 +23,26 @@ interface Props {
 const { lang } = Astro.props;
 const t = usarTraduccion(lang);
 
-const resueltos = await obtenerProyectos(lang);
+// En la traza mandan las fechas, no el campo `orden`: es una línea de tiempo.
+// Se ordena por el primer año que aparece en el período.
+const primerAnio = (periodo: string) => Number(periodo.match(/\d{4}/)?.[0] ?? 0);
+const proyectos = (await obtenerProyectos(lang))
+  .map((r) => r.entrada)
+  .sort((a, b) => primerAnio(a.data.periodo) - primerAnio(b.data.periodo));
+
 const cursos = (await getCollection('formacion')).filter((c) => !c.data.oculto);
-const rutaCaso = lang === 'es' ? 'proyectos' : 'en/projects';
-
-// El primero de la lista se muestra en grande: es la puerta de entrada y
-// merece más aire que el resto.
-const [destacado, ...resto] = resueltos;
-
-const grupos = (
-  [
-    { id: 'datos', titulo: t('grupo.datos'), bajada: t('grupo.datos.bajada') },
-    { id: 'gestion', titulo: t('grupo.gestion'), bajada: t('grupo.gestion.bajada') },
-    { id: 'herramienta', titulo: t('grupo.herramienta'), bajada: t('grupo.herramienta.bajada') },
-  ] as const
-).map((g, i) => ({
-  ...g,
-  indice: String(i + 1).padStart(2, '0'),
-  items: resto.filter((p) => p.entrada.data.categoria === g.id),
-}));
-
-const secciones = [
-  ...grupos.filter((g) => g.items.length > 0).map((g) => ({ id: g.id, titulo: g.titulo })),
-  { id: 'herramientas', titulo: t('herramientas.titulo') },
-  { id: 'formacion', titulo: t('formacion.titulo') },
-];
 
 const cifras = [
-  { label: t('hero.gasoductos'), valor: '12.000 km' },
+  { label: t('hero.gasoductos'), valor: '12.000' },
   { label: t('hero.estaciones'), valor: '150' },
   { label: t('hero.conexiones'), valor: '500' },
   { label: t('hero.anios'), valor: '~10' },
+];
+
+const secciones = [
+  { id: 'traza', titulo: t('nav.traza') },
+  { id: 'herramientas', titulo: t('herramientas.titulo') },
+  { id: 'formacion', titulo: t('formacion.titulo') },
 ];
 
 const titulo =
@@ -62,138 +54,42 @@ const titulo =
 <Base titulo={titulo} descripcion={t('hero.bajada')} lang={lang} alterna={lang === 'es' ? 'en/' : ''}>
   <Nav lang={lang} alterna={lang === 'es' ? 'en/' : ''} secciones={secciones} />
 
-  {/* La línea recorre TODA la página, del hero al último proyecto. */}
-  <div class="relative">
-    <Linea />
-
-  <header class="halo relative overflow-hidden border-b border-borde">
-    <div class="relative mx-auto max-w-5xl px-6 py-16 sm:py-20">
-      {/* El rubro es un rótulo, no un titular: chico y tenue. */}
-      <p class="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-tenue">
+  {/* La identidad va arriba de la traza y ocupa poco: lo que hay que mirar es
+      el recorrido, no una portada. */}
+  <header class="mx-auto flex max-w-[1400px] flex-wrap items-start justify-between gap-x-12 gap-y-7 px-8 pb-8 pt-10">
+    <div>
+      <p class="font-mono text-[0.6rem] font-medium uppercase tracking-[0.2em] text-acento">
         {t('hero.rubro')}
       </p>
-      {/* El nombre no necesita ocupar media pantalla para que se sepa de quién
-          es el sitio. Lo que tiene que leerse es la bajada. */}
-      <h1 class="mt-3 text-[1.4rem] font-bold leading-[1.15] sm:text-[1.85rem]">
-        Francisco Poncio
-      </h1>
-      <p class="mt-5 max-w-xl text-[0.95rem] leading-relaxed text-tenue sm:text-base">
-        {t('hero.bajada')}
-      </p>
-
-      <dl class="mt-9 grid grid-cols-2 gap-x-8 gap-y-6 font-mono sm:flex sm:flex-wrap sm:gap-x-12">
-        {
-          cifras.map((c) => (
-            <div>
-              <dt class="text-[0.65rem] uppercase tracking-[0.14em] text-tenue">{c.label}</dt>
-              <dd class="contador mt-1 text-base font-semibold sm:text-lg">{c.valor}</dd>
-            </div>
-          ))
-        }
-      </dl>
+      <h1 class="mt-2.5 text-[1.35rem] font-bold sm:text-[1.6rem]">Francisco Poncio</h1>
+      <p class="mt-3 max-w-[38ch] text-[0.86rem] leading-relaxed text-tenue">{t('hero.bajada')}</p>
     </div>
+
+    <dl class="flex flex-wrap gap-x-9 gap-y-4">
+      {
+        cifras.map((c) => (
+          <div class="text-right">
+            <dt class="font-mono text-[0.55rem] uppercase tracking-[0.15em] text-tenue">
+              {c.label}
+            </dt>
+            <dd class="contador mt-1 font-mono text-lg font-bold tracking-[-0.08em] tabular-nums">
+              {c.valor}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
   </header>
 
+  <Traza proyectos={proyectos} lang={lang} />
 
-  <main class="relative mx-auto max-w-5xl px-6">
-    {
-      destacado && (
-        <section class="revelar relative mt-20">
-          <Estacion marca="00" lectura={t('proyecto.destacado')} />
-          <a
-            href={conBase(`${rutaCaso}/${destacado.entrada.id}/`)}
-            class="tarjeta group grid overflow-hidden rounded-xl border border-borde bg-panel hover:bg-panel-alto hover:shadow-[0_0_0_1px_var(--color-datos)] lg:grid-cols-5"
-          >
-            <div class="lg:col-span-2">
-              {destacado.entrada.data.portada ? (
-                <Image
-                  src={destacado.entrada.data.portada.src}
-                  alt={destacado.entrada.data.portada.alt}
-                  widths={[400, 800]}
-                  sizes="(min-width: 1024px) 40vw, 100vw"
-                  class="h-48 w-full object-cover lg:h-full"
-                  loading="eager"
-                />
-              ) : (
-                <div class="sin-portada h-48 w-full lg:h-full" />
-              )}
-            </div>
+  <p class="mx-auto max-w-[1400px] px-8 pb-10 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-tenue">
+    {t('traza.pie')}
+  </p>
 
-            <div class="flex flex-col p-6 lg:col-span-3 lg:p-7">
-              <p class="flex items-center gap-2.5">
-                <span class="size-1.5 rounded-full bg-datos" />
-                <span class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-datos">
-                  {t('proyecto.destacado')}
-                </span>
-              </p>
-
-              <h2 class="mt-4 text-base font-semibold leading-snug sm:text-lg">
-                {destacado.entrada.data.titulo}
-                {destacado.entrada.data.borrador && (
-                  <span class="ml-2 align-middle rounded bg-acento/15 px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider text-acento">
-                    {t('proyecto.borrador')}
-                  </span>
-                )}
-              </h2>
-              <p class="mt-3 text-[0.9rem] leading-relaxed text-tenue">{destacado.entrada.data.resumen}</p>
-
-              {destacado.entrada.data.kpis.length > 0 && (
-                <dl class="mt-7 flex flex-wrap gap-x-8 gap-y-4 font-mono">
-                  {destacado.entrada.data.kpis.slice(0, 3).map((k) => (
-                    <div>
-                      <dt class="text-[0.65rem] uppercase tracking-[0.12em] text-tenue">
-                        {k.label}
-                      </dt>
-                      <dd class="mt-0.5 text-base font-semibold tabular-nums">{k.valor}</dd>
-                    </div>
-                  ))}
-                </dl>
-              )}
-
-              <span class="mt-auto pt-7 font-mono text-xs text-datos">{t('proyecto.ver')}</span>
-            </div>
-          </a>
-        </section>
-      )
-    }
-
-    {
-      grupos.map(
-        (grupo) =>
-          grupo.items.length > 0 && (
-            <section class="revelar relative mt-24 scroll-mt-24" id={grupo.id}>
-              <Estacion marca={String(grupo.items.length).padStart(2, '0')} lectura={grupo.titulo} />
-              {/* El número ya lo muestra la estación sobre la línea; repetirlo
-                  acá dejaba dos 01 seguidos. */}
-              <h2 class="text-base font-semibold sm:text-lg">{grupo.titulo}</h2>
-              <p class="mt-1.5 text-sm text-tenue">{grupo.bajada}</p>
-
-              <div class="escalona mt-8">
-                <Carrusel
-                  etiqueta={grupo.titulo}
-                  anterior={t('carrusel.anterior')}
-                  siguiente={t('carrusel.siguiente')}
-                >
-                  {grupo.items.map((p) => (
-                    <ProyectoCard proyecto={p.entrada} lang={lang} />
-                  ))}
-                </Carrusel>
-              </div>
-            </section>
-          ),
-      )
-    }
-  </main>
-
-  <div class="mt-24">
-    <Herramientas
-      lang={lang}
-      indice={String(grupos.filter((g) => g.items.length > 0).length + 1).padStart(2, '0')}
-    />
-  </div>
+  <Herramientas lang={lang} indice="02" />
 
   <div class="mt-16">
-    <Formacion cursos={cursos} indice={String(grupos.filter((g) => g.items.length > 0).length + 2).padStart(2, '0')} lang={lang} />
-  </div>
+    <Formacion cursos={cursos} indice="03" lang={lang} />
   </div>
 </Base>

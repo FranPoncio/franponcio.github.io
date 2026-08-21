@@ -1,17 +1,17 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/instrument-sans';
+@import '@fontsource/martian-mono/latin-400.css';
+@import '@fontsource/martian-mono/latin-500.css';
+@import '@fontsource/martian-mono/latin-700.css';
+@import '@fontsource/martian-mono/latin-ext-400.css';
+@import '@fontsource/martian-mono/latin-ext-700.css';
 
 /* Las tipografías viajan en el repo (paquetes de Fontsource), no se bajan de
    Google Fonts. Ventajas: no depende de un CDN externo, no hay salto de fuente
    al cargar, y no se le cuenta a Google quién entra al sitio.
    Cada subset trae su unicode-range: el navegador baja latin y sólo pide
    latin-ext si aparece un carácter que lo necesite. */
-@import '@fontsource/martian-mono/latin-400.css';
-@import '@fontsource/martian-mono/latin-600.css';
-@import '@fontsource/martian-mono/latin-700.css';
-@import '@fontsource/martian-mono/latin-ext-400.css';
-@import '@fontsource/martian-mono/latin-ext-600.css';
-@import '@fontsource/martian-mono/latin-ext-700.css';
-@import '@fontsource-variable/chivo';
 
 /*
  * Tokens del portfolio. Tailwind 4 genera las utilidades desde acá:
@@ -43,8 +43,8 @@
   /* Los títulos y los datos hablan con la misma voz: una mono ancha y técnica.
      El cuerpo lo lleva una grotesca neutra para que los casos se puedan leer
      largo — la mono sirve para un titular, no para tres párrafos. */
-  --font-titulo: 'Martian Mono', ui-monospace, 'SF Mono', monospace;
-  --font-display: 'Chivo Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-titulo: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Martian Mono', ui-monospace, 'SF Mono', monospace;
 }
 
@@ -271,7 +271,8 @@ body {
 h1, h2, h3, .titular {
   font-family: var(--font-titulo);
   font-weight: 700;
-  letter-spacing: -0.075em;
+  letter-spacing: -0.025em;
+  font-variation-settings: 'wdth' 103, 'opsz' 32;
 }
 /* Los rótulos en mayúscula van al revés: abiertos, para que se lean como
    etiquetas de instrumento y no como una palabra apretada. */
