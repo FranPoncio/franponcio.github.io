@@ -1,0 +1,393 @@
+---
+/**
+ * Traza de la red de gas: se dibuja sola a medida que scrolleás, crece, y los
+ * números cuentan hacia arriba cuando el caño llega a cada nodo.
+ *
+ * NO es un mapa real. Es un esquema de los tipos de activo que componen la red
+ * —cabecera, troncal, ramales, estaciones de regulación, conexiones
+ * industriales—. Dibujar la traza real sería inventar geografía sobre
+ * infraestructura ajena, y los datos operativos no son públicos.
+ *
+ * Cómo funciona: el bloque mide 200vh y adentro hay un panel `sticky` que queda
+ * pegado mientras el bloque pasa. Cuánto pasó = `--dibujo`, de 0 a 1. El script
+ * escribe esa variable y el resto lo resuelve el compositor: `stroke-dashoffset`
+ * y `transform` no recalculan layout.
+ *
+ * Hay dos versiones del mismo esquema —una apaisada y una vertical— porque un
+ * dibujo de 880×400 metido en un celular no se lee. El CSS muestra una y esconde
+ * la otra; el script maneja las dos igual, sin saber cuál está visible.
+ *
+ * Sin JavaScript el fallback de cada `var()` es 1: se ve todo dibujado y quieto.
+ */
+
+interface Tramo {
+  d: string;
+  clase: 'troncal' | 'ramal';
+  ancho: number;
+  /** Cuándo empieza a dibujarse este tramo (0 a 1). */
+  desde: number;
+  /** Cuánto scroll tarda en dibujarse. */
+  dura: number;
+}
+
+interface Nodo {
+  x: number;
+  y: number;
+  etiqueta: string;
+  /** El número que cuenta hacia arriba. Sin esto el nodo es sólo un punto. */
+  numero?: number;
+  sufijo?: string;
+  /** En qué punto del dibujo el caño llega hasta acá. */
+  desde: number;
+  /**
+   * Corrimiento del texto respecto del punto. En la vista vertical el troncal
+   * pasa justo por donde iría el número, así que se lo manda al costado.
+   */
+  dx?: number;
+  ancla?: 'middle' | 'start';
+  etiquetaDy?: number;
+  valorDy?: number;
+}
+
+interface Vista {
+  clase: string;
+  viewBox: string;
+  tramos: Tramo[];
+  nodos: Nodo[];
+  /** Recorrido de la punta del caño sobre el troncal. */
+  cabeza: [number, number, number, number];
+}
+
+// En las dos vistas los ramales salen del troncal al 32 % y al 66 % de su largo.
+// Por eso arrancan ahí: el caño no puede ramificarse antes de pasar.
+const vistas: Vista[] = [
+  {
+    clase: 'ancha',
+    viewBox: '0 0 880 400',
+    tramos: [
+      { d: 'M60 210 H820', clase: 'troncal', ancho: 3, desde: 0, dura: 1 },
+      { d: 'M300 210 V110 H620', clase: 'ramal', ancho: 2, desde: 0.32, dura: 0.3 },
+      { d: 'M560 210 V320 H820', clase: 'ramal', ancho: 2, desde: 0.66, dura: 0.3 },
+    ],
+    nodos: [
+      { x: 60, y: 210, etiqueta: 'Cabecera', desde: 0.03 },
+      { x: 190, y: 210, etiqueta: 'Troncal', numero: 12000, sufijo: ' km', desde: 0.17 },
+      { x: 450, y: 110, etiqueta: 'Estaciones', numero: 150, desde: 0.5 },
+      { x: 700, y: 320, etiqueta: 'Industriales', numero: 500, desde: 0.86 },
+    ],
+    cabeza: [60, 210, 820, 210],
+  },
+  {
+    clase: 'angosta',
+    viewBox: '0 0 420 900',
+    tramos: [
+      { d: 'M100 50 V870', clase: 'troncal', ancho: 4, desde: 0, dura: 1 },
+      { d: 'M100 312 H330', clase: 'ramal', ancho: 3, desde: 0.32, dura: 0.3 },
+      { d: 'M100 591 H330', clase: 'ramal', ancho: 3, desde: 0.66, dura: 0.3 },
+    ],
+    nodos: [
+      { x: 100, y: 50, etiqueta: 'Cabecera', desde: 0.03, dx: 26, ancla: 'start', etiquetaDy: -4 },
+      {
+        x: 100,
+        y: 190,
+        etiqueta: 'Troncal',
+        numero: 12000,
+        sufijo: ' km',
+        desde: 0.17,
+        dx: 26,
+        ancla: 'start',
+        etiquetaDy: -16,
+        valorDy: 26,
+      },
+      { x: 250, y: 312, etiqueta: 'Estaciones', numero: 150, desde: 0.51 },
+      { x: 250, y: 591, etiqueta: 'Industriales', numero: 500, desde: 0.85 },
+    ],
+    cabeza: [100, 50, 100, 870],
+  },
+];
+---
+
+<div class="traza-marco">
+  <div class="traza-pega">
+    <figure class="traza">
+      {
+        vistas.map((v) => (
+          <svg
+            class:list={['traza-svg', `vista-${v.clase}`]}
+            viewBox={v.viewBox}
+            role="img"
+            aria-labelledby={`traza-titulo-${v.clase}`}
+          >
+            <title id={`traza-titulo-${v.clase}`}>
+              Esquema de la red de gas: una cabecera, 12.000 km de troncal, 150 estaciones de
+              regulación de presión y 500 conexiones industriales.
+            </title>
+
+            {/* El caño se dibuja con stroke-dashoffset: el trazo existe siempre,
+                lo que cambia es cuánto se ve. Es lo barato de animar. */}
+            {v.tramos.map((t) => (
+              <path
+                class:list={['tubo', t.clase]}
+                d={t.d}
+                stroke-width={t.ancho}
+                data-desde={t.desde}
+                data-dura={t.dura}
+              />
+            ))}
+
+            {/* La punta del caño, viajando por el troncal. */}
+            <circle
+              class="cabeza"
+              cx={v.cabeza[0]}
+              cy={v.cabeza[1]}
+              r="6"
+              data-de={`${v.cabeza[0]},${v.cabeza[1]}`}
+              data-a={`${v.cabeza[2]},${v.cabeza[3]}`}
+            />
+
+            {v.nodos.map((n) => (
+              <g class="nodo" style={`--desde:${n.desde}`} data-desde={n.desde}>
+                <circle cx={n.x} cy={n.y} r="10" class="nodo-halo" />
+                <circle cx={n.x} cy={n.y} r="4" class="nodo-punto" />
+                <text
+                  x={n.x + (n.dx ?? 0)}
+                  y={n.y + (n.etiquetaDy ?? -26)}
+                  class="nodo-etiqueta"
+                  text-anchor={n.ancla ?? 'middle'}
+                >
+                  {n.etiqueta}
+                </text>
+                {n.numero !== undefined && (
+                  <text
+                    x={n.x + (n.dx ?? 0)}
+                    y={n.y + (n.valorDy ?? 38)}
+                    class="nodo-valor"
+                    text-anchor={n.ancla ?? 'middle'}
+                    data-numero={n.numero}
+                    data-sufijo={n.sufijo ?? ''}
+                  >
+                    {n.numero.toLocaleString('es-AR') + (n.sufijo ?? '')}
+                  </text>
+                )}
+              </g>
+            ))}
+          </svg>
+        ))
+      }
+
+      <figcaption class="traza-pie">Esquema de la red — no representa la traza real</figcaption>
+    </figure>
+  </div>
+</div>
+
+<style>
+  /* El esquema se sale de la columna de texto: es lo único de la página que
+     pide pantalla entera. El `min()` deja aire a los costados en desktop y en
+     celular usa todo el ancho disponible. */
+  .traza-marco {
+    width: min(100vw - 2rem, 1320px);
+    margin-inline: calc(50% - min(50vw - 1rem, 660px));
+    /* El alto es cuánto scroll dura el dibujo. Más alto = más lento. */
+    height: 200vh;
+    margin-block: 3rem;
+  }
+  .traza-pega {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: grid;
+    place-items: center;
+  }
+
+  .traza {
+    width: 100%;
+    /* Crece a medida que se dibuja: el gesto que se pidió. Nunca pasa de 1,
+       así que no se desborda. */
+    transform: scale(calc(0.84 + var(--dibujo, 1) * 0.16));
+    transform-origin: center;
+  }
+
+  /* Móvil primero: se ve la vertical y la apaisada no existe. */
+  .traza-svg {
+    display: block;
+    overflow: visible;
+  }
+  .vista-ancha {
+    display: none;
+  }
+  .vista-angosta {
+    height: min(74vh, 760px);
+    width: auto;
+    margin-inline: auto;
+  }
+  @media (min-width: 700px) {
+    .vista-angosta {
+      display: none;
+    }
+    .vista-ancha {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  }
+
+  .tubo {
+    fill: none;
+    stroke-linecap: round;
+    /* --largo lo mide el script con getTotalLength(); --d es el avance de este
+       tramo, ya con su retraso aplicado. */
+    stroke-dasharray: var(--largo, 1);
+    stroke-dashoffset: calc(var(--largo, 1) * (1 - var(--d, 1)));
+  }
+  .troncal {
+    stroke: var(--color-acento);
+    filter: drop-shadow(0 0 7px color-mix(in srgb, var(--color-acento) 45%, transparent));
+  }
+  .ramal {
+    stroke: var(--color-acento-tenue);
+  }
+
+  .cabeza {
+    fill: var(--color-acento);
+    opacity: var(--d, 0);
+    filter: drop-shadow(0 0 9px var(--color-acento));
+  }
+
+  .nodo {
+    /* Aparece cuando el caño ya pasó por su posición. */
+    opacity: clamp(0, calc((var(--dibujo, 1) - var(--desde)) * 14), 1);
+  }
+  .nodo-halo {
+    fill: var(--color-acento);
+    opacity: 0.16;
+  }
+  .nodo-punto {
+    fill: var(--color-acento);
+  }
+  .nodo-etiqueta {
+    fill: var(--color-tenue);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .nodo-valor {
+    fill: var(--color-texto);
+    font-family: var(--font-mono);
+    font-size: 30px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  /* En la vertical el viewBox es más chico, así que el tipo tiene que ser más
+     grande en unidades de dibujo para leerse igual. */
+  .vista-angosta .nodo-etiqueta {
+    font-size: 17px;
+  }
+  .vista-angosta .nodo-valor {
+    font-size: 38px;
+  }
+
+  .traza-pie {
+    margin-top: 1.75rem;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--color-tenue);
+  }
+
+  /* Con el movimiento reducido no hay nada que ganar: el marco se achica y el
+     esquema se muestra entero y quieto. El script hace su parte. */
+  @media (prefers-reduced-motion: reduce) {
+    .traza-marco {
+      height: auto;
+    }
+    .traza-pega {
+      position: static;
+      height: auto;
+    }
+    .traza {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  // Este script viaja sólo en las páginas que usan el componente.
+  const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const acotar = (v: number) => Math.min(Math.max(v, 0), 1);
+  const par = (s: string | undefined) => (s ?? '0,0').split(',').map(Number);
+
+  for (const marco of document.querySelectorAll<HTMLElement>('.traza-marco')) {
+    // Las dos vistas se preparan igual: la que está oculta por CSS no molesta,
+    // y getTotalLength() no depende de que el elemento se esté pintando.
+    const vistas = [...marco.querySelectorAll<SVGSVGElement>('.traza-svg')].map((svg) => ({
+      tubos: [...svg.querySelectorAll<SVGPathElement>('.tubo')].map((el) => {
+        // El largo real del trazo. Sin esto el dasharray es un número inventado
+        // y el caño se completa mucho antes de que termines de scrollear.
+        el.style.setProperty('--largo', String(el.getTotalLength()));
+        return { el, desde: Number(el.dataset.desde), dura: Number(el.dataset.dura) };
+      }),
+      cabezas: [...svg.querySelectorAll<SVGCircleElement>('.cabeza')].map((el) => {
+        const [x1, y1] = par(el.dataset.de);
+        const [x2, y2] = par(el.dataset.a);
+        return { el, x1, y1, dx: x2 - x1, dy: y2 - y1 };
+      }),
+      valores: [...svg.querySelectorAll<SVGTextElement>('.nodo-valor')].map((el) => ({
+        el,
+        // El nodo que lo contiene decide cuándo empieza a contar.
+        desde: Number((el.closest('.nodo') as SVGGElement | null)?.dataset.desde ?? 0),
+        numero: Number(el.dataset.numero),
+        sufijo: el.dataset.sufijo ?? '',
+        ultimo: -1,
+      })),
+    }));
+    if (!vistas.length) continue;
+
+    const pintar = (dibujo: number) => {
+      marco.style.setProperty('--dibujo', dibujo.toFixed(4));
+
+      for (const v of vistas) {
+        // Cada tramo arranca en su retraso y se dibuja en su propia ventana.
+        for (const t of v.tubos) {
+          t.el.style.setProperty('--d', acotar((dibujo - t.desde) / t.dura).toFixed(4));
+        }
+        // La punta del caño viaja por el troncal.
+        for (const c of v.cabezas) {
+          c.el.setAttribute('cx', (c.x1 + dibujo * c.dx).toFixed(1));
+          c.el.setAttribute('cy', (c.y1 + dibujo * c.dy).toFixed(1));
+        }
+        for (const n of v.valores) {
+          // Cuenta en el tramo corto que sigue a la aparición del nodo: el
+          // número llega a destino justo cuando el nodo terminó de aparecer.
+          const actual = Math.round(n.numero * acotar((dibujo - n.desde) / 0.12));
+          if (actual === n.ultimo) continue; // no reescribir texto por gusto
+          n.ultimo = actual;
+          n.el.textContent = actual.toLocaleString('es-AR') + n.sufijo;
+        }
+      }
+    };
+
+    if (reducir) {
+      pintar(1);
+      continue;
+    }
+
+    let pendiente = false;
+    const medir = () => {
+      pendiente = false;
+      const caja = marco.getBoundingClientRect();
+      // El recorrido útil es lo que sobra del marco por encima de la pantalla.
+      const recorrido = caja.height - window.innerHeight;
+      pintar(recorrido <= 0 ? 1 : acotar(-caja.top / recorrido));
+    };
+    const alScroll = () => {
+      if (pendiente) return;
+      pendiente = true;
+      requestAnimationFrame(medir);
+    };
+    addEventListener('scroll', alScroll, { passive: true });
+    addEventListener('resize', alScroll, { passive: true });
+    medir();
+  }
+</script>
