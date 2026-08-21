@@ -30,7 +30,6 @@ kpis:
   - label: Alcance
     valor: 'A → Z'
     nota: 'el ciclo completo de la obra'
-borrador: true
 ---
 
 ## El contexto
