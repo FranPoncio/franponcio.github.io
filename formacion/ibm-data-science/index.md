@@ -2,10 +2,9 @@
 titulo: IBM Data Science Professional Certificate
 entidad: IBM · Coursera
 estado: completado
-periodo: '2026'
+periodo: 'agosto 2026'
 orden: 1
-nota: Python, SQL, análisis y visualización de datos, machine learning.
+nota: 12 cursos — Python, SQL, bases de datos, análisis y machine learning.
+notaEn: 12 courses — Python, SQL, databases, analysis and machine learning.
 certificado: ./certificado.jpg
-# Pegá acá el link del badge de Credly:
-# credencial: https://www.credly.com/badges/...
 ---
