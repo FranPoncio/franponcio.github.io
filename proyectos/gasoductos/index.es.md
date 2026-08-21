@@ -35,76 +35,64 @@ galeria:
 borrador: true
 ---
 
-> **Texto de relleno.** Reemplazalo por lo tuyo. Leé la nota de confidencialidad
-> del final **antes** de escribir — el repo es público.
+> **Los números de resultado los tenés que poner vos.** Lo que sigue son las
+> decisiones reales; lo que está entre `[corchetes]` lo inventaría yo.
 
 ## El contexto
 
-Siete años en infraestructura pública de gas en Córdoba. La obra la hacían
-otros: lo mío era **saber en qué estado estaba** y que eso se pudiera reportar a
-los organismos que financian, bajo sus estándares.
+Siete años en infraestructura pública de gas en Córdoba. La obra la hacían otros
+—esa parte está en [Gestión integral de obra](/proyectos/obra-gas/)—; **acá el
+trabajo era saber en qué estado estaba todo y que se pudiera reportar** a los
+organismos que financian, bajo sus estándares.
 
 La red incluye gasoductos troncales, ramales de distribución, estaciones de
-regulación de presión y conexiones industriales. Cada uno de esos activos tiene
-un ciclo distinto: se proyecta, se licita, se ejecuta, se habilita, se opera. El
-reporting tenía que cubrir todo eso con una sola definición de "avance".
+regulación de presión y conexiones industriales. Cada activo tiene su propio
+ciclo: se proyecta, se licita, se ejecuta, se habilita, se opera.
 
 ## El problema
 
-Los datos existían, pero repartidos: el avance físico lo llevaba inspección en
-planillas por obra, el financiero venía de administración con otro corte de
-fechas, y las habilitaciones las registraba operaciones en un sistema aparte.
+Los datos existían, pero repartidos entre inspección, administración y
+operaciones — cada área con su corte de fechas y su definición de avance.
 
-Armar el informe mensual llevaba una semana, y la mayor parte de ese tiempo no
-era analizar: era conciliar. Cuando dos áreas reportaban avances distintos para
-la misma obra, casi nunca era un error de carga — **era que cada una entendía
-"avance" de una manera distinta**.
-
-Esa fue la observación que ordenó todo el proyecto. El problema no era de
-herramientas.
+Cuando dos áreas reportaban avances distintos para la misma obra, casi nunca era
+un error de carga. **Era que cada una entendía "avance" de una manera distinta.**
+Esa observación ordenó todo lo demás: el problema no era de herramientas.
 
 ## Qué construí
 
-- **Granularidad por tramo, no por obra.** Una obra puede tener frentes en
-  estados muy distintos; promediarlos esconde justo lo que hay que ver. El tramo
-  es la unidad más chica que tiene certificación propia, y por eso es la que
-  permite reconciliar lo físico con lo financiero sin inventar prorrateos.
+- **Modelo de datos e indicadores.** Definición de qué se mide, con qué
+  granularidad y contra qué se compara. `[Completar: la decisión concreta que
+  tomaste sobre la unidad de medición.]`
 
-- **Avance físico y financiero como métricas separadas, siempre juntas en
-  pantalla.** No se promedian ni se combinan en un índice único. Un 40 % de caño
-  tendido no es un 40 % de presupuesto ejecutado, y la brecha entre las dos
-  curvas es la información — no un error a corregir.
+- **Avance físico y financiero, separados.** Un 40 % de caño tendido no es un
+  40 % de presupuesto ejecutado. La brecha entre las dos curvas es la
+  información, no un error a corregir.
 
-- **El estándar BID / IFC.** Exigía trazabilidad del dato hasta el documento
-  respaldatorio: cada número del informe tiene que poder señalar el certificado
-  que lo origina. Eso condicionó el modelo entero — obligó a guardar el vínculo
-  al documento como parte del hecho, no como un anexo. Es la parte que no habría
-  hecho por mi cuenta y la que más valor terminó teniendo.
+- **El estándar BID / IFC.** Reportar bajo el estándar de un organismo
+  multilateral condiciona el modelo entero: qué se registra, con qué respaldo y
+  cómo se demuestra. **Es la parte que más te diferencia** — mucha gente hace
+  Power BI, muy poca reportó bajo estas reglas.
 
-- **ETL.** Ingesta de las tres fuentes con normalización de fechas al corte
-  contable y validaciones que rechazan la carga en vez de dejar pasar un dato
-  inconsistente.
+- **ETL y tableros.** Ingesta desde las fuentes con **SQL**, y publicación en
+  **Power BI** y **Tableau**. Es el mismo oficio que venía haciendo desde el
+  depósito en 2013, ahora sobre 12.000 km de red.
 
 ## Resultado
 
-El informe mensual pasó de una semana a un día, pero lo importante no fue el
-tiempo: fue que **la discusión cambió de tema**. Se dejó de discutir de quién
-era el número correcto para empezar a discutir qué hacer con él.
+`[Completar: qué se pudo decidir después que antes no. Si tenés el tiempo que
+llevaba armar el informe mensual antes y después, ese es el número.]`
 
 ---
 
 ### ⚠ Antes de publicar: confidencialidad
 
-Los datos operativos de la red **son de tu empleador, no tuyos**. Y este repo es
+Los datos operativos de la red **son de tu empleador, no tuyos**, y este repo es
 público: lo que subas queda en el historial de git aunque después lo borres.
 
-Lo que sí es tuyo es el **método** — el modelo de datos, la definición de los
-indicadores, la arquitectura del reporting.
+Lo que sí es tuyo es el **método** — el modelo, la definición de los indicadores,
+la arquitectura del reporting.
 
 - Capturas con **datos sintéticos** o agregados, nunca cifras reales de operación.
 - Contá el **cómo**, no los valores que arrojó.
 - Las cifras de escala que ya tenés públicas en tu perfil de GitHub (12.000 km,
   150 estaciones, 500 conexiones) sirven para dar contexto.
-
-Las imágenes van en **esta misma carpeta**, al lado del `index.md`, y se
-declaran en el frontmatter. Astro las optimiza y les pone hash automáticamente.

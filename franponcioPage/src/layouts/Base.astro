@@ -55,5 +55,67 @@ const otro = lang === 'es' ? 'en' : 'es';
         </nav>
       </div>
     </footer>
+    <script>
+      // Todo lo de acá es decorativo: si el script no corre, la página se ve
+      // igual, sólo que sin las transiciones. Por eso la clase `js-on` se
+      // agrega desde JavaScript y no viene en el HTML.
+      document.documentElement.classList.add('js-on');
+
+      const suave = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // 1) Revelar secciones al entrar en pantalla.
+      const observador = new IntersectionObserver(
+        (entradas) => {
+          for (const e of entradas) {
+            if (!e.isIntersecting) continue;
+            e.target.classList.add('visible');
+            observador.unobserve(e.target); // una sola vez, no al volver a subir
+          }
+        },
+        { rootMargin: '0px 0px -12% 0px' },
+      );
+      for (const el of document.querySelectorAll('.revelar')) observador.observe(el);
+
+      // 2) Las cifras del hero cuentan hacia arriba.
+      //    Se respeta el formato original (12.000 km, ~10, 500) leyendo el
+      //    número y devolviendo el resto del texto tal cual.
+      function contar(el: Element) {
+        const texto = el.textContent.trim();
+        const m = texto.match(/^(\D*)([\d.,]+)(.*)$/);
+        if (!m) return;
+        const [, antes, numTxt, despues] = m;
+        const destino = parseInt(numTxt.replace(/[.,]/g, ''), 10);
+        if (!isFinite(destino) || destino === 0) return;
+
+        const ms = 1100;
+        const t0 = performance.now();
+        const separador = numTxt.includes('.') ? '.' : '';
+
+        function paso(t: number) {
+          const p = Math.min((t - t0) / ms, 1);
+          // easeOutExpo: arranca rápido y frena, se siente mecánico
+          const v = Math.round(destino * (p === 1 ? 1 : 1 - Math.pow(2, -10 * p)));
+          const s = separador ? v.toLocaleString('es-AR') : String(v);
+          el.textContent = antes + s + despues;
+          if (p < 1) requestAnimationFrame(paso);
+        }
+        requestAnimationFrame(paso);
+      }
+
+      const cifras = document.querySelectorAll<HTMLElement>('.contador');
+      if (suave && cifras.length) {
+        const obsCifras = new IntersectionObserver(
+          (entradas) => {
+            for (const e of entradas) {
+              if (!e.isIntersecting) continue;
+              contar(e.target);
+              obsCifras.unobserve(e.target);
+            }
+          },
+          { threshold: 0.6 },
+        );
+        for (const c of cifras) obsCifras.observe(c);
+      }
+    </script>
   </body>
 </html>

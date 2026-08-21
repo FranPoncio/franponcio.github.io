@@ -6,19 +6,22 @@
  * La paleta acompaña a PMI-Toolbox para que todo se lea como la misma marca.
  */
 @theme {
-  --color-fondo: #0b0f14;
-  --color-panel: #121820;
-  --color-panel-alto: #1a222d;
-  --color-borde: #243040;
-  --color-borde-vivo: #33445a;
-  --color-texto: #e8eef5;
-  --color-tenue: #8ba0b6;
-  --color-acento: #ff9f43;
+  /* Fondo apenas verdoso: da unidad sin que se note como "tema verde". */
+  --color-fondo: #080d0b;
+  --color-panel: #101815;
+  --color-panel-alto: #17211d;
+  --color-borde: #223029;
+  --color-borde-vivo: #35473d;
+  --color-texto: #e6f0ea;
+  --color-tenue: #8aa398;
+  --color-acento: #3ddc84;
+  --color-acento-tenue: #1e6b45;
 
-  /* Un color por categoría: la misma señal en la tarjeta y en el caso. */
+  /* Un color por categoría. Se corrieron para no chocar con el verde del
+     acento: gestión pasó de verde a ámbar. */
   --color-datos: #38bdf8;
-  --color-gestion: #4ade80;
-  --color-herramienta: #a78bfa;
+  --color-gestion: #fbbf24;
+  --color-herramienta: #c084fc;
 
   --font-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
@@ -100,32 +103,61 @@ body {
   pointer-events: none;
   background: radial-gradient(
     55% 50% at 30% 40%,
-    rgba(255, 159, 67, 0.13),
+    rgba(61, 220, 132, 0.16),
     transparent 70%
   );
+  animation: respirar 9s ease-in-out infinite;
+}
+
+/* El halo late despacio. 9 segundos es lento a propósito: se percibe como
+   que la página está viva, no como una animación que pide atención. */
+@keyframes respirar {
+  0%, 100% { opacity: 0.75; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .halo::before { animation: none; }
 }
 
 /* ── Revelado al hacer scroll ─────────────────────────────────────────────
    Animaciones guiadas por scroll, sin una línea de JavaScript. Los
    navegadores que no lo soportan simplemente muestran el contenido: la
    regla @supports evita que quede invisible en ese caso. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .revelar {
-      animation: revelar-entrada linear both;
-      animation-timeline: view();
-      animation-range: entry 0% entry 45%;
-    }
-  }
+/* El revelado lo dispara un IntersectionObserver (ver Base.astro). Antes
+   dependía de `animation-timeline`, que sólo soportan los navegadores nuevos:
+   en el resto no pasaba nada. `.js-on` lo activa sólo si el script corrió, así
+   que sin JavaScript el contenido se ve igual. */
+.js-on .revelar {
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
-@keyframes revelar-entrada {
-  from {
-    opacity: 0;
-    transform: translateY(1.25rem);
-  }
-  to {
+.js-on .revelar.visible {
+  opacity: 1;
+  transform: none;
+}
+/* Las tarjetas de una misma sección entran escalonadas. */
+.js-on .revelar.visible .escalona > * {
+  animation: subir 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.js-on .revelar.visible .escalona > *:nth-child(2) { animation-delay: 0.08s; }
+.js-on .revelar.visible .escalona > *:nth-child(3) { animation-delay: 0.16s; }
+.js-on .revelar.visible .escalona > *:nth-child(4) { animation-delay: 0.24s; }
+
+@keyframes subir {
+  from { opacity: 0; transform: translateY(1rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-on .revelar,
+  .js-on .revelar.visible .escalona > * {
     opacity: 1;
     transform: none;
+    animation: none;
+    transition: none;
   }
 }
 
@@ -149,7 +181,15 @@ body {
 }
 @media (hover: hover) {
   .tarjeta:hover {
-    transform: translateY(-3px);
+    transform: translateY(-4px);
+  }
+  /* La portada se acerca apenas: da sensación de profundidad sin recortar
+     nada, porque el contenedor tiene overflow oculto. */
+  .tarjeta img {
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .tarjeta:hover img {
+    transform: scale(1.045);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -168,4 +208,33 @@ body {
     var(--color-panel) 10px,
     var(--color-panel) 20px
   );
+}
+
+
+/* ── Subrayado que crece en los links del menú ───────────────────────────── */
+.link-nav {
+  position: relative;
+}
+.link-nav::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  height: 1px;
+  width: 100%;
+  background: var(--color-acento);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.link-nav:hover::after {
+  transform: scaleX(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .link-nav::after { transition: none; }
+}
+
+/* ── Cifras del hero: reservan su ancho para no saltar al contar ─────────── */
+.contador {
+  font-variant-numeric: tabular-nums;
 }
