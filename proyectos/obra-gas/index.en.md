@@ -30,7 +30,6 @@ kpis:
   - label: Scope
     valor: 'A → Z'
     nota: 'the full life of the works'
-borrador: true
 ---
 
 ## Context
