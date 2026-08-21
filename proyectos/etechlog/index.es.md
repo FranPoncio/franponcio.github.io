@@ -4,7 +4,7 @@ resumen: Análisis integral de la operación de depósito con SAP y ERP — redu
 categoria: datos
 orden: 3
 periodo: 2015 — 2016
-rol: '[Gestión de inventario y mejora de la operación]'
+rol: Business Analyst · Data Analyst · Project Manager
 stack: ['SAP', 'ERP', 'SQL', 'Power BI', 'Tableau', 'C++', 'ISO 14001', 'ISO 45001']
 kpis:
   - label: Stock muerto
@@ -22,8 +22,8 @@ kpis:
 borrador: true
 ---
 
-> **Faltan los porcentajes.** Poné los que tengas — el de stock muerto es el que
-> más peso tiene.
+> **Falta un solo dato: el porcentaje de stock muerto.** Es el número que le
+> cierra el caso.
 
 ## El contexto
 

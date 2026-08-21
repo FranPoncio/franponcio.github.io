@@ -4,7 +4,7 @@ resumen: Sistema de indicadores, tableros y reporting sobre la red de gas de Có
 categoria: datos
 orden: 1
 periodo: 2016 — 2023
-rol: Indicadores, tableros y reporting
+rol: Business Analyst · Data Analyst
 stack: ['Power BI', 'DAX', 'SQL', 'Power Query', 'ETL']
 kpis:
   - label: Red gestionada

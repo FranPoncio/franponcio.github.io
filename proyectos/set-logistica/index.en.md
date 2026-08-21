@@ -4,7 +4,7 @@ resumen: Implementation, certification and recertification of ISO 9001, 14001 an
 categoria: gestion
 orden: 3
 periodo: 2013 — 2015
-rol: '[Integrated management system lead]'
+rol: Project Manager · Business Analyst · Data Analyst
 stack: ['ISO 9001', 'ISO 14001', 'ISO 45001', 'ERP', 'SQL', 'Power BI', 'Tableau']
 kpis:
   - label: Accidents

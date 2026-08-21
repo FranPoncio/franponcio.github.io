@@ -4,7 +4,7 @@ resumen: Indicator system, dashboards and reporting for the Córdoba gas network
 categoria: datos
 orden: 1
 periodo: 2016 — 2023
-rol: Indicators, dashboards and reporting
+rol: Business Analyst · Data Analyst
 stack: ['Power BI', 'DAX', 'SQL', 'Power Query', 'ETL']
 kpis:
   - label: Network

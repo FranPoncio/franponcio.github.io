@@ -4,7 +4,7 @@ resumen: End-to-end analysis of a warehouse operation using SAP and ERP — dead
 categoria: datos
 orden: 3
 periodo: 2015 — 2016
-rol: '[Inventory management and operations improvement]'
+rol: Business Analyst · Data Analyst · Project Manager
 stack: ['SAP', 'ERP', 'SQL', 'Power BI', 'Tableau', 'C++', 'ISO 14001', 'ISO 45001']
 kpis:
   - label: Dead stock

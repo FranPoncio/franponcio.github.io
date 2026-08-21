@@ -4,7 +4,7 @@ resumen: 'De la carpeta de licitación a la habilitación: armado del proyecto, 
 categoria: gestion
 orden: 2
 periodo: 2016 — 2023
-rol: '[Proyecto, licitación e inspección de obra]'
+rol: Project Manager · Business Analyst
 stack:
   [
     'Licitación pública',
@@ -27,7 +27,7 @@ kpis:
 borrador: true
 ---
 
-> **Falta el rol exacto y algún número de cierre.** El resto es real.
+> **Falta un número de cierre** — obras o kilómetros intervenidos. El resto es real.
 
 ## El contexto
 
