@@ -133,8 +133,13 @@ credencial: https://...   # opcional, link a la credencial verificable
 nota: Una línea sobre qué cubre.   # opcional
 notaEn: One line in English.       # opcional
 certificado: ./certificado.jpg     # opcional — jpg, png, webp o svg
+oculto: true                       # opcional — queda en el repo, fuera del home
 ---
 ```
+
+**`oculto: true`** sirve para los cursos cortos que al lado de un certificado de
+12 cursos sólo diluyen: el archivo y su certificado siguen en el repo, pero no
+aparecen en el home. Sacar esa línea alcanza para volver a mostrarlo.
 
 Aparece en la banda **Formación** del home, en la columna de su `estado`. Si hay
 certificado, se muestra una miniatura que abre la imagen en grande; Astro la

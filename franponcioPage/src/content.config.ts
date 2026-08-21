@@ -86,6 +86,13 @@ const formacion = defineCollection({
     notaEn: z.string().optional(),
 
     /**
+     * true = queda en el repo pero no se muestra en el home.
+     * Para cursos cortos que, al lado de un certificado de 12 cursos, sólo
+     * diluyen. Sacar esta línea alcanza para volver a mostrarlo.
+     */
+    oculto: z.boolean().default(false),
+
+    /**
      * El certificado, en la misma carpeta del curso: `./certificado.jpg`.
      * Sirve jpg, png, webp y svg. Para un PDF usá `certificadoPdf`.
      */
