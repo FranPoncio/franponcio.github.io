@@ -5,6 +5,7 @@ import Base from '../layouts/Base.astro';
 import Nav from './Nav.astro';
 import ProyectoCard from './ProyectoCard.astro';
 import Formacion from './Formacion.astro';
+import Herramientas from './Herramientas.astro';
 import Linea from './Linea.astro';
 import Carrusel from './Carrusel.astro';
 import Estacion from './Estacion.astro';
@@ -41,6 +42,7 @@ const grupos = (
 
 const secciones = [
   ...grupos.filter((g) => g.items.length > 0).map((g) => ({ id: g.id, titulo: g.titulo })),
+  { id: 'herramientas', titulo: t('herramientas.titulo') },
   { id: 'formacion', titulo: t('formacion.titulo') },
 ];
 
@@ -65,23 +67,26 @@ const titulo =
     <Linea />
 
   <header class="halo relative overflow-hidden border-b border-borde">
-    <div class="relative mx-auto max-w-5xl px-6 py-20 sm:py-28">
-      <p class="font-mono text-xs uppercase tracking-[0.2em] text-acento">{t('hero.rubro')}</p>
-      <h1
-        class="mt-5 text-[2rem] font-bold leading-[1.08] sm:text-[3.1rem] lg:text-[3.9rem]"
-      >
-        Francisco<br class="hidden sm:block" /> Poncio
+    <div class="relative mx-auto max-w-5xl px-6 py-16 sm:py-20">
+      {/* El rubro es un rótulo, no un titular: chico y tenue. */}
+      <p class="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-tenue">
+        {t('hero.rubro')}
+      </p>
+      {/* El nombre no necesita ocupar media pantalla para que se sepa de quién
+          es el sitio. Lo que tiene que leerse es la bajada. */}
+      <h1 class="mt-3 text-[1.4rem] font-bold leading-[1.15] sm:text-[1.85rem]">
+        Francisco Poncio
       </h1>
-      <p class="mt-7 max-w-2xl text-lg leading-relaxed text-tenue sm:text-xl">
+      <p class="mt-5 max-w-xl text-[0.95rem] leading-relaxed text-tenue sm:text-base">
         {t('hero.bajada')}
       </p>
 
-      <dl class="mt-12 grid grid-cols-2 gap-x-8 gap-y-6 font-mono sm:flex sm:flex-wrap sm:gap-x-12">
+      <dl class="mt-9 grid grid-cols-2 gap-x-8 gap-y-6 font-mono sm:flex sm:flex-wrap sm:gap-x-12">
         {
           cifras.map((c) => (
             <div>
               <dt class="text-[0.65rem] uppercase tracking-[0.14em] text-tenue">{c.label}</dt>
-              <dd class="contador mt-1 text-xl font-semibold sm:text-2xl">{c.valor}</dd>
+              <dd class="contador mt-1 text-base font-semibold sm:text-lg">{c.valor}</dd>
             </div>
           ))
         }
@@ -114,7 +119,7 @@ const titulo =
               )}
             </div>
 
-            <div class="flex flex-col p-7 lg:col-span-3 lg:p-9">
+            <div class="flex flex-col p-6 lg:col-span-3 lg:p-7">
               <p class="flex items-center gap-2.5">
                 <span class="size-1.5 rounded-full bg-datos" />
                 <span class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-datos">
@@ -122,7 +127,7 @@ const titulo =
                 </span>
               </p>
 
-              <h2 class="mt-4 text-xl font-semibold leading-snug sm:text-2xl">
+              <h2 class="mt-4 text-base font-semibold leading-snug sm:text-lg">
                 {destacado.entrada.data.titulo}
                 {destacado.entrada.data.borrador && (
                   <span class="ml-2 align-middle rounded bg-acento/15 px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider text-acento">
@@ -130,7 +135,7 @@ const titulo =
                   </span>
                 )}
               </h2>
-              <p class="mt-3 leading-relaxed text-tenue">{destacado.entrada.data.resumen}</p>
+              <p class="mt-3 text-[0.9rem] leading-relaxed text-tenue">{destacado.entrada.data.resumen}</p>
 
               {destacado.entrada.data.kpis.length > 0 && (
                 <dl class="mt-7 flex flex-wrap gap-x-8 gap-y-4 font-mono">
@@ -139,7 +144,7 @@ const titulo =
                       <dt class="text-[0.65rem] uppercase tracking-[0.12em] text-tenue">
                         {k.label}
                       </dt>
-                      <dd class="mt-0.5 text-lg font-semibold tabular-nums">{k.valor}</dd>
+                      <dd class="mt-0.5 text-base font-semibold tabular-nums">{k.valor}</dd>
                     </div>
                   ))}
                 </dl>
@@ -160,7 +165,7 @@ const titulo =
               <Estacion marca={String(grupo.items.length).padStart(2, '0')} lectura={grupo.titulo} />
               {/* El número ya lo muestra la estación sobre la línea; repetirlo
                   acá dejaba dos 01 seguidos. */}
-              <h2 class="text-lg font-semibold sm:text-xl">{grupo.titulo}</h2>
+              <h2 class="text-base font-semibold sm:text-lg">{grupo.titulo}</h2>
               <p class="mt-1.5 text-sm text-tenue">{grupo.bajada}</p>
 
               <div class="escalona mt-8">
@@ -181,7 +186,14 @@ const titulo =
   </main>
 
   <div class="mt-24">
-    <Formacion cursos={cursos} indice={String(grupos.filter((g) => g.items.length > 0).length + 1).padStart(2, '0')} lang={lang} />
+    <Herramientas
+      lang={lang}
+      indice={String(grupos.filter((g) => g.items.length > 0).length + 1).padStart(2, '0')}
+    />
+  </div>
+
+  <div class="mt-16">
+    <Formacion cursos={cursos} indice={String(grupos.filter((g) => g.items.length > 0).length + 2).padStart(2, '0')} lang={lang} />
   </div>
   </div>
 </Base>
