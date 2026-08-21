@@ -6,6 +6,7 @@ import Nav from './Nav.astro';
 import ProyectoCard from './ProyectoCard.astro';
 import Formacion from './Formacion.astro';
 import Linea from './Linea.astro';
+import Carrusel from './Carrusel.astro';
 import Estacion from './Estacion.astro';
 import { conBase } from '../lib/url';
 import { obtenerProyectos } from '../lib/proyectos';
@@ -34,13 +35,13 @@ const grupos = (
   ] as const
 ).map((g, i) => ({
   ...g,
-  indice: String(i + 2).padStart(2, '0'),
+  indice: String(i + 1).padStart(2, '0'),
   items: resto.filter((p) => p.entrada.data.categoria === g.id),
 }));
 
 const secciones = [
-  { id: 'formacion', titulo: t('formacion.titulo') },
   ...grupos.filter((g) => g.items.length > 0).map((g) => ({ id: g.id, titulo: g.titulo })),
+  { id: 'formacion', titulo: t('formacion.titulo') },
 ];
 
 const cifras = [
@@ -88,7 +89,6 @@ const titulo =
     </div>
   </header>
 
-  <Formacion cursos={cursos} indice="01" lang={lang} />
 
   <main class="relative mx-auto max-w-5xl px-6">
     {
@@ -158,8 +158,9 @@ const titulo =
           grupo.items.length > 0 && (
             <section class="revelar relative mt-24 scroll-mt-24" id={grupo.id}>
               <Estacion marca={grupo.indice} />
-              <p class="indice">{grupo.indice}</p>
-              <div class="mt-2 flex items-baseline gap-4">
+              {/* El número ya lo muestra la estación sobre la línea; repetirlo
+                  acá dejaba dos 01 seguidos. */}
+              <div class="flex items-baseline gap-4">
                 <h2 class="text-lg font-semibold sm:text-xl">{grupo.titulo}</h2>
                 <span class="font-mono text-xs tabular-nums text-tenue">
                   {String(grupo.items.length).padStart(2, '0')}
@@ -167,20 +168,25 @@ const titulo =
               </div>
               <p class="mt-1.5 text-sm text-tenue">{grupo.bajada}</p>
 
-              <div
-                class:list={[
-                  'escalona mt-8 grid gap-5',
-                  grupo.items.length > 1 && 'md:grid-cols-2',
-                ]}
-              >
-                {grupo.items.map((p) => (
-                  <ProyectoCard proyecto={p.entrada} lang={lang} />
-                ))}
+              <div class="escalona mt-8">
+                <Carrusel
+                  etiqueta={grupo.titulo}
+                  anterior={t('carrusel.anterior')}
+                  siguiente={t('carrusel.siguiente')}
+                >
+                  {grupo.items.map((p) => (
+                    <ProyectoCard proyecto={p.entrada} lang={lang} />
+                  ))}
+                </Carrusel>
               </div>
             </section>
           ),
       )
     }
   </main>
+
+  <div class="mt-24">
+    <Formacion cursos={cursos} indice={String(grupos.filter((g) => g.items.length > 0).length + 1).padStart(2, '0')} lang={lang} />
+  </div>
   </div>
 </Base>

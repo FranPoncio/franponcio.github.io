@@ -1,83 +1,119 @@
 ---
 /**
- * La línea: un riel vertical que recorre la página y se va llenando con el
- * scroll, con una estación por sección.
+ * La línea: un eje vertical en el centro de la página que se va llenando —y
+ * ENSANCHANDO— con el scroll.
  *
  * No es decoración: gasoductos, cadena de suministro y pipelines de datos son
  * todos lo mismo mirado de distinta forma. La línea es el tema.
  *
- * El relleno se controla con la variable --avance (0 a 1), que actualiza el
- * script del layout. Sin JavaScript el riel se ve completo y quieto.
+ * Todo lo mueve una sola variable, --avance (0 a 1), que escribe el script del
+ * layout. El relleno usa `transform: scaleX() scaleY()` en vez de cambiar
+ * `width` y `height`: el compositor lo resuelve sin recalcular layout en
+ * ningún frame.
+ *
+ * Sin JavaScript el eje se ve completo y quieto, no vacío.
  */
 ---
 
 <div class="riel" aria-hidden="true">
   <div class="riel-fondo"></div>
   <div class="riel-relleno"></div>
-  <div class="riel-paquete"></div>
+  <div class="riel-nodo"></div>
 </div>
 
 <style>
   .riel {
     position: absolute;
-    left: 1.5rem;
+    left: 50%;
     top: 0;
     bottom: 0;
-    width: 2px;
+    width: 10px;
+    margin-left: -5px;
     pointer-events: none;
+    /* Detrás de todo. Con z-index 0 el eje se dibujaba ENCIMA de las tarjetas;
+       con -1 queda por debajo del fondo de cualquier bloque, pero por encima
+       del fondo de la página. Se lo ve en los huecos entre secciones, que es
+       donde tiene que verse. */
+    z-index: -1;
   }
 
-  /* En pantallas chicas no hay margen para el riel: se esconde. */
-  @media (max-width: 1100px) {
-    .riel {
-      display: none;
-    }
-  }
-
+  /* El recorrido completo, apagado. Se desvanece en las dos puntas para que
+     no arranque ni termine con un corte seco. */
   .riel-fondo {
     position: absolute;
-    inset: 0;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    margin-left: -0.5px;
     background: linear-gradient(
       to bottom,
       transparent,
-      var(--color-borde) 6%,
-      var(--color-borde) 94%,
+      var(--color-borde) 4%,
+      var(--color-borde) 96%,
       transparent
     );
   }
 
-  /* El tramo recorrido. `scaleY` con origen arriba es lo barato de animar:
-     no recalcula layout en cada frame. */
+  /* El tramo recorrido. Dos cosas a la vez:
+     scaleY  → cuánto se llenó
+     scaleX  → de 1px a 7px de ancho. Es el "se va ampliando". */
   .riel-relleno {
     position: absolute;
-    inset: 0;
-    transform-origin: top;
-    transform: scaleY(var(--avance, 0));
-    background: linear-gradient(
-      to bottom,
-      var(--color-acento-tenue),
-      var(--color-acento)
-    );
-    box-shadow: 0 0 10px -4px var(--color-acento);
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 7px;
+    margin-left: -3.5px;
+    border-radius: 4px;
+    transform-origin: top center;
+    transform: scaleX(calc(0.14 + var(--avance, 1) * 0.86)) scaleY(var(--avance, 1));
+    background: linear-gradient(to bottom, var(--color-acento-tenue), var(--color-acento));
+    /* El resplandor también crece: sube con el avance. */
+    box-shadow: 0 0 calc(var(--avance, 1) * 22px) calc(var(--avance, 1) * -6px)
+      var(--color-acento);
   }
 
-  /* El "paquete" que viaja: marca dónde estás parado en la línea. */
-  .riel-paquete {
+  /* La cabeza: marca dónde estás parado sobre el eje. */
+  .riel-nodo {
     position: absolute;
     left: 50%;
-    top: calc(var(--avance, 0) * 100%);
-    width: 9px;
-    height: 9px;
-    margin-left: -4.5px;
-    margin-top: -4.5px;
-    border-radius: 2px;
-    background: var(--color-acento);
-    box-shadow: 0 0 10px -1px var(--color-acento);
-    transform: rotate(45deg);
+    top: calc(var(--avance, 1) * 100%);
+    width: 15px;
+    height: 15px;
+    margin-left: -7.5px;
+    margin-top: -7.5px;
+    border-radius: 50%;
+    background: var(--color-fondo);
+    border: 2px solid var(--color-acento);
+    /* Crece con el avance, igual que el eje. */
+    transform: scale(calc(0.6 + var(--avance, 1) * 0.4));
+    box-shadow: 0 0 0 calc(var(--avance, 1) * 5px)
+      color-mix(in srgb, var(--color-acento) 12%, transparent);
+  }
+
+  /* En pantallas chicas el eje se corre al margen izquierdo: en el centro le
+     pasaría por encima al texto, que ahí ocupa todo el ancho. */
+  @media (max-width: 860px) {
+    .riel {
+      left: 0.85rem;
+      margin-left: 0;
+    }
+    .riel-relleno {
+      width: 5px;
+      margin-left: -2.5px;
+    }
+    .riel-nodo {
+      width: 11px;
+      height: 11px;
+      margin-left: -5.5px;
+      margin-top: -5.5px;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .riel-paquete {
+    .riel-relleno,
+    .riel-nodo {
       box-shadow: none;
     }
   }

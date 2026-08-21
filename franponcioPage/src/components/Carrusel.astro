@@ -1,0 +1,132 @@
+---
+/**
+ * Carrusel horizontal con scroll-snap.
+ *
+ * El scroll lo hace el navegador —scroll-snap-type y scroll-behavior—, así que
+ * anda con el dedo, con la rueda y con el teclado aunque el script no corra.
+ * El script sólo agrega las flechas y las apaga cuando no hay a dónde ir.
+ */
+
+interface Props {
+  /** Para el lector de pantalla: qué hay adentro. */
+  etiqueta: string;
+  /** Texto de las flechas para el lector de pantalla. */
+  anterior: string;
+  siguiente: string;
+}
+
+const { etiqueta, anterior, siguiente } = Astro.props;
+---
+
+<div class="carrusel" data-carrusel>
+  <div class="pista" tabindex="0" role="group" aria-label={etiqueta}>
+    <slot />
+  </div>
+
+  <button class="flecha izq" type="button" data-paso="-1" aria-label={anterior} hidden>
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+      <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+    </svg>
+  </button>
+  <button class="flecha der" type="button" data-paso="1" aria-label={siguiente} hidden>
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+      <path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+    </svg>
+  </button>
+</div>
+
+<style>
+  .carrusel { position: relative; }
+
+  .pista {
+    display: flex;
+    gap: 1.15rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    /* Aire a los costados para que la primera y la última no queden pegadas
+       al borde, y espacio abajo para la sombra del hover. */
+    padding: 0.35rem 0.25rem 1.1rem;
+    scroll-padding-inline: 0.25rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-borde-vivo) transparent;
+  }
+  .pista::-webkit-scrollbar { height: 6px; }
+  .pista::-webkit-scrollbar-thumb { background: var(--color-borde-vivo); border-radius: 3px; }
+  .pista:focus-visible { outline: 2px solid var(--color-acento); outline-offset: 4px; border-radius: 10px; }
+
+  .pista > :global(*) {
+    scroll-snap-align: start;
+    flex: 0 0 min(88vw, 340px);
+  }
+
+  .flecha {
+    position: absolute;
+    top: calc(50% - 1.1rem);
+    display: grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    margin-top: -1.2rem;
+    border-radius: 50%;
+    border: 1px solid var(--color-borde);
+    background: var(--color-panel);
+    color: var(--color-texto);
+    cursor: pointer;
+    box-shadow: 0 2px 14px -4px rgba(13, 26, 19, 0.25);
+    transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  }
+  .flecha:hover { background: var(--color-panel-alto); border-color: var(--color-acento); }
+  .flecha:focus-visible { outline: 2px solid var(--color-acento); outline-offset: 2px; }
+  .flecha[disabled] { opacity: 0.28; cursor: default; }
+  .izq { left: -0.6rem; }
+  .der { right: -0.6rem; }
+
+  /* Con el dedo no hacen falta: el carrusel ya se arrastra. */
+  @media (pointer: coarse), (max-width: 700px) {
+    .flecha { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pista { scroll-behavior: auto; }
+  }
+</style>
+
+<script>
+  for (const carrusel of document.querySelectorAll<HTMLElement>('[data-carrusel]')) {
+    const pista = carrusel.querySelector<HTMLElement>('.pista');
+    const flechas = [...carrusel.querySelectorAll<HTMLButtonElement>('.flecha')];
+    if (!pista || !flechas.length) continue;
+
+    // Sin JavaScript las flechas no sirven, así que vienen ocultas del HTML y
+    // se muestran recién acá.
+    for (const f of flechas) f.hidden = false;
+
+    // Un "paso" es una tarjeta más el hueco: así siempre cae en un snap.
+    const paso = () => {
+      const primera = pista.firstElementChild as HTMLElement | null;
+      if (!primera) return pista.clientWidth;
+      const hueco = parseFloat(getComputedStyle(pista).columnGap || '0') || 0;
+      return primera.getBoundingClientRect().width + hueco;
+    };
+
+    const revisar = () => {
+      const tope = pista.scrollWidth - pista.clientWidth - 2;
+      for (const f of flechas) {
+        f.disabled = Number(f.dataset.paso) < 0 ? pista.scrollLeft <= 2 : pista.scrollLeft >= tope;
+      }
+      // Si entra todo, el carrusel no es un carrusel: no van flechas.
+      const sobra = pista.scrollWidth > pista.clientWidth + 4;
+      for (const f of flechas) f.hidden = !sobra;
+    };
+
+    for (const f of flechas) {
+      f.addEventListener('click', () => {
+        pista.scrollBy({ left: Number(f.dataset.paso) * paso() });
+      });
+    }
+    pista.addEventListener('scroll', revisar, { passive: true });
+    addEventListener('resize', revisar, { passive: true });
+    revisar();
+  }
+</script>

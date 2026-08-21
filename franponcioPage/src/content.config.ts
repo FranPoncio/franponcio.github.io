@@ -98,6 +98,12 @@ const formacion = defineCollection({
      */
     certificado: image().optional(),
     /**
+     * Insignia GENERADA, para los cursos que no tienen certificado en el repo.
+     * Es una ficha del curso, no un certificado, y la imagen lo dice. Sirve
+     * para que la fila de formación no tenga huecos.
+     */
+    insignia: image().optional(),
+    /**
      * Certificado en PDF. Va en franponcioPage/public/certificados/ porque los
      * PDF no pasan por el optimizador de imágenes, y acá se pone la ruta:
      * `/certificados/archivo.pdf`.
