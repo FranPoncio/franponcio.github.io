@@ -1,6 +1,6 @@
 # Build
-franponcio/dist/
-franponcio/.astro/
+franponcioPage/dist/
+franponcioPage/.astro/
 
 # Dependencias
 node_modules/
