@@ -14,16 +14,22 @@ stack:
     'Fibre optics',
     'LNG',
   ]
+# PROVISIONAL FIGURES — replace once the records turn up:
+#   works: +35   ·   route: 320 km   ·   durations: 6 to 18 months
+# Order-of-magnitude estimates, not verified data.
 kpis:
-  - label: Scope
-    valor: 'A → Z'
+  - label: Projects
+    valor: '+35'
     nota: 'tender to commissioning'
+  - label: Route worked
+    valor: '320 km'
+    nota: 'pipelines and branch lines'
   - label: Disciplines
     valor: '4'
     nota: 'mechanical, civil, electronic, environmental'
-  - label: Network
-    valor: 12,000 km
-    nota: 'pipelines and branch lines'
+  - label: Scope
+    valor: 'A → Z'
+    nota: 'the full life of the works'
 borrador: true
 ---
 
@@ -88,6 +94,17 @@ industrial plant and an LNG facility share little beyond the molecule.
 Environmental work on **biodiesel and biogas**. That's where the energy mix is
 heading, and it shows up in the same place as traditional infrastructure: the
 existing network is what will carry whatever comes next.
+
+## Outcome
+
+Seven years, **more than 35 projects** taken from the tender package through to
+commissioning, and **320 km of route worked** across pipelines and branch lines.
+Individual projects ran **6 to 18 months** depending on the section and how many
+crossings it had.
+
+What those numbers don't show is the part that took the most work: none of those
+projects stalled on an argument between disciplines that the tender package
+should have settled.
 
 ## What I took from it
 

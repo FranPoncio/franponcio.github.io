@@ -14,20 +14,24 @@ stack:
     'Fibra óptica',
     'GNL',
   ]
+# CIFRAS PROVISORIAS — reemplazar cuando aparezca la documentación:
+#   obras: +35   ·   traza: 320 km   ·   plazos: 6 a 18 meses
+# Son estimaciones de orden de magnitud, no datos verificados.
 kpis:
-  - label: Alcance
-    valor: 'A → Z'
+  - label: Obras
+    valor: '+35'
     nota: 'de la licitación a la habilitación'
+  - label: Traza intervenida
+    valor: '320 km'
+    nota: 'gasoductos y ramales'
   - label: Disciplinas
     valor: '4'
     nota: 'mecánica, civil, electrónica y ambiental'
-  - label: Red
-    valor: 12.000 km
-    nota: 'gasoductos y ramales'
+  - label: Alcance
+    valor: 'A → Z'
+    nota: 'el ciclo completo de la obra'
 borrador: true
 ---
-
-> **Falta un número de cierre** — obras o kilómetros intervenidos. El resto es real.
 
 ## El contexto
 
@@ -93,15 +97,18 @@ Trabajo en la parte ambiental sobre **biodiésel y biogás**. Es la dirección h
 donde va la matriz, y aparece en el mismo lugar que la infraestructura
 tradicional: la red existente es la que va a transportar lo que venga.
 
+## Resultado
+
+Siete años, **más de 35 obras** llevadas de la carpeta de licitación a la
+habilitación, y **320 km de traza intervenida** entre gasoductos y ramales.
+Obras de **6 a 18 meses** según el tramo y la cantidad de cruces.
+
+Lo que no se ve en esos números es lo que más costó: ninguna de esas obras se
+frenó por una discusión entre disciplinas que el pliego no hubiera previsto.
+
 ## Lo que me llevé
 
 Que las obras no fallan por lo técnico. Fallan en las juntas: entre el pliego y
 la ejecución, entre una disciplina y la siguiente, entre lo que se contrató y lo
 que se entendió. **Haber estado en las dos puntas es lo que permite ver esas
 juntas antes de que se abran.**
-
----
-
-**Para completar:** cantidad de obras o kilómetros intervenidos, plazos, y el
-detalle de alguna obra concreta que se pueda contar. Las fotos van en esta misma
-carpeta.
