@@ -3,9 +3,9 @@ titulo: Gestión de inventario y operación — E-Techlog SA
 resumen: Análisis integral de la operación de depósito con SAP y ERP — reducción de stock muerto, exactitud de inventario y gestión de seguridad y ambiente.
 categoria: datos
 orden: 3
-periodo: '[2021 — 2023]'
+periodo: 2015 — 2016
 rol: '[Gestión de inventario y mejora de la operación]'
-stack: ['SAP', 'ERP', 'Gestión de inventario', 'ISO 14001', 'ISO 45001']
+stack: ['SAP', 'ERP', 'SQL', 'Power BI', 'Tableau', 'C++', 'ISO 14001', 'ISO 45001']
 kpis:
   - label: Stock muerto
     valor: '[−X %]'
@@ -16,6 +16,9 @@ kpis:
   - label: Alcance
     valor: 'Operación completa'
     nota: 'de recepción a despacho'
+  - label: Análisis
+    valor: 'SQL + BI'
+    nota: 'sobre SAP y ERP'
 borrador: true
 ---
 
@@ -54,9 +57,14 @@ contestaba solo. **La decisión de fondo: definir cuál es la fuente de verdad p
 cada dato.** Cuando dos sistemas describen el mismo depósito, la pregunta no es
 cuál está bien — es cuál manda para qué.
 
+Consultas en **SQL** contra las dos bases, y los resultados publicados en
+**Power BI** y **Tableau** para que la operación los mirara sin depender de que
+alguien corriera un reporte. Para el cruce pesado —recorrer movimientos históricos
+ítem por ítem, que en una consulta directa no cerraba en tiempo— usé **C++**.
+
 ### Stock muerto
 
-Identificación por rotación y antigüedad, valorización de lo inmovilizado, y el
+Acá es donde el análisis paga. Identificación por rotación y antigüedad, valorización de lo inmovilizado, y el
 circuito para decidir qué hacer con cada ítem. La parte técnica es la más fácil;
 lo que cuesta es **que alguien se haga cargo de la decisión**, porque dar de baja
 stock es reconocer una compra que no sirvió.

@@ -3,9 +3,9 @@ titulo: Sistema de gestión trinorma — Set Logística SRL
 resumen: Implementación, certificación y recertificación de ISO 9001, 14001 y 45001 sobre una operación logística, con el ERP como columna vertebral del sistema.
 categoria: gestion
 orden: 3
-periodo: '[2018 — 2021]'
+periodo: 2013 — 2015
 rol: '[Responsable del sistema de gestión integrado]'
-stack: ['ISO 9001', 'ISO 14001', 'ISO 45001', 'ERP', 'Auditoría interna']
+stack: ['ISO 9001', 'ISO 14001', 'ISO 45001', 'ERP', 'SQL', 'Power BI', 'Tableau']
 kpis:
   - label: Accidentes
     valor: '0'
@@ -22,7 +22,7 @@ kpis:
 borrador: true
 ---
 
-> **Faltan los años exactos y el detalle del equipo.** El resto es real.
+> **Falta el rol exacto y el detalle del equipo.** El resto es real.
 
 ## El contexto
 
@@ -72,6 +72,20 @@ Gestión del ciclo completo: detección, análisis de causa raíz, acción corre
 y verificación de eficacia. La parte que más cuesta no es levantar la no
 conformidad — es **verificar meses después que la acción funcionó** y no volvió a
 pasar.
+
+### Los indicadores
+
+El sistema no se sostiene con la carpeta: se sostiene con lo que se mide. Armé
+los tableros que seguían la operación —no conformidades abiertas y cerradas,
+tiempos de respuesta, incidentes, reclamos por cliente y por causa— consultando
+directamente contra la base del ERP con **SQL**, y publicando en **Power BI** y
+**Tableau**.
+
+Eso es lo que convirtió la revisión por la dirección en una reunión útil: se
+entra con los números arriba de la mesa, no con un relato.
+
+Y es donde empieza el hilo que sigue hasta hoy — **el trabajo de datos no arrancó
+en la infraestructura de gas, arrancó acá, en 2013**.
 
 ## Resultado
 

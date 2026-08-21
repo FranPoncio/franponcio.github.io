@@ -3,9 +3,9 @@ titulo: Inventory and operations management — E-Techlog SA
 resumen: End-to-end analysis of a warehouse operation using SAP and ERP — dead stock reduction, inventory accuracy, and safety and environmental management.
 categoria: datos
 orden: 3
-periodo: '[2021 — 2023]'
+periodo: 2015 — 2016
 rol: '[Inventory management and operations improvement]'
-stack: ['SAP', 'ERP', 'Inventory management', 'ISO 14001', 'ISO 45001']
+stack: ['SAP', 'ERP', 'SQL', 'Power BI', 'Tableau', 'C++', 'ISO 14001', 'ISO 45001']
 kpis:
   - label: Dead stock
     valor: '[−X%]'
@@ -16,6 +16,9 @@ kpis:
   - label: Scope
     valor: 'Full operation'
     nota: 'receiving to dispatch'
+  - label: Analysis
+    valor: 'SQL + BI'
+    nota: 'across SAP and ERP'
 borrador: true
 ---
 
@@ -51,6 +54,11 @@ Working across the data in both systems to answer questions neither could answer
 alone. **The underlying decision: defining the source of truth for each piece of
 data.** When two systems describe the same warehouse, the question isn't which
 one is right — it's which one governs what.
+
+Queries in **SQL** against both databases, with results published in **Power BI**
+and **Tableau** so operations could look at them without waiting for someone to
+run a report. For the heavy cross-referencing — walking historical movements item
+by item, which wouldn't finish in time as a direct query — I used **C++**.
 
 ### Dead stock
 
