@@ -96,10 +96,10 @@ const otro = lang === 'es' ? 'en' : 'es';
         requestAnimationFrame(paso);
       }
 
-      // 3) La línea de producción: se llena según cuánto de la página se
-      //    recorrió. Se escribe una sola variable CSS y el resto lo resuelve
-      //    el compositor — no se toca layout en ningún frame.
-      const riel = document.querySelector<HTMLElement>('.riel');
+      // 3) El troncal: se llena según cuánto de la página se recorrió. Se
+      //    escribe una sola variable CSS (--avance) y el resto lo resuelven el
+      //    compositor y un clip-path — no se toca layout en ningún frame.
+      const riel = document.querySelector<HTMLElement>('.troncal');
       if (riel) {
         let pendiente = false;
         const actualizar = () => {
