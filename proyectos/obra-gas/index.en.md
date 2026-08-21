@@ -4,7 +4,7 @@ resumen: 'From the tender package to commissioning: project definition, contract
 categoria: gestion
 orden: 2
 periodo: 2016 — 2023
-rol: '[Project, tendering and site supervision]'
+rol: Project Manager · Business Analyst
 stack:
   [
     'Public tendering',

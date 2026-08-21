@@ -4,7 +4,7 @@ resumen: Implementación, certificación y recertificación de ISO 9001, 14001 y
 categoria: gestion
 orden: 3
 periodo: 2013 — 2015
-rol: '[Responsable del sistema de gestión integrado]'
+rol: Project Manager · Business Analyst · Data Analyst
 stack: ['ISO 9001', 'ISO 14001', 'ISO 45001', 'ERP', 'SQL', 'Power BI', 'Tableau']
 kpis:
   - label: Accidentes
@@ -21,8 +21,6 @@ kpis:
     nota: 'auditoría externa superada dos veces'
 borrador: true
 ---
-
-> **Falta el rol exacto y el detalle del equipo.** El resto es real.
 
 ## El contexto
 
