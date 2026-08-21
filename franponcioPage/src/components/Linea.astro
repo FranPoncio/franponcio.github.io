@@ -1,0 +1,84 @@
+---
+/**
+ * La línea: un riel vertical que recorre la página y se va llenando con el
+ * scroll, con una estación por sección.
+ *
+ * No es decoración: gasoductos, cadena de suministro y pipelines de datos son
+ * todos lo mismo mirado de distinta forma. La línea es el tema.
+ *
+ * El relleno se controla con la variable --avance (0 a 1), que actualiza el
+ * script del layout. Sin JavaScript el riel se ve completo y quieto.
+ */
+---
+
+<div class="riel" aria-hidden="true">
+  <div class="riel-fondo"></div>
+  <div class="riel-relleno"></div>
+  <div class="riel-paquete"></div>
+</div>
+
+<style>
+  .riel {
+    position: absolute;
+    left: 1.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    pointer-events: none;
+  }
+
+  /* En pantallas chicas no hay margen para el riel: se esconde. */
+  @media (max-width: 1100px) {
+    .riel {
+      display: none;
+    }
+  }
+
+  .riel-fondo {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      var(--color-borde) 6%,
+      var(--color-borde) 94%,
+      transparent
+    );
+  }
+
+  /* El tramo recorrido. `scaleY` con origen arriba es lo barato de animar:
+     no recalcula layout en cada frame. */
+  .riel-relleno {
+    position: absolute;
+    inset: 0;
+    transform-origin: top;
+    transform: scaleY(var(--avance, 0));
+    background: linear-gradient(
+      to bottom,
+      var(--color-acento-tenue),
+      var(--color-acento)
+    );
+    box-shadow: 0 0 12px -2px var(--color-acento);
+  }
+
+  /* El "paquete" que viaja: marca dónde estás parado en la línea. */
+  .riel-paquete {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--avance, 0) * 100%);
+    width: 9px;
+    height: 9px;
+    margin-left: -4.5px;
+    margin-top: -4.5px;
+    border-radius: 2px;
+    background: var(--color-acento);
+    box-shadow: 0 0 14px 1px var(--color-acento);
+    transform: rotate(45deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .riel-paquete {
+      box-shadow: none;
+    }
+  }
+</style>

@@ -102,6 +102,34 @@ const otro = lang === 'es' ? 'en' : 'es';
         requestAnimationFrame(paso);
       }
 
+      // 3) La línea de producción: se llena según cuánto de la página se
+      //    recorrió. Se escribe una sola variable CSS y el resto lo resuelve
+      //    el compositor — no se toca layout en ningún frame.
+      const riel = document.querySelector<HTMLElement>('.riel');
+      if (riel) {
+        let pendiente = false;
+        const actualizar = () => {
+          pendiente = false;
+          const caja = riel.getBoundingClientRect();
+          const alto = caja.height;
+          if (alto <= 0) return;
+          // 0 cuando el riel asoma por abajo de la pantalla, 1 cuando su
+          // extremo inferior llega al borde inferior. Así la línea arranca en
+          // cuanto aparece y termina de llenarse justo al final del recorrido.
+          const recorrido = window.innerHeight - caja.top;
+          const avance = Math.min(Math.max(recorrido / alto, 0), 1);
+          riel.style.setProperty('--avance', avance.toFixed(4));
+        };
+        const alScroll = () => {
+          if (pendiente) return;
+          pendiente = true;
+          requestAnimationFrame(actualizar);
+        };
+        addEventListener('scroll', alScroll, { passive: true });
+        addEventListener('resize', alScroll, { passive: true });
+        actualizar();
+      }
+
       const cifras = document.querySelectorAll<HTMLElement>('.contador');
       if (suave && cifras.length) {
         const obsCifras = new IntersectionObserver(
