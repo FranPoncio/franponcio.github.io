@@ -19,7 +19,6 @@ kpis:
   - label: Cycles
     valor: 'Cert. + recert.'
     nota: 'external audit passed twice'
-borrador: true
 ---
 
 ## Context

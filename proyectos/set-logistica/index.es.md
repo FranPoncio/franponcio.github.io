@@ -19,7 +19,6 @@ kpis:
   - label: Ciclos
     valor: 'Cert. + recert.'
     nota: 'auditoría externa superada dos veces'
-borrador: true
 ---
 
 ## El contexto

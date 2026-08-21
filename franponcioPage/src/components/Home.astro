@@ -74,7 +74,7 @@ const titulo =
           cifras.map((c) => (
             <div>
               <dt class="text-[0.65rem] uppercase tracking-[0.14em] text-tenue">{c.label}</dt>
-              <dd class="mt-1 text-xl font-semibold tabular-nums sm:text-2xl">{c.valor}</dd>
+              <dd class="contador mt-1 text-xl font-semibold sm:text-2xl">{c.valor}</dd>
             </div>
           ))
         }
@@ -159,7 +159,12 @@ const titulo =
               </div>
               <p class="mt-1.5 text-sm text-tenue">{grupo.bajada}</p>
 
-              <div class:list={['mt-8 grid gap-5', grupo.items.length > 1 && 'md:grid-cols-2']}>
+              <div
+                class:list={[
+                  'escalona mt-8 grid gap-5',
+                  grupo.items.length > 1 && 'md:grid-cols-2',
+                ]}
+              >
                 {grupo.items.map((p) => (
                   <ProyectoCard proyecto={p.entrada} lang={lang} />
                 ))}
