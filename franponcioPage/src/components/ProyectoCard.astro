@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { conBase } from '../lib/url';
+import { logosDelStack } from '../lib/logos';
 import { usarTraduccion, type Idioma } from '../i18n/ui';
 import type { Proyecto } from '../lib/proyectos';
 
@@ -31,15 +32,34 @@ const acento = {
 }[categoria];
 
 const destacado = kpis[0];
+
+// Marca de agua: los logos de las herramientas del proyecto. Los SVG vienen de
+// simple-icons, incrustados durante el build — cero pedidos de red.
+// Power BI y Tableau NO están en el paquete: Microsoft y Salesforce pidieron
+// que los saquen. Esos casos quedan sin marca, que es lo correcto — dibujar
+// una aproximación de una marca ajena es peor que no ponerla.
+const marcas = logosDelStack(stack, 3);
 ---
 
 <a
   href={conBase(`${base}/${proyecto.id}/`)}
   class:list={[
-    'tarjeta group flex flex-col overflow-hidden rounded-xl border border-borde bg-panel hover:bg-panel-alto',
+    'tarjeta group relative flex flex-col overflow-hidden rounded-xl border border-borde bg-panel hover:bg-panel-alto',
     acento.brillo,
   ]}
 >
+  {
+    portada && marcas.length > 0 && (
+      <span class="marcas" aria-hidden="true">
+        {marcas.map((m) => (
+          <svg viewBox="0 0 24 24" role="presentation">
+            <path d={m.path} fill="currentColor" />
+          </svg>
+        ))}
+      </span>
+    )
+  }
+
   {
     portada ? (
       <Image
@@ -50,8 +70,18 @@ const destacado = kpis[0];
         class="h-40 w-full object-cover"
         loading="lazy"
       />
+    ) : marcas.length > 0 ? (
+      /* Sin foto, el arte de la tarjeta son las herramientas: los mismos
+         logos, en grande. Es el hueco resuelto con algo que además informa. */
+      <div class="portada-marcas h-40 w-full" aria-hidden="true">
+        {marcas.map((m) => (
+          <svg viewBox="0 0 24 24" role="presentation">
+            <path d={m.path} fill="currentColor" />
+          </svg>
+        ))}
+      </div>
     ) : (
-      <div class="sin-portada h-24 w-full" />
+      <div class="sin-portada h-40 w-full" />
     )
   }
 
@@ -106,3 +136,62 @@ const destacado = kpis[0];
   <span class="sr-only">{t('proyecto.rol')}: {rol}</span>
   </div>
 </a>
+
+<style>
+  .portada-marcas {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    border-bottom: 1px solid var(--color-borde);
+    background:
+      repeating-linear-gradient(
+        45deg,
+        var(--color-panel-alto),
+        var(--color-panel-alto) 9px,
+        var(--color-panel) 9px,
+        var(--color-panel) 18px
+      );
+    color: var(--color-texto);
+  }
+  .portada-marcas svg {
+    width: 2.6rem;
+    height: 2.6rem;
+    flex: none;
+    opacity: 0.34;
+    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .group:hover .portada-marcas svg { opacity: 0.55; transform: translateY(-2px); }
+  @media (prefers-reduced-motion: reduce) {
+    .portada-marcas svg { transition: none; }
+    .group:hover .portada-marcas svg { transform: none; }
+  }
+
+  /* Los logos viven detrás del texto, apenas visibles. Se despiertan un poco
+     al pasar el mouse: es el único momento en que tiene sentido mirarlos. */
+  .marcas {
+    position: absolute;
+    right: 0.9rem;
+    bottom: 0.9rem;
+    z-index: 0;
+    display: flex;
+    gap: 0.55rem;
+    pointer-events: none;
+    color: var(--color-texto);
+    opacity: 0.07;
+    transition:
+      opacity 0.25s ease,
+      transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .marcas svg { width: 3.1rem; height: 3.1rem; flex: none; }
+
+  .group:hover .marcas { opacity: 0.12; transform: translateY(-0.35rem); }
+
+  /* El contenido va por encima de la marca de agua. */
+  .group > :global(div) { position: relative; z-index: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marcas { transition: none; }
+    .group:hover .marcas { transform: none; }
+  }
+</style>

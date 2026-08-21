@@ -36,6 +36,10 @@ export const ui = {
     'formacion.credencial': 'Ver credencial',
     'formacion.certificado': 'Certificado',
     'formacion.verCertificado': 'ver certificado ↗',
+    'formacion.insignia': 'insignia generada — no es un certificado',
+    'formacion.proximo': 'Lo que viene',
+    'carrusel.anterior': 'Ver el anterior',
+    'carrusel.siguiente': 'Ver el siguiente',
 
     'grupo.datos': 'Datos y BI',
     'grupo.datos.bajada': 'Indicadores, tableros y reporting sobre operación real.',
@@ -78,6 +82,10 @@ export const ui = {
     'formacion.credencial': 'View credential',
     'formacion.certificado': 'Certificate',
     'formacion.verCertificado': 'view certificate ↗',
+    'formacion.insignia': 'generated badge — not a certificate',
+    'formacion.proximo': 'Coming up',
+    'carrusel.anterior': 'Previous',
+    'carrusel.siguiente': 'Next',
 
     'grupo.datos': 'Data & BI',
     'grupo.datos.bajada': 'Indicators, dashboards and reporting on real operations.',

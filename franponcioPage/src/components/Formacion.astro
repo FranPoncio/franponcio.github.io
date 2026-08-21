@@ -1,11 +1,24 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { Image, getImage } from 'astro:assets';
+import Carrusel from './Carrusel.astro';
 import { usarTraduccion, type Idioma } from '../i18n/ui';
+
+/**
+ * Formación: una fila de certificados que se desliza.
+ *
+ * Antes eran tres columnas por estado (cursando / completado / planificado) y
+ * las columnas flacas dejaban huecos. Ahora es una sola fila de imágenes: lo
+ * hecho y lo que está en curso van juntos, en orden, y lo planificado queda
+ * abajo como una lista corta — todavía no es una credencial y no debería
+ * ocupar el mismo lugar visual que una.
+ *
+ * Los cursos sin certificado en el repo muestran una insignia generada, que
+ * dice en la propia imagen que no es un certificado.
+ */
 
 interface Props {
   cursos: CollectionEntry<'formacion'>[];
-  /** Número de sección que se muestra arriba del título. */
   indice: string;
   lang: Idioma;
 }
@@ -13,31 +26,27 @@ interface Props {
 const { cursos, indice, lang } = Astro.props;
 const t = usarTraduccion(lang);
 
-// La miniatura linkea al certificado en grande. `getImage` corre en el build,
-// así que la URL ya viene optimizada y con hash — no se sirve el original.
-const certificadosPlenos = new Map<string, string>();
-for (const curso of cursos) {
-  if (curso.data.certificado) {
-    const pleno = await getImage({ src: curso.data.certificado, width: 1600 });
-    certificadosPlenos.set(curso.id, pleno.src);
-  }
+const enFila = cursos
+  .filter((c) => c.data.estado !== 'planificado')
+  .sort((a, b) => a.data.orden - b.data.orden);
+
+const proximos = cursos
+  .filter((c) => c.data.estado === 'planificado')
+  .sort((a, b) => a.data.orden - b.data.orden);
+
+// `getImage` corre en el build: la URL del certificado en grande ya viene
+// optimizada y con hash, nunca se sirve el original.
+const plenos = new Map<string, string>();
+for (const c of cursos) {
+  const fuente = c.data.certificado ?? c.data.insignia;
+  if (fuente) plenos.set(c.id, (await getImage({ src: fuente, width: 1600 })).src);
 }
 
-// Orden deliberado: primero lo que estoy haciendo (es lo más vivo), después lo
-// terminado (lo que respalda), y al final lo que viene (muestra dirección).
-const grupos = [
-  { estado: 'cursando' as const, titulo: t('formacion.cursando'), punto: 'bg-acento', texto: 'text-acento' },
-  { estado: 'completado' as const, titulo: t('formacion.completado'), punto: 'bg-gestion', texto: 'text-gestion' },
-  { estado: 'planificado' as const, titulo: t('formacion.planificado'), punto: 'bg-tenue', texto: 'text-tenue' },
-].map((g) => ({
-  ...g,
-  items: cursos
-    .filter((c) => c.data.estado === g.estado)
-    .sort((a, b) => a.data.orden - b.data.orden),
-}));
+const nota = (c: CollectionEntry<'formacion'>) =>
+  lang === 'en' ? (c.data.notaEn ?? c.data.nota) : c.data.nota;
 ---
 
-<section class="revelar scroll-mt-24 border-b border-borde bg-panel/40" id="formacion">
+<section class="revelar scroll-mt-24 border-y border-borde bg-panel/50" id="formacion">
   <div class="mx-auto max-w-5xl px-6 py-16">
     <p class="indice">{indice}</p>
     <div class="mt-2 flex items-baseline gap-4">
@@ -48,94 +57,96 @@ const grupos = [
     </div>
     <p class="mt-1.5 text-sm text-tenue">{t('formacion.bajada')}</p>
 
-    <div class="mt-8 grid items-start gap-px overflow-hidden rounded-lg border border-borde bg-borde md:grid-cols-3">
-      {
-        grupos.map((grupo) => (
-          <div class="bg-panel p-5">
-            <p class="flex items-center gap-2">
-              <span class:list={['size-1.5 rounded-full', grupo.punto]} />
-              <span
-                class:list={[
-                  'font-mono text-[0.68rem] uppercase tracking-[0.14em]',
-                  grupo.texto,
-                ]}
-              >
-                {grupo.titulo}
-              </span>
-              <span class="ml-auto font-mono text-[0.68rem] tabular-nums text-tenue">
-                {grupo.items.length}
-              </span>
-            </p>
+    <div class="mt-8">
+      <Carrusel
+        etiqueta={t('formacion.titulo')}
+        anterior={t('carrusel.anterior')}
+        siguiente={t('carrusel.siguiente')}
+      >
+        {
+          enFila.map((c) => {
+            const imagen = c.data.certificado ?? c.data.insignia;
+            const esInsignia = !c.data.certificado && !!c.data.insignia;
+            return (
+              <article class="tarjeta flex flex-col overflow-hidden rounded-xl border border-borde bg-panel">
+                {imagen && (
+                  <a
+                    href={plenos.get(c.id)}
+                    class="block overflow-hidden border-b border-borde bg-panel-alto"
+                    aria-label={`${t('formacion.certificado')}: ${c.data.titulo}`}
+                  >
+                    <Image
+                      src={imagen}
+                      alt={
+                        esInsignia
+                          ? `${c.data.titulo} — ${t('formacion.insignia')}`
+                          : `${t('formacion.certificado')} — ${c.data.titulo}`
+                      }
+                      widths={[340, 680]}
+                      sizes="340px"
+                      class="h-40 w-full object-cover object-top"
+                      loading="lazy"
+                    />
+                  </a>
+                )}
 
-            {grupo.items.length === 0 ? (
-              <p class="mt-4 text-sm text-tenue/60">—</p>
-            ) : (
-              <ul class="mt-4 space-y-4">
-                {grupo.items.map((curso) => (
-                  <li>
-                    <p class="text-sm font-medium leading-snug">{curso.data.titulo}</p>
-                    <p class="mt-0.5 font-mono text-[0.68rem] text-tenue">
-                      {curso.data.entidad} · {curso.data.periodo}
-                    </p>
-                    {(lang === 'en' ? (curso.data.notaEn ?? curso.data.nota) : curso.data.nota) && (
-                      <p class="mt-1 text-xs leading-snug text-tenue">
-                        {lang === 'en' ? (curso.data.notaEn ?? curso.data.nota) : curso.data.nota}
-                      </p>
-                    )}
-                    {curso.data.certificado && (
+                <div class="flex flex-1 flex-col p-4">
+                  <p class="text-sm font-medium leading-snug">{c.data.titulo}</p>
+                  <p class="mt-1 font-mono text-[0.66rem] text-tenue">
+                    {c.data.entidad} · {c.data.periodo}
+                  </p>
+                  {nota(c) && <p class="mt-2 text-xs leading-snug text-tenue">{nota(c)}</p>}
+
+                  <div class="mt-auto flex flex-wrap gap-2 pt-4">
+                    {c.data.certificado && (
                       <a
-                        href={certificadosPlenos.get(curso.id)}
-                        class="mt-2.5 block overflow-hidden rounded border border-borde transition-colors hover:border-acento"
-                        aria-label={`${t('formacion.certificado')}: ${curso.data.titulo}`}
+                        href={plenos.get(c.id)}
+                        class="rounded border border-borde px-2 py-1 font-mono text-[0.62rem] text-tenue transition-colors hover:border-acento hover:text-acento"
                       >
-                        <Image
-                          src={curso.data.certificado}
-                          alt={`${t('formacion.certificado')} — ${curso.data.titulo}`}
-                          widths={[240, 480]}
-                          sizes="240px"
-                          class="h-24 w-full bg-panel-alto object-cover object-top"
-                          loading="lazy"
-                        />
-                        <span class="block border-t border-borde px-2 py-1 font-mono text-[0.6rem] text-tenue">
-                          {t('formacion.verCertificado')}
-                        </span>
+                        {t('formacion.verCertificado')}
                       </a>
                     )}
-
-                    {curso.data.certificadoPdf && (
+                    {c.data.certificadoPdf && (
                       <a
-                        href={curso.data.certificadoPdf}
-                        class="mt-2 inline-flex items-center gap-1.5 rounded border border-borde px-2 py-1 font-mono text-[0.62rem] text-tenue transition-colors hover:border-acento hover:text-acento"
+                        href={c.data.certificadoPdf}
+                        class="rounded border border-borde px-2 py-1 font-mono text-[0.62rem] text-tenue transition-colors hover:border-acento hover:text-acento"
                       >
-                        PDF ↗ {t('formacion.verCertificado')}
+                        PDF ↗
                       </a>
                     )}
-
-                    {curso.data.credencial && (
+                    {c.data.credencial && (
                       <a
-                        href={curso.data.credencial}
-                        class="mt-2 inline-flex items-center gap-1.5 rounded border border-borde px-2 py-1 font-mono text-[0.62rem] text-tenue transition-colors hover:border-acento hover:text-acento"
+                        href={c.data.credencial}
+                        class="rounded border border-borde px-2 py-1 font-mono text-[0.62rem] text-tenue transition-colors hover:border-acento hover:text-acento"
                       >
-                        <svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true">
-                          <path
-                            d="M2.5 6.2l2.2 2.2 4.8-4.8"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.6"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          />
-                        </svg>
                         {t('formacion.credencial')}
                       </a>
                     )}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        ))
-      }
+                  </div>
+                </div>
+              </article>
+            );
+          })
+        }
+      </Carrusel>
     </div>
+
+    {
+      proximos.length > 0 && (
+        <div class="mt-6 border-t border-borde pt-5">
+          <p class="font-mono text-[0.66rem] uppercase tracking-[0.14em] text-tenue">
+            {t('formacion.proximo')}
+          </p>
+          <ul class="mt-3 flex flex-wrap gap-x-7 gap-y-2">
+            {proximos.map((c) => (
+              <li class="text-sm">
+                <span class="font-medium">{c.data.titulo}</span>
+                <span class="ml-2 font-mono text-[0.66rem] text-tenue">{c.data.entidad}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
   </div>
 </section>

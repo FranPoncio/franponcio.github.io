@@ -104,14 +104,12 @@ const otro = lang === 'es' ? 'en' : 'es';
         let pendiente = false;
         const actualizar = () => {
           pendiente = false;
-          const caja = riel.getBoundingClientRect();
-          const alto = caja.height;
-          if (alto <= 0) return;
-          // 0 cuando el riel asoma por abajo de la pantalla, 1 cuando su
-          // extremo inferior llega al borde inferior. Así la línea arranca en
-          // cuanto aparece y termina de llenarse justo al final del recorrido.
-          const recorrido = window.innerHeight - caja.top;
-          const avance = Math.min(Math.max(recorrido / alto, 0), 1);
+          // Cuánto de la página se recorrió: 0 arriba de todo, 1 abajo de todo.
+          // La fórmula anterior medía contra el alto del riel y arrancaba en
+          // 0.21 con la página sin tocar — parecía que no se llenaba desde cero.
+          const recorrido = document.documentElement.scrollHeight - window.innerHeight;
+          if (recorrido <= 0) return riel.style.setProperty('--avance', '1');
+          const avance = Math.min(Math.max(window.scrollY / recorrido, 0), 1);
           riel.style.setProperty('--avance', avance.toFixed(4));
         };
         const alScroll = () => {
