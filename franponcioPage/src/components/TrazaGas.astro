@@ -20,6 +20,37 @@
  * Sin JavaScript el fallback de cada `var()` es 1: se ve todo dibujado y quieto.
  */
 
+interface Props {
+  /** El idioma de la pagina que lo incluye. Cambia etiquetas y separador de miles. */
+  lang?: 'es' | 'en';
+}
+
+const { lang = 'es' } = Astro.props;
+
+// Los numeros no se traducen, las etiquetas si. Y el separador de miles cambia:
+// 12.000 en español, 12,000 en ingles.
+const locale = lang === 'es' ? 'es-AR' : 'en-US';
+const textos = {
+  es: {
+    cabecera: 'Cabecera',
+    troncal: 'Troncal',
+    estaciones: 'Estaciones',
+    industriales: 'Industriales',
+    titulo:
+      'Esquema de la red de gas: una cabecera, 12.000 km de troncal, 150 estaciones de regulación de presión y 500 conexiones industriales.',
+    pie: 'Esquema de la red — no representa la traza real',
+  },
+  en: {
+    cabecera: 'Head station',
+    troncal: 'Trunk line',
+    estaciones: 'Reg. stations',
+    industriales: 'Industrial',
+    titulo:
+      'Gas network schematic: one head station, 12,000 km of trunk line, 150 pressure regulating stations and 500 industrial connections.',
+    pie: 'Schematic — not the actual route',
+  },
+}[lang];
+
 interface Tramo {
   d: string;
   clase: 'troncal' | 'ramal';
@@ -70,10 +101,10 @@ const vistas: Vista[] = [
       { d: 'M560 210 V320 H820', clase: 'ramal', ancho: 2, desde: 0.66, dura: 0.3 },
     ],
     nodos: [
-      { x: 60, y: 210, etiqueta: 'Cabecera', desde: 0.03 },
-      { x: 190, y: 210, etiqueta: 'Troncal', numero: 12000, sufijo: ' km', desde: 0.17 },
-      { x: 450, y: 110, etiqueta: 'Estaciones', numero: 150, desde: 0.5 },
-      { x: 700, y: 320, etiqueta: 'Industriales', numero: 500, desde: 0.86 },
+      { x: 60, y: 210, etiqueta: textos.cabecera, desde: 0.03 },
+      { x: 190, y: 210, etiqueta: textos.troncal, numero: 12000, sufijo: ' km', desde: 0.17 },
+      { x: 450, y: 110, etiqueta: textos.estaciones, numero: 150, desde: 0.5 },
+      { x: 700, y: 320, etiqueta: textos.industriales, numero: 500, desde: 0.86 },
     ],
     cabeza: [60, 210, 820, 210],
   },
@@ -86,11 +117,11 @@ const vistas: Vista[] = [
       { d: 'M100 591 H330', clase: 'ramal', ancho: 3, desde: 0.66, dura: 0.3 },
     ],
     nodos: [
-      { x: 100, y: 50, etiqueta: 'Cabecera', desde: 0.03, dx: 26, ancla: 'start', etiquetaDy: -4 },
+      { x: 100, y: 50, etiqueta: textos.cabecera, desde: 0.03, dx: 26, ancla: 'start', etiquetaDy: -4 },
       {
         x: 100,
         y: 190,
-        etiqueta: 'Troncal',
+        etiqueta: textos.troncal,
         numero: 12000,
         sufijo: ' km',
         desde: 0.17,
@@ -99,15 +130,15 @@ const vistas: Vista[] = [
         etiquetaDy: -16,
         valorDy: 26,
       },
-      { x: 250, y: 312, etiqueta: 'Estaciones', numero: 150, desde: 0.51 },
-      { x: 250, y: 591, etiqueta: 'Industriales', numero: 500, desde: 0.85 },
+      { x: 250, y: 312, etiqueta: textos.estaciones, numero: 150, desde: 0.51 },
+      { x: 250, y: 591, etiqueta: textos.industriales, numero: 500, desde: 0.85 },
     ],
     cabeza: [100, 50, 100, 870],
   },
 ];
 ---
 
-<div class="traza-marco">
+<div class="traza-marco" data-locale={locale}>
   <div class="traza-pega">
     <figure class="traza">
       {
@@ -118,10 +149,7 @@ const vistas: Vista[] = [
             role="img"
             aria-labelledby={`traza-titulo-${v.clase}`}
           >
-            <title id={`traza-titulo-${v.clase}`}>
-              Esquema de la red de gas: una cabecera, 12.000 km de troncal, 150 estaciones de
-              regulación de presión y 500 conexiones industriales.
-            </title>
+            <title id={`traza-titulo-${v.clase}`}>{textos.titulo}</title>
 
             {/* El caño se dibuja con stroke-dashoffset: el trazo existe siempre,
                 lo que cambia es cuánto se ve. Es lo barato de animar. */}
@@ -166,7 +194,7 @@ const vistas: Vista[] = [
                     data-numero={n.numero}
                     data-sufijo={n.sufijo ?? ''}
                   >
-                    {n.numero.toLocaleString('es-AR') + (n.sufijo ?? '')}
+                    {n.numero.toLocaleString(locale) + (n.sufijo ?? '')}
                   </text>
                 )}
               </g>
@@ -175,7 +203,7 @@ const vistas: Vista[] = [
         ))
       }
 
-      <figcaption class="traza-pie">Esquema de la red — no representa la traza real</figcaption>
+      <figcaption class="traza-pie">{textos.pie}</figcaption>
     </figure>
   </div>
 </div>
@@ -319,6 +347,7 @@ const vistas: Vista[] = [
   const par = (s: string | undefined) => (s ?? '0,0').split(',').map(Number);
 
   for (const marco of document.querySelectorAll<HTMLElement>('.traza-marco')) {
+    const locale = marco.dataset.locale ?? 'es-AR';
     // Las dos vistas se preparan igual: la que está oculta por CSS no molesta,
     // y getTotalLength() no depende de que el elemento se esté pintando.
     const vistas = [...marco.querySelectorAll<SVGSVGElement>('.traza-svg')].map((svg) => ({
@@ -363,7 +392,7 @@ const vistas: Vista[] = [
           const actual = Math.round(n.numero * acotar((dibujo - n.desde) / 0.12));
           if (actual === n.ultimo) continue; // no reescribir texto por gusto
           n.ultimo = actual;
-          n.el.textContent = actual.toLocaleString('es-AR') + n.sufijo;
+          n.el.textContent = actual.toLocaleString(locale) + n.sufijo;
         }
       }
     };
