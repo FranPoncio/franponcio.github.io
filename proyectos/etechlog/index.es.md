@@ -7,23 +7,19 @@ periodo: 2015 — 2016
 rol: Business Analyst · Data Analyst · Project Manager
 stack: ['SAP', 'ERP', 'SQL', 'Power BI', 'Tableau', 'C++', 'ISO 14001', 'ISO 45001']
 kpis:
+  - label: Reclamos o scrap
+    valor: '< 5 %'
+    nota: 'de los pedidos despachados'
   - label: Stock muerto
-    valor: '[−X %]'
-    nota: 'sobre el valor inmovilizado'
-  - label: Exactitud
-    valor: '[X %]'
-    nota: 'sistema contra depósito'
+    valor: 'Reducido'
+    nota: 'identificado, valorizado y dado de baja'
   - label: Alcance
     valor: 'Operación completa'
     nota: 'de recepción a despacho'
   - label: Análisis
     valor: 'SQL + BI'
     nota: 'sobre SAP y ERP'
-borrador: true
 ---
-
-> **Falta un solo dato: el porcentaje de stock muerto.** Es el número que le
-> cierra el caso.
 
 ## El contexto
 
@@ -78,8 +74,10 @@ las responsabilidades se cruzan y hay que dejarlas escritas.
 
 ## Resultado
 
-- **Reducción del stock muerto** en **[X %]** sobre el valor inmovilizado.
-- **[Completar]** exactitud de inventario alcanzada.
+- **Menos del 5 % de los pedidos terminaba en reclamo o scrap.** Es el nivel de
+  la operación, no la mejora: sobre esa base es que se podía discutir el resto.
+- **Stock muerto reducido:** identificado por rotación y antigüedad, valorizado,
+  y con el circuito armado para darlo de baja.
 - La operación analizada de punta a punta, con los cuellos identificados y
   medidos.
 

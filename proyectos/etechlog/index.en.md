@@ -7,19 +7,18 @@ periodo: 2015 — 2016
 rol: Business Analyst · Data Analyst · Project Manager
 stack: ['SAP', 'ERP', 'SQL', 'Power BI', 'Tableau', 'C++', 'ISO 14001', 'ISO 45001']
 kpis:
+  - label: Claims or scrap
+    valor: '< 5%'
+    nota: 'of orders dispatched'
   - label: Dead stock
-    valor: '[−X%]'
-    nota: 'of immobilised value'
-  - label: Accuracy
-    valor: '[X%]'
-    nota: 'system vs. warehouse'
+    valor: 'Reduced'
+    nota: 'identified, valued and written off'
   - label: Scope
     valor: 'Full operation'
     nota: 'receiving to dispatch'
   - label: Analysis
     valor: 'SQL + BI'
     nota: 'across SAP and ERP'
-borrador: true
 ---
 
 ## Context
@@ -76,8 +75,11 @@ and have to be written down.
 
 ## Outcome
 
-- **Dead stock reduced** by **[X%]** of immobilised value.
-- **[Fill in]** inventory accuracy achieved.
+- **Under 5% of orders ended in a claim or as scrap.** That is the level the
+  operation ran at, not the improvement — it is the baseline everything else was
+  argued from.
+- **Dead stock reduced:** identified by turnover and age, valued, and with the
+  write-off process in place.
 - The operation analysed end to end, with bottlenecks identified and measured.
 
 ## What I took from it
