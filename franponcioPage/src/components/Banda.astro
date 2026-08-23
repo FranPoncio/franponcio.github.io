@@ -1,0 +1,82 @@
+---
+/**
+ * La banda que abre una sección.
+ *
+ * Existe para que no haya duda de dónde termina una cosa y empieza otra: los
+ * trabajos, las herramientas, los certificados y el stack son cuatro cosas
+ * distintas y antes se encadenaban sin corte. La banda corta la página de lado
+ * a lado y anuncia qué viene.
+ */
+
+interface Props {
+  indice: string;
+  titulo: string;
+  bajada: string;
+  /** Ancla para el menú. */
+  id?: string;
+}
+
+const { indice, titulo, bajada, id } = Astro.props;
+---
+
+<div class="banda" id={id}>
+  <div class="dentro">
+    <span class="num">{indice}</span>
+    <div class="texto">
+      <h2>{titulo}</h2>
+      <p>{bajada}</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .banda {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--color-borde-vivo);
+    border-bottom: 1px solid var(--color-borde);
+    background: var(--color-panel);
+    scroll-margin-top: 4.5rem;
+  }
+  .dentro {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 1.6rem 2rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1.4rem;
+  }
+  .num {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 1.55rem;
+    font-weight: 700;
+    letter-spacing: -0.09em;
+    line-height: 1;
+    color: var(--color-borde-vivo);
+    font-variant-numeric: tabular-nums;
+  }
+  .texto { min-width: 0; }
+  h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+  p {
+    margin: 0.3rem 0 0;
+    max-width: 62ch;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--color-tenue);
+  }
+
+  @media (max-width: 700px) {
+    .dentro {
+      padding: 1.25rem 1.25rem;
+      gap: 0.95rem;
+    }
+    .num { font-size: 1.2rem; }
+    h2 { font-size: 1rem; }
+  }
+</style>

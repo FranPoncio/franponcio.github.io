@@ -50,6 +50,7 @@
   const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (lienzo && ctx && !quieto) {
+    const cx = ctx;
     const raiz = getComputedStyle(document.documentElement);
     // Se resuelven los tokens a componentes RGB UNA vez. Antes se armaba un
     // color-mix() por dígito y por pluma —cientos de strings CSS por frame que
@@ -84,7 +85,7 @@
       al = lienzo.clientHeight;
       lienzo.width = Math.round(an * dpr);
       lienzo.height = Math.round(al * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       // La densidad sale del área: en un celular no van 40 plumas.
       const area = (an * al) / (1440 * 900);
@@ -135,7 +136,7 @@
 
     function pintar() {
       if (!corriendo) return;
-      ctx.clearRect(0, 0, an, al);
+      cx.clearRect(0, 0, an, al);
 
       // El empuje se disipa solo: el fondo vuelve a su ritmo si dejás de scrollear.
       empuje *= 0.93;
@@ -157,18 +158,18 @@
         const alfa = Math.sin(p.vida * Math.PI) * 0.17;
         if (alfa <= 0.001) continue;
 
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+        const g = cx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
         g.addColorStop(0, rgba(acento, alfa));
         g.addColorStop(1, rgba(acento, 0));
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
+        cx.fillStyle = g;
+        cx.beginPath();
+        cx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        cx.fill();
       }
 
       // ── Unos y ceros ────────────────────────────────────────────────────
-      ctx.font = "500 14px 'Martian Mono', ui-monospace, monospace";
-      ctx.textAlign = 'center';
+      cx.font = "500 14px 'Martian Mono', ui-monospace, monospace";
+      cx.textAlign = 'center';
       for (const c of columnas) {
         c.y += c.v + empuje * 0.85;
         const largo = c.bits.length * c.paso;
@@ -185,8 +186,8 @@
         for (let i = 0; i < c.bits.length; i++) {
           // La cabeza de la columna es la más marcada y se apaga hacia atrás.
           const alfa = (1 - i / c.bits.length) * 0.3;
-          ctx.fillStyle = rgba(i === 0 ? acento : tinta, alfa);
-          ctx.fillText(c.bits[i], c.x, c.y - i * c.paso);
+          cx.fillStyle = rgba(i === 0 ? acento : tinta, alfa);
+          cx.fillText(c.bits[i], c.x, c.y - i * c.paso);
         }
       }
 
