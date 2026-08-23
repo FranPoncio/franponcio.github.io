@@ -58,11 +58,11 @@ const nota = (c: CollectionEntry<'formacion'>) =>
             const imagen = c.data.certificado ?? c.data.insignia;
             const esInsignia = !c.data.certificado && !!c.data.insignia;
             return (
-              <article class="tarjeta flex flex-col overflow-hidden rounded-xl border border-borde bg-panel">
+              <article class="tarjeta ficha-curso flex flex-col overflow-hidden">
                 {imagen && (
                   <a
                     href={plenos.get(c.id)}
-                    class="block overflow-hidden border-b border-borde bg-panel-alto"
+                    class="block overflow-hidden border-b-[3px] border-borde bg-panel-alto"
                     aria-label={`${t('formacion.certificado')}: ${c.data.titulo}`}
                   >
                     <Image
@@ -140,3 +140,19 @@ const nota = (c: CollectionEntry<'formacion'>) =>
     }
   </div>
 </section>
+
+<style>
+  .ficha-curso {
+    border: 3px solid var(--color-texto);
+    border-radius: 14px;
+    background: var(--color-panel);
+    box-shadow: var(--sombra);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  @media (hover: hover) {
+    .ficha-curso:hover {
+      transform: translate(-3px, -3px);
+      box-shadow: var(--sombra-alta);
+    }
+  }
+</style>

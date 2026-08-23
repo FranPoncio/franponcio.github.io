@@ -64,8 +64,8 @@
       const n = parseInt(m[1], 16);
       return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
     };
-    const acento = aRgb(raiz.getPropertyValue('--color-acento'), [11, 110, 168]);
-    const tinta = aRgb(raiz.getPropertyValue('--color-texto'), [18, 24, 29]);
+    const acento = aRgb(raiz.getPropertyValue('--color-acento'), [255, 45, 120]);
+    const tinta = aRgb(raiz.getPropertyValue('--color-texto'), [20, 18, 16]);
     const rgba = ([r, g, b]: [number, number, number], a: number) => `rgba(${r},${g},${b},${a})`;
 
     let an = 0;
@@ -264,7 +264,7 @@
         if (Math.random() < 0.75) nacerHumo(marco, Math.random() * avance, true);
       }
 
-      cx.font = "600 12px 'Martian Mono', ui-monospace, monospace";
+      cx.font = "700 13px 'Martian Mono', ui-monospace, monospace";
       cx.textAlign = 'center';
 
       for (let i = humo.length - 1; i >= 0; i--) {
@@ -289,13 +289,14 @@
         if (y < -120 || y > al + 120 || x < -120 || x > an + 120) continue;
 
         if (q.bit) {
-          cx.fillStyle = `rgba(40, 90, 125, ${(alfa * 0.68).toFixed(3)})`;
+          cx.fillStyle = `rgba(255, 45, 120, ${(alfa * 0.85).toFixed(3)})`;
           cx.fillText(q.bit, x, y);
         } else {
           const g = cx.createRadialGradient(x, y, 0, x, y, q.r);
-          g.addColorStop(0, `rgba(96, 116, 132, ${(alfa * 0.34).toFixed(3)})`);
-          g.addColorStop(0.5, `rgba(96, 116, 132, ${(alfa * 0.16).toFixed(3)})`);
-          g.addColorStop(1, 'rgba(96, 116, 132, 0)');
+          // Tinta sobre crema: el humo se ve por ser MAS OSCURO que el fondo.
+          g.addColorStop(0, `rgba(20, 18, 16, ${(alfa * 0.3).toFixed(3)})`);
+          g.addColorStop(0.5, `rgba(20, 18, 16, ${(alfa * 0.13).toFixed(3)})`);
+          g.addColorStop(1, 'rgba(20, 18, 16, 0)');
           cx.fillStyle = g;
           cx.beginPath();
           cx.arc(x, y, q.r, 0, Math.PI * 2);
