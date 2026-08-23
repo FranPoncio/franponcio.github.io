@@ -67,6 +67,18 @@ const estaciones = proyectos.map((p) => ({
 <section class="marco" id={id}>
   <div class="via" aria-hidden="true"><span class="frente"></span></div>
 
+  {/* La válvula de la punta va APARTE del caño y por encima de las fichas.
+      Adentro de `.frente` quedaba atrapada en el mismo plano que el caño, que
+      pasa por detrás de las fichas — y como las fichas están centradas sobre
+      el mismo eje y la punta cae siempre a la misma altura de pantalla, la
+      válvula quedaba atrapada en el plano del caño.
+      Va en su propia capa, PERO POR DEBAJO de las fichas: encima tapaba el
+      dato grande de la ficha —se comía un dígito de "12.000 km"— y un número
+      del caso vale más que un adorno. Asomando entre ficha y ficha se ve
+      igual, y que el caño pase por detrás del panel es lo que además
+      corresponde. */}
+  <span class="valvula" aria-hidden="true"></span>
+
   <ol class="pista">
     {
       estaciones.map(({ p, anio, marcas }) => (
@@ -206,41 +218,64 @@ const estaciones = proyectos.map((p) => ({
       repeating-linear-gradient(
         to bottom,
         transparent 0 88px,
-        rgba(0, 0, 0, 0.5) 88px 90px,
-        rgba(255, 255, 255, 0.07) 90px 92px
+        rgba(0, 0, 0, 0.55) 88px 90px,
+        rgba(255, 255, 255, 0.09) 90px 92px
       ),
-      /* El cilindro: la luz pega arriba a la izquierda y la sombra cae a la
-         derecha. Los siete cortes son lo que da el volumen — con dos el caño
-         se ve plano, como una cinta. Cobre quemado, que es el acento. */
-      linear-gradient(
-        to right,
-        #241a11 0%,
-        #4f3a22 16%,
-        #966c42 38%,
-        #c79a68 50%,
-        #8a6238 62%,
-        #46331e 84%,
-        #1e150d 100%
-      );
-    box-shadow: 0 0 18px -2px color-mix(in srgb, var(--color-acento) 30%, transparent);
+      var(--acero);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
   }
-  /* La punta abierta del caño: la elipse que se ve de la boca, encendida. */
-  .frente::after {
+  /* ── LA VÁLVULA DE LA PUNTA ───────────────────────────────────────────
+     Baja con el frente porque `top` sale del mismo `--avance` que estira el
+     caño, y las dos medidas se resuelven contra la misma caja: `.marco` es el
+     bloque que las contiene a las dos.
+
+     La opacidad sale de una cuenta sobre el propio `--avance`: con el caño
+     sin empezar la válvula no tiene dónde apoyarse y quedaba flotando arriba
+     de todo. `calc(var(--avance) * 20)` la trae entera a partir del 5 % del
+     recorrido — arriba de 1 la opacidad se recorta sola, así que no hace
+     falta ni un `min()`. */
+  .valvula {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--avance, 0) * 100%);
+    /* Arriba del caño, abajo de las fichas y de las válvulas de estación. */
+    z-index: 1;
+    opacity: calc(var(--avance, 0) * 20);
+  }
+  .valvula::before,
+  .valvula::after {
     content: '';
     position: absolute;
     left: 50%;
-    bottom: 0;
-    width: 22px;
-    height: 10px;
-    margin-left: -11px;
-    margin-bottom: -5px;
+  }
+  /* El cuerpo, más ancho que el caño y centrado en la boca. */
+  .valvula::before {
+    top: -12px;
+    width: 38px;
+    height: 24px;
+    margin-left: -19px;
+    border-radius: 3px;
+    background: var(--acero);
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.6),
+      0 5px 16px -3px rgba(0, 0, 0, 0.9);
+  }
+  /* El volante. Va encendido, que es por donde sale el gas. */
+  .valvula::after {
+    top: -9.5px;
+    width: 19px;
+    height: 19px;
+    margin-left: -9.5px;
     border-radius: 50%;
-    background: radial-gradient(
-      ellipse at center,
-      var(--color-acento) 0%,
-      color-mix(in srgb, var(--color-acento) 45%, transparent) 45%,
-      transparent 72%
-    );
+    border: 3px solid var(--color-acento);
+    background:
+      radial-gradient(circle, var(--color-acento) 0 2.5px, transparent 2.5px),
+      repeating-conic-gradient(
+        from 45deg,
+        var(--color-acento) 0 5deg,
+        transparent 5deg 90deg
+      );
+    box-shadow: 0 0 16px 1px color-mix(in srgb, var(--color-acento) 55%, transparent);
   }
 
   .pista {
@@ -285,19 +320,56 @@ const estaciones = proyectos.map((p) => ({
     white-space: nowrap;
   }
 
+  /* ── LA ESTACIÓN ES UNA BRIDA ─────────────────────────────────────────
+     La válvula es UNA sola y es la que viaja con la punta. En las estaciones
+     va lo que va de verdad en un gasoducto: una brida, la junta empernada
+     entre dos tramos de caño. Antes había un volante en cada estación, y eso
+     no existe — no se pone una válvula de mano en cada junta.
+
+     Se arma cuando la válvula LLEGA, no cuando entra la ficha: son dos
+     momentos distintos y por eso son dos clases distintas (`activa` para el
+     contenido, `bridada` para la junta). */
   .nodo {
     position: relative;
     z-index: 3;
-    width: 21px;
-    height: 21px;
-    border-radius: 50%;
-    background: var(--c);
-    box-shadow:
-      0 0 0 5px var(--color-fondo),
-      0 0 0 7px color-mix(in srgb, var(--c) 45%, transparent),
-      0 0 20px 2px color-mix(in srgb, var(--c) 60%, transparent);
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: 46px;
+    height: 28px;
   }
+  /* Las dos placas con sus cuatro bulones. La franja del medio va
+     transparente: por ahí se ve pasar el caño. */
+  .nodo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 2px;
+    background:
+      radial-gradient(circle at 9px 5px, #c8d1d3 2px, transparent 2px),
+      radial-gradient(circle at 37px 5px, #c8d1d3 2px, transparent 2px),
+      radial-gradient(circle at 9px 23px, #c8d1d3 2px, transparent 2px),
+      radial-gradient(circle at 37px 23px, #c8d1d3 2px, transparent 2px),
+      linear-gradient(
+        to bottom,
+        var(--acero-claro) 0 10px,
+        transparent 10px 18px,
+        var(--acero-claro) 18px 28px
+      );
+    box-shadow: 0 3px 10px -3px rgba(0, 0, 0, 0.85);
+  }
+  /* La junta que aprieta, en el color del proyecto: es lo único que
+     distingue una estación de otra. */
+  .nodo::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 24px;
+    height: 9px;
+    margin: -4.5px 0 0 -12px;
+    border-radius: 2px;
+    background: var(--c);
+    box-shadow: 0 0 13px 0 color-mix(in srgb, var(--c) 70%, transparent);
+  }
+
   /* El tramito que baja del nodo a la ficha. */
   .tallo {
     position: relative;
@@ -522,21 +594,34 @@ const estaciones = proyectos.map((p) => ({
   .ir:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; border-radius: 3px; }
 
   /* ── Entrada: la estación se enciende cuando el frente la alcanza ────── */
-  :global(.js-on) .parada > * {
+  :global(.js-on) .parada > *:not(.nodo) {
     opacity: 0;
     translate: 0 26px;
     transition:
       opacity 0.55s ease,
       translate 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  :global(.js-on) .parada.activa > * {
+  :global(.js-on) .parada.activa > *:not(.nodo) {
     opacity: 1;
     translate: 0 0;
   }
   /* El año de fondo entra apenas después y desde más abajo: da profundidad. */
   :global(.js-on) .parada .anio-fondo { translate: -50% 40px; transition-delay: 0.1s; }
   :global(.js-on) .parada.activa .anio-fondo { translate: -50% 0; }
-  :global(.js-on) .parada.activa .nodo { transition-delay: 0.05s; }
+  /* La brida se APRIETA cuando llega la válvula: entra angosta y se abre
+     hasta calzar sobre el caño. Va aparte del resto de la estación porque
+     responde a otro momento — `bridada`, no `activa`. */
+  :global(.js-on) .parada .nodo {
+    opacity: 0;
+    transform: scaleX(0.28);
+    transition:
+      opacity 0.3s ease,
+      transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  :global(.js-on) .parada.bridada .nodo {
+    opacity: 1;
+    transform: none;
+  }
   :global(.js-on) .parada.activa .ficha { transition-delay: 0.14s; }
 
   @media (max-width: 700px) {
@@ -552,7 +637,9 @@ const estaciones = proyectos.map((p) => ({
 
   @media (prefers-reduced-motion: reduce) {
     .ficha, .nodo, .chevron, .mas, .mas-dentro > * { transition: none; }
-    :global(.js-on) .parada > * { opacity: 1; translate: none; transition: none; }
+    /* Nada se arma a la vista: las bridas ya están todas puestas. */
+    :global(.js-on) .parada .nodo { opacity: 1; transform: none; transition: none; }
+    :global(.js-on) .parada > *:not(.nodo) { opacity: 1; translate: none; transition: none; }
     :global(.js-on) .parada .anio-fondo { translate: -50% 0; }
   }
 </style>
@@ -614,6 +701,7 @@ const estaciones = proyectos.map((p) => ({
     const paradas = [...marco.querySelectorAll<HTMLElement>('.parada')].map((el) => ({
       el,
       nodo: el.querySelector<HTMLElement>('.nodo')!,
+      bridada: false,
       tapa: el.querySelector<HTMLButtonElement>('.tapa')!,
       cifra: el.querySelector<HTMLElement>('.cifra b'),
       activa: false,
@@ -650,15 +738,33 @@ const estaciones = proyectos.map((p) => ({
       // el de abajo. Es exactamente lo que escala `.frente` en Y.
       const avance =
         caja.height <= 0 ? 0 : Math.min(Math.max((frente - caja.top) / caja.height, 0), 1);
-      via.style.setProperty('--avance', avance.toFixed(4));
+      const v = avance.toFixed(4);
+      via.style.setProperty('--avance', v);
+      // También en el marco: de ahí lo lee la válvula de la punta, que está
+      // fuera de `.via` para poder pintarse por encima de las fichas.
+      marco.style.setProperty('--avance', v);
 
       const entrada = window.innerHeight * ENTRADA;
+      // Al final del recorrido se dan por puestas todas: si una estación
+      // quedara sin cruzar el frente —porque la página se terminó antes— su
+      // brida no se armaría nunca.
+      const alFinal = avance > 0.995;
+
       for (const p of paradas) {
-        if (p.activa) continue;
-        if (p.nodo.getBoundingClientRect().top > entrada) continue;
-        p.activa = true;
-        p.el.classList.add('activa');
-        if (suave && p.cifra) contar(p.cifra);
+        const caja = p.nodo.getBoundingClientRect();
+
+        // 1) La ficha se revela al ENTRAR, para que abajo no quede el hueco.
+        if (!p.activa && caja.top <= entrada) {
+          p.activa = true;
+          p.el.classList.add('activa');
+          if (suave && p.cifra) contar(p.cifra);
+        }
+
+        // 2) La brida se arma cuando LLEGA LA VÁLVULA, que va en el frente.
+        if (!p.bridada && (alFinal || caja.top + caja.height / 2 <= frente)) {
+          p.bridada = true;
+          p.el.classList.add('bridada');
+        }
       }
     };
 
