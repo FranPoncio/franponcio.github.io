@@ -33,6 +33,16 @@ const proyectos = (await obtenerProyectos(lang))
 
 const cursos = (await getCollection('formacion')).filter((c) => !c.data.oculto);
 
+// Dos trazas separadas, no una con rótulos adentro: el trabajo pago y las
+// herramientas que me escribí son dos cosas distintas y tienen que leerse así.
+const laboral = proyectos.filter((p) => p.data.tramo === 'laboral');
+const propias = proyectos.filter((p) => p.data.tramo === 'proyecto');
+
+const anios = (lista: typeof proyectos) => {
+  const todos = lista.flatMap((p) => p.data.periodo.match(/\d{4}/g) ?? []).sort();
+  return todos.length ? `${todos[0]} — ${todos.at(-1)}` : '';
+};
+
 const cifras = [
   { label: t('hero.gasoductos'), valor: '12.000' },
   { label: t('hero.estaciones'), valor: '150' },
@@ -41,7 +51,8 @@ const cifras = [
 ];
 
 const secciones = [
-  { id: 'traza', titulo: t('nav.traza') },
+  { id: 'experiencia', titulo: t('tramo.laboral') },
+  { id: 'propias', titulo: t('tramo.proyecto') },
   { id: 'herramientas', titulo: t('herramientas.titulo') },
   { id: 'formacion', titulo: t('formacion.titulo') },
 ];
@@ -83,21 +94,26 @@ const titulo =
   </header>
 
   <Banda
-    id="traza"
+    id="experiencia"
     indice="01"
-    titulo={t('banda.traza')}
-    bajada={t('banda.traza.bajada')}
+    titulo={t('tramo.laboral')}
+    anios={anios(laboral)}
+    bajada={t('tramo.laboral.bajada')}
   />
+  <Traza id="traza-laboral" proyectos={laboral} lang={lang} />
 
-  <Traza proyectos={proyectos} lang={lang} />
-
-  <p class="mx-auto max-w-[1400px] px-8 pb-10 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-tenue">
-    {t('traza.pie')}
-  </p>
+  <Banda
+    id="propias"
+    indice="02"
+    titulo={t('tramo.proyecto')}
+    anios={anios(propias)}
+    bajada={t('tramo.proyecto.bajada')}
+  />
+  <Traza id="traza-propias" proyectos={propias} lang={lang} />
 
   <Banda
     id="herramientas"
-    indice="02"
+    indice="03"
     titulo={t('herramientas.titulo')}
     bajada={t('banda.stack.bajada')}
   />
@@ -105,7 +121,7 @@ const titulo =
 
   <Banda
     id="formacion"
-    indice="03"
+    indice="04"
     titulo={t('formacion.titulo')}
     bajada={t('banda.formacion.bajada')}
   />

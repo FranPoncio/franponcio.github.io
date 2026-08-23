@@ -24,18 +24,13 @@ import type { Proyecto } from '../lib/proyectos';
 interface Props {
   proyectos: Proyecto[];
   lang: Idioma;
+  /** Hay más de una traza en la página; cada una necesita su ancla. */
+  id: string;
 }
 
-const { proyectos, lang } = Astro.props;
+const { proyectos, lang, id } = Astro.props;
 const t = usarTraduccion(lang);
 const base = lang === 'es' ? 'proyectos' : 'en/projects';
-
-const anio = (periodo: string) => periodo.match(/\d{4}/)?.[0] ?? '';
-const rango = (tramo: 'laboral' | 'proyecto') => {
-  const del = proyectos.filter((p) => p.data.tramo === tramo);
-  const anios = del.flatMap((p) => p.data.periodo.match(/\d{4}/g) ?? []);
-  return anios.length ? `${anio(del[0].data.periodo)} — ${anios.sort().at(-1)}` : '';
-};
 
 /** El título largo no entra en un pin: se corta en el primer corte natural. */
 const corto = (titulo: string) => {
@@ -43,43 +38,24 @@ const corto = (titulo: string) => {
   return limpio.length > 34 ? limpio.slice(0, 32).trimEnd() + '…' : limpio;
 };
 
-let previo: string | null = null;
-const estaciones = proyectos.map((p, i) => {
-  const abre = p.data.tramo !== previo ? p.data.tramo : null;
-  previo = p.data.tramo;
-  return {
-    p,
-    arriba: i % 2 === 0,
-    marcas: logosDelStack(p.data.stack, 3),
-    rotulo: abre && {
-      titulo: abre === 'laboral' ? t('tramo.laboral') : t('tramo.proyecto'),
-      bajada: abre === 'laboral' ? t('tramo.laboral.bajada') : t('tramo.proyecto.bajada'),
-      anios: rango(abre),
-    },
-  };
-});
+const estaciones = proyectos.map((p, i) => ({
+  p,
+  arriba: i % 2 === 0,
+  marcas: logosDelStack(p.data.stack, 3),
+}));
 ---
 
-<section class="marco" id="la-traza" style={`--paradas:${estaciones.length}`}>
+<section class="marco" id={id} style={`--paradas:${estaciones.length}`}>
   <div class="pega">
     <div class="via" aria-hidden="true"></div>
 
     <ol class="pista">
       {
-        estaciones.map(({ p, arriba, marcas, rotulo }) => (
+        estaciones.map(({ p, arriba, marcas }) => (
           <li
-            class:list={['parada', arriba ? 'arriba' : 'abajo', rotulo && 'abre-tramo']}
+            class:list={['parada', arriba ? 'arriba' : 'abajo']}
             style={`--c: var(--color-${p.data.categoria})`}
           >
-            {rotulo && (
-              <span class="tramo">
-                <span class="valvula" aria-hidden="true" />
-                <b>{rotulo.titulo}</b>
-                <i>{rotulo.anios}</i>
-                <em>{rotulo.bajada}</em>
-              </span>
-            )}
-
             <span class="nodo" aria-hidden="true" />
 
             {/* El pin: lo único que se ve siempre. */}
@@ -179,7 +155,6 @@ const estaciones = proyectos.map((p, i) => {
        se lee como una línea, no como una fila de cajas. */
     flex: 0 0 calc(clamp(200px, 16vw, 245px) + var(--sangria));
   }
-  .abre-tramo { --sangria: clamp(190px, 15vw, 230px); }
 
   .nodo {
     position: absolute;
@@ -373,63 +348,14 @@ const estaciones = proyectos.map((p, i) => {
   .pin:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; }
   .ir:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; border-radius: 3px; }
 
-  /* ── El rótulo del tramo ──────────────────────────────────────────────── */
-  .tramo {
-    position: absolute;
-    left: 0;
-    bottom: calc(50% + 26px);
-    width: calc(var(--sangria) - 1.5rem);
-    padding-left: 1.1rem;
-  }
-  .valvula {
-    position: absolute;
-    left: 0;
-    bottom: -32px;
-    width: 11px;
-    height: 26px;
-    margin-left: -5.5px;
-    border-radius: 3px;
-    border: 2px solid var(--color-acento);
-    background: var(--color-fondo);
-    box-shadow: 0 0 0 4px var(--color-fondo);
-  }
-  .tramo b {
-    display: block;
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--color-acento);
-  }
-  .tramo i {
-    display: block;
-    margin-top: 0.2rem;
-    font-family: var(--font-mono);
-    font-style: normal;
-    font-size: 0.58rem;
-    letter-spacing: -0.03em;
-    color: var(--color-tenue);
-  }
-  .tramo em {
-    display: block;
-    margin-top: 0.5rem;
-    font-style: normal;
-    font-size: 0.72rem;
-    line-height: 1.45;
-    color: var(--color-tenue);
-  }
-
   /* ── Entrada: cada estación se enciende cuando el gas la alcanza ──────── */
   :global(.js-on) .pin,
-  :global(.js-on) .anio,
-  :global(.js-on) .tramo {
+  :global(.js-on) .anio {
     opacity: 0;
     translate: 0 14px;
     transition: opacity 0.5s ease, translate 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  :global(.js-on) .parada.activa .pin,
-  :global(.js-on) .parada.activa .tramo {
+  :global(.js-on) .parada.activa .pin {
     opacity: 1;
     translate: 0 0;
   }
@@ -488,7 +414,6 @@ const estaciones = proyectos.map((p, i) => {
     }
     .pin-titulo { font-size: 0.95rem; }
     .pin-dato b { font-size: 1.3rem; }
-    .abre-tramo { margin-top: 2.4rem; }
 
     .nodo {
       left: -1.95rem;
@@ -526,14 +451,6 @@ const estaciones = proyectos.map((p, i) => {
       border-width: 1px;
     }
 
-    .tramo {
-      position: static;
-      width: auto;
-      padding-left: 0;
-      margin-bottom: 1rem;
-    }
-    .valvula { display: none; }
-    .tramo em { max-width: 34ch; }
   }
 
     to { background-position: 0 210px; }
@@ -545,9 +462,9 @@ const estaciones = proyectos.map((p, i) => {
 </style>
 
 <script>
-  const marco = document.querySelector<HTMLElement>('#la-traza');
-  const pista = marco?.querySelector<HTMLElement>('.pista');
-  const via = marco?.querySelector<HTMLElement>('.via');
+  // Hay más de una traza en la página —experiencia y herramientas son dos
+  // secciones separadas—, así que todo esto corre por cada una.
+  const trazas = [...document.querySelectorAll<HTMLElement>('.marco')];
   const suave = !matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /**
@@ -580,7 +497,11 @@ const estaciones = proyectos.map((p, i) => {
     requestAnimationFrame(paso);
   }
 
-  if (marco && pista && via) {
+  for (const marco of trazas) {
+    const pista = marco.querySelector<HTMLElement>('.pista');
+    const via = marco.querySelector<HTMLElement>('.via');
+    if (!pista || !via) continue;
+
     const paradas = [...marco.querySelectorAll<HTMLElement>('.parada')].map((el) => ({
       el,
       nodo: el.querySelector<HTMLElement>('.nodo')!,
