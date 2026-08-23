@@ -1,92 +1,145 @@
 ---
 titulo: Tablero EVM en Power BI
-resumen: Control de avance de obra por Earned Value Management sobre un gasoducto, con curva S, proyección de cierre y análisis de desvíos.
+resumen: Control de avance de obra por Earned Value Management sobre un gasoducto, armado como proyecto de texto plano — se versiona, se revisa en un PR y se regenera con un comando.
 categoria: datos
 tramo: proyecto
 orden: 2
-periodo: '2025'
+periodo: '2026'
 rol: Modelo de datos y diseño del tablero
-stack: ['Power BI', 'DAX', 'PBIP', 'EVM']
+stack: ['Power BI', 'DAX', 'PBIP', 'TMDL', 'EVM']
 kpis:
-  - label: Indicadores
-    valor: SPI / CPI
-    nota: 'plazo y costo contra plan'
-  - label: Proyección
-    valor: EAC
-    nota: 'tres variantes de cálculo'
+  - label: Medidas DAX
+    valor: '22'
+    nota: 'replican un motor de EVM con 41 tests'
   - label: Formato
     valor: PBIP
-    nota: 'versionable en git'
-borrador: true
+    nota: 'TMDL + PBIR, texto plano y versionable'
+  - label: Paquetes
+    valor: '7'
+    nota: '35 reportes de avance'
+  - label: SPI · CPI
+    valor: 0,75 · 0,90
+    nota: 'a la fecha de corte, sobre datos sintéticos'
+enlace:
+  label: Ver el proyecto PBIP
+  url: https://github.com/FranPoncio/Data/tree/claude/power-bi-reports-playwright-tuqf5b/powerbi
+borrador: false
 ---
-
-> **Texto de relleno.** El material real está en la rama
-> `claude/power-bi-reports-playwright-tuqf5b` del repo `Data` — traelo acá.
 
 ## El problema
 
-Un avance del 60 % no dice nada solo. ¿Contra qué plan? ¿A qué costo? El EVM
-resuelve eso cruzando tres curvas a una fecha de corte:
+Un avance del 60 % no dice nada solo. ¿Contra qué plan? ¿A qué costo? El Earned
+Value Management resuelve eso cruzando tres magnitudes a una fecha de corte: lo
+que **debería** llevar gastado según el plan (PV), lo que **vale** lo realmente
+ejecutado (EV) y lo que **efectivamente** costó (AC). De ahí salen dos números
+que sí dicen algo — SPI para el plazo, CPI para el costo — y de ahí, la
+proyección de cómo va a cerrar la obra.
 
-| Curva | Qué es |
-| ----- | ------ |
-| **PV** | lo que estaba planificado gastar a esta altura |
-| **EV** | lo que efectivamente se avanzó, valuado al presupuesto |
-| **AC** | lo que realmente se gastó |
+## La decisión de fondo: que el tablero sea texto
 
-De ahí salen SPI y CPI, y con ellos la pregunta que importa en un comité de
-obra: **¿cómo va a terminar esto si seguimos al ritmo actual?**
+Un `.pbix` es un binario. No se puede leer en un pull request, no se puede
+diffear, no se puede revisar. Cae en la misma trampa que el Excel que se pasa
+por mail: existe una versión buena y nadie sabe cuál es.
 
-## Por qué Power BI y no una planilla
+El proyecto está en **PBIP**, que es el mismo tablero pero en texto plano: el
+modelo en TMDL, el informe en PBIR con un JSON por visual. Se versiona, se
+revisa y se regenera con `npm run powerbi`. Un cambio en una medida es una
+línea en un diff, no un archivo nuevo de 4 MB.
 
-La planilla funcionaba para una obra. Con varias en paralelo, cada una terminaba
-con su propia copia, su propia fórmula y su propia fecha de corte — y cuando
-alguien encontraba un error, había que corregirlo en todas.
+Los datos van **embebidos en el modelo** como literales `#table` de M, y no
+apuntando a los CSV que están al lado. No es capricho: Power BI no resuelve
+rutas relativas, así que un `.pbip` enganchado a un archivo local abre sólo en
+la máquina donde se creó. Embebido abre en cualquiera, y además los datos
+aparecen en el diff.
 
-El modelo tabular invierte eso: las medidas se escriben una vez y se recalculan
-solas al cambiar la fecha de corte o el filtro de obra. El mismo tablero sirve
-para una obra o para la cartera completa.
+## Las dos medidas que sostienen a las otras veinte
 
-## El modelo
+De las 22 medidas, hay dos que no se ven en ningún visual y sin las cuales el
+resto da mal:
 
-- **Granularidad.** Por paquete de trabajo, con jerarquía de WBS para poder subir
-  y bajar de nivel sin recalcular nada.
+- **`Último corte`** — la fecha del avance más reciente, *ignorando los filtros
+  de fecha*. Es el data date real de la obra.
+- **`Fecha de análisis`** — a qué fecha se evalúan PV, EV y AC. Si el visual
+  filtra por tiempo (el eje de meses de la curva S) usa el fin de ese período;
+  si no filtra (una tarjeta de KPI) usa el último corte.
 
-- **Medidas DAX.** SPI, CPI, SV, CV, EAC, ETC, VAC y TCPI. El detalle que más
-  problemas evita: **las divisiones por cero devuelven vacío, no infinito**. Un
-  CPI con AC = 0 no es "infinitamente eficiente" — es que todavía no hay
-  información suficiente. Mostrar ∞ en un tablero de dirección es peor que no
-  mostrar nada, porque parece un dato.
+```dax
+Fecha de análisis =
+    IF ( ISCROSSFILTERED ( Calendario ),
+         MAX ( Calendario[Fecha] ),
+         [Último corte] )
+```
 
-- **Time-phasing del PV.** Curva S: arranque lento, aceleración, desaceleración.
-  El reparto lineal es cómodo y miente — ninguna obra gasta parejo desde el día
-  uno, y usar una recta genera desvíos falsos en los primeros meses que después
-  hay que salir a explicar.
+Sin esa segunda medida las tarjetas mostrarían **el PV al final del proyecto en
+lugar del PV a hoy** — un número enorme, perfectamente creíble y completamente
+equivocado. Es el tipo de error que no rompe nada y se detecta tarde.
 
-- **Tres variantes de EAC.** Según el desvío sea sistémico, puntual o combinado
-  de costo y plazo. Mostrar las tres juntas evita la discusión sobre cuál es la
-  buena: la comparación entre ellas ya dice algo.
+El PV se distribuye en el tiempo con una curva S —smoothstep de Hermite,
+`3t²−2t³`— sobre la ventana de baseline de cada paquete. EV y AC toman, para
+cada paquete, su último reporte con fecha menor o igual a la de análisis, y
+quedan en `BLANK` más allá del último corte: así la línea del gráfico **se
+corta** ahí en vez de desplomarse a cero, que es lo que haría creer que la obra
+se frenó.
 
-## Por qué PBIP importa
+## Cómo se verifica que las medidas no mienten
 
-Guardar el informe en formato **PBIP** lo vuelve texto: se versiona en git, se
-revisa en un diff, se compara entre ramas. Un `.pbix` es un binario opaco — no
-podés ver qué cambió entre dos versiones, ni quién lo cambió, ni volver atrás
-una medida sin restaurar el archivo entero.
+Las medidas DAX replican un motor de EVM escrito antes en TypeScript
+(`evm.ts`, con **41 tests**). Traducirlo a DAX es reescribirlo, y una
+reescritura se rompe en silencio.
 
-Es una decisión de ingeniería aplicada a una herramienta de BI, y de las cosas
-que menos gente cuenta.
+La verificación va por un camino distinto al del tablero:
+`check-powerbi-data.mjs` calcula los indicadores **en JavaScript** sobre los
+mismos datos y deja la tabla de resultados esperados en el README. Si el
+tablero no muestra esos números, hay un error en las medidas. Dos
+implementaciones independientes que tienen que coincidir.
 
-## Relación con PMI Toolbox
+A la fecha de corte, sobre los 7 paquetes y 35 reportes de avance del caso:
 
-Este tablero y [PMI Toolbox](/proyectos/pmiproject/) resuelven el mismo problema
-por dos caminos: uno dentro de la herramienta que la organización ya usa, otro
-como aplicación propia. **Que existan los dos dice más que cualquiera de los dos
-por separado** — muestra que la herramienta se elige por contexto, no por
-costumbre.
+| | |
+|---|---:|
+| BAC | $23.200.000 |
+| PV | $11.323.519 |
+| EV | $8.456.000 |
+| AC | $9.440.000 |
+| SPI | 0,75 |
+| CPI | 0,90 |
+| EAC (BAC/CPI) | $25.899.716 |
+| VAC | −$2.699.716 |
+| TCPI hasta BAC | 1,07 |
 
----
+La obra viene atrasada y con sobrecosto, empujada por el tendido del ducto:
+**36,4 % de avance real contra 48,8 % planificado**, y se proyecta cerrar $2,7 M
+por encima del presupuesto autorizado.
 
-Las imágenes van en **esta misma carpeta**, al lado del `index.md`, y se
-declaran en el frontmatter (`portada` y `galeria`). Astro las optimiza y les
-pone hash automáticamente.
+Una diferencia de forma entre las dos implementaciones: donde el TypeScript
+devuelve `null` al dividir por cero, el DAX usa `DIVIDE`, que devuelve `BLANK`.
+Misma semántica de «indefinido» — que no es lo mismo que cero.
+
+## Qué se ve
+
+**Resumen EVM.** Seis tarjetas (BAC, PV, EV, AC, CPI, SPI), la curva S de
+planificado contra ganado contra real, las cuatro proyecciones al cierre (EAC,
+VAC, ETC, TCPI) y el desvío de costo por paquete.
+
+**Paquetes de trabajo.** El EVM completo por paquete y dos barras con CPI y SPI,
+para ver de dónde sale el desvío. Son 19 visuales, todos generados por script.
+
+## Lo que este tablero todavía no es
+
+Tres cosas, y prefiero decirlas acá antes de que las descubra quien lo abra:
+
+- **Los datos son sintéticos.** Salen del fixture del caso GC-3, no de una obra
+  real. Los números de operación de un gasoducto no son míos para publicar.
+- **El historial mensual está interpolado.** El fixture tiene un solo corte, y
+  una curva S con un único punto de EV/AC no se puede graficar. El último corte
+  reproduce el fixture exacto —eso lo verifica el script—; los anteriores son
+  plausibles, no medidos.
+- **El informe se generó sin poder abrirlo.** El PBIR se escribió contra la
+  estructura documentada del formato, pero Power BI Desktop es sólo Windows.
+  El modelo semántico es la parte sólida y está verificado; de los visuales
+  puedo decir que están bien formados, no que carguen.
+
+Y una advertencia de uso: los generadores son de ida nomás. En cuanto abrís el
+`.pbip` y guardás, Desktop reescribe los archivos con su propio formato y pasa
+a ser el dueño del informe. Sirven para arrancar y para rehacer desde cero, no
+para ir y volver.
