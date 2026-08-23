@@ -47,6 +47,16 @@ const camposProyecto = ({ image }: { image: () => any }) =>
       .default([]),
 
     borrador: z.boolean().default(false),
+
+    /**
+     * `borrador` marca "esto todavía no está terminado" pero SE PUBLICA.
+     * `oculto` es distinto: el proyecto no se genera ni aparece en ningún
+     * lado. Es para lo que existe como archivo pero no puede estar a la
+     * vista todavía — un caso escrito con texto de relleno, por ejemplo, que
+     * publicado le hace más daño al portfolio que no estar.
+     * Se saca poniéndolo en false; no hay que borrar ni mover nada.
+     */
+    oculto: z.boolean().default(false),
   });
 
 /** Saca `/index.es` o `/index.en` del id para que la URL quede limpia. */

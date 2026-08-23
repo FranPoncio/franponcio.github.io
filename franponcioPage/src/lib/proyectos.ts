@@ -17,7 +17,11 @@ export interface ProyectoResuelto {
  * nunca queda con huecos ni con un 404.
  */
 export async function obtenerProyectos(lang: Idioma): Promise<ProyectoResuelto[]> {
-  const es = await getCollection('proyectosEs');
+  // Los ocultos se filtran ACÁ y no en cada página: por esta función pasan
+  // tanto el home como el `getStaticPaths` de las dos rutas de caso, así que
+  // un proyecto oculto desaparece de la traza, deja de generar su página y
+  // sale de los enlaces anterior/siguiente, todo con este solo filtro.
+  const es = (await getCollection('proyectosEs')).filter((p) => !p.data.oculto);
   if (lang === 'es') {
     return es
       .sort((a, b) => a.data.orden - b.data.orden)
