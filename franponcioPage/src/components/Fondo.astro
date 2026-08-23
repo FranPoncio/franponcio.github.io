@@ -63,8 +63,8 @@
       const n = parseInt(m[1], 16);
       return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
     };
-    const acento = aRgb(raiz.getPropertyValue('--color-acento'), [12, 122, 69]);
-    const tinta = aRgb(raiz.getPropertyValue('--color-texto'), [13, 26, 19]);
+    const acento = aRgb(raiz.getPropertyValue('--color-acento'), [11, 110, 168]);
+    const tinta = aRgb(raiz.getPropertyValue('--color-texto'), [18, 24, 29]);
     const rgba = ([r, g, b]: [number, number, number], a: number) => `rgba(${r},${g},${b},${a})`;
 
     let an = 0;
