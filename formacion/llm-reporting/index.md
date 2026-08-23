@@ -1,6 +1,6 @@
 ---
 titulo: LLMs aplicados a reporting y documentación
-entidad: Autodidacta
+entidad: IBM
 estado: planificado
 periodo: '2026'
 orden: 2

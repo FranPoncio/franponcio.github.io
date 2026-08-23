@@ -92,10 +92,11 @@ const estaciones = proyectos.map((p) => ({
 
           <article class="ficha">
             <button type="button" class="tapa" aria-expanded="false">
-              <span class="cab">
-                <span class="rubro">{p.data.categoria}</span>
-                <span class="periodo">{p.data.periodo}</span>
-              </span>
+              {/* Sólo el rubro. El período NO va acá: el año gigante del
+                  fondo ya lo dice, y repetirlo era la mitad del contenido de
+                  una ficha que de por sí tiene poco. El rango completo pasa
+                  al detalle, donde hay lugar y no compite con nada. */}
+              <span class="rubro">{p.data.categoria}</span>
 
               <span class="titulo">{corto(p.data.titulo)}</span>
 
@@ -119,6 +120,7 @@ const estaciones = proyectos.map((p) => ({
                 nada con JavaScript. */}
             <div class="mas">
               <div class="mas-dentro">
+                <p class="periodo">{p.data.periodo}</p>
                 <p class="resumen">{p.data.resumen}</p>
 
                 {p.data.kpis.length > 1 && (
@@ -203,6 +205,24 @@ const estaciones = proyectos.map((p) => ({
       transparent 9px 18px
     );
     opacity: 0.75;
+  }
+
+  /* ── LA TAPA DEL FINAL ────────────────────────────────────────────────
+     Cada traza termina en una tapa ciega. No es adorno: es lo que separa una
+     corrida de la siguiente. Los trabajos y las herramientas propias son dos
+     recorridos distintos, y sin la tapa el caño seguía de largo por la banda
+     y las dos trazas se leían como una sola tirada. */
+  .via::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 34px;
+    height: 9px;
+    margin-left: -17px;
+    border-radius: 2px;
+    background: var(--acero-claro);
+    box-shadow: 0 3px 10px -3px rgba(0, 0, 0, 0.85);
   }
 
   .frente {
@@ -293,7 +313,7 @@ const estaciones = proyectos.map((p) => ({
      Centrada, simétrica, sin alternar lados. */
   .parada {
     position: relative;
-    width: min(620px, 100%);
+    width: min(500px, 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -386,9 +406,13 @@ const estaciones = proyectos.map((p) => ({
     position: relative;
     z-index: 2;
     width: 100%;
-    border: 1px solid var(--color-borde);
-    border-radius: 18px;
-    background: color-mix(in srgb, var(--color-panel) 84%, transparent);
+    /* Sin recuadro. Con tan poco contenido, un borde de lado a lado hacía
+       ver una caja medio vacía; ahora es el contenido apoyado sobre el caño.
+       Queda un panel translúcido —el humo pasa por atrás y el texto tiene que
+       leerse igual— y el borde aparece recién al abrir o al pasar por encima. */
+    border: 1px solid transparent;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--color-panel) 72%, transparent);
     backdrop-filter: blur(7px);
     -webkit-backdrop-filter: blur(7px);
     overflow: hidden;
@@ -414,7 +438,7 @@ const estaciones = proyectos.map((p) => ({
     align-items: center;
     gap: 0.55rem;
     width: 100%;
-    padding: 1.5rem 1.6rem 1.35rem;
+    padding: 1rem 1.2rem 0.9rem;
     border: 0;
     background: none;
     color: inherit;
@@ -434,6 +458,7 @@ const estaciones = proyectos.map((p) => ({
     justify-content: center;
     gap: 0.7rem;
   }
+  .cab { display: none; }
   .rubro {
     font-family: var(--font-mono);
     font-size: 0.5rem;
@@ -455,10 +480,10 @@ const estaciones = proyectos.map((p) => ({
   .titulo {
     font-family: var(--font-titulo);
     font-weight: 750;
-    font-size: clamp(1.4rem, 3.4vw, 1.95rem);
+    font-size: clamp(1.25rem, 3vw, 1.7rem);
     line-height: 1.02;
     letter-spacing: -0.028em;
-    max-width: 20ch;
+    max-width: 22ch;
     text-wrap: balance;
   }
 
@@ -474,7 +499,7 @@ const estaciones = proyectos.map((p) => ({
     /* En 800 el cero de Syne se cierra y queda una elipse maciza: la cifra
        "0 accidentes" se leia como una pastilla y no como un numero. */
     font-weight: 700;
-    font-size: clamp(2.4rem, 7vw, 3.4rem);
+    font-size: clamp(2rem, 6vw, 2.8rem);
     line-height: 1;
     letter-spacing: -0.045em;
     color: var(--c);
@@ -530,9 +555,17 @@ const estaciones = proyectos.map((p) => ({
     transition-delay: 0.12s;
   }
 
+  .periodo {
+    margin: 0 0 0.5rem;
+    padding: 0 1.2rem;
+    font-size: 0.64rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-acento);
+  }
   .resumen {
     margin: 0;
-    padding: 0 1.6rem;
+    padding: 0 1.2rem;
     max-width: 52ch;
     margin-inline: auto;
     font-size: 0.86rem;
@@ -546,7 +579,7 @@ const estaciones = proyectos.map((p) => ({
     justify-content: center;
     gap: 0.6rem 2.2rem;
     margin-top: 1.1rem;
-    padding: 0 1.6rem;
+    padding: 0 1.2rem;
   }
   .datos > span {
     display: flex;
@@ -575,7 +608,7 @@ const estaciones = proyectos.map((p) => ({
     justify-content: space-between;
     gap: 1rem;
     margin-top: 1.35rem;
-    padding: 0.85rem 1.6rem;
+    padding: 0.8rem 1.2rem;
     border-top: 1px solid var(--color-borde);
     background: color-mix(in srgb, var(--color-panel-alto) 55%, transparent);
   }
@@ -632,7 +665,7 @@ const estaciones = proyectos.map((p) => ({
     .tapa { padding: 1.25rem 1.1rem 1.15rem; }
     /* "12.000 km" a 2.4rem no entra en 390 px: en angosto manda el vw. */
     .cifra b { font-size: clamp(1.9rem, 8.5vw, 2.6rem); }
-    .resumen, .datos, .pie { padding-inline: 1.1rem; }
+    .resumen, .datos, .pie, .periodo { padding-inline: 1.1rem; }
   }
 
   @media (prefers-reduced-motion: reduce) {

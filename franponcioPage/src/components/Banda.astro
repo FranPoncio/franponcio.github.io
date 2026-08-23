@@ -30,7 +30,7 @@ const { indice, titulo, bajada, anios, id } = Astro.props;
 
   <span class="num">{indice}</span>
 
-  <h2>{titulo}</h2>
+  <h2><span class="raya" aria-hidden="true"></span>{titulo}<span class="raya" aria-hidden="true"></span></h2>
   {anios && <span class="anios">{anios}</span>}
   <p>{bajada}</p>
 
@@ -87,11 +87,26 @@ const { indice, titulo, bajada, anios, id } = Astro.props;
   }
 
   h2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.4rem;
+    width: 100%;
     margin: 1.5rem 0 0;
     font-size: clamp(2rem, 6vw, 3.4rem);
     letter-spacing: -0.035em;
     text-wrap: balance;
   }
+  /* Las rayas cortan la página de lado a lado: es lo que deja en claro que
+     acá termina un tramo y empieza otro. */
+  .raya {
+    flex: 1;
+    max-width: 16rem;
+    height: 1px;
+    background: linear-gradient(to var(--hacia, right), transparent, var(--color-borde));
+  }
+  .raya:last-child { --hacia: left; }
+
   .anios {
     margin-top: 0.7rem;
     font-family: var(--font-mono);
@@ -113,6 +128,7 @@ const { indice, titulo, bajada, anios, id } = Astro.props;
     .eje { height: 2.6rem; margin-bottom: 1.2rem; }
     .eje.abajo { height: 1.8rem; }
     .num { width: 2.6rem; height: 2.6rem; font-size: 1rem; }
-    h2 { margin-top: 1.1rem; }
+    h2 { margin-top: 1.1rem; gap: 0.8rem; }
+    .raya { max-width: 4rem; }
   }
 </style>

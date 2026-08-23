@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { Image, getImage } from 'astro:assets';
 import Carrusel from './Carrusel.astro';
+import Proximos from './Proximos.astro';
 import { usarTraduccion, type Idioma } from '../i18n/ui';
 
 /**
@@ -10,8 +11,8 @@ import { usarTraduccion, type Idioma } from '../i18n/ui';
  * Antes eran tres columnas por estado (cursando / completado / planificado) y
  * las columnas flacas dejaban huecos. Ahora es una sola fila de imágenes: lo
  * hecho y lo que está en curso van juntos, en orden, y lo planificado queda
- * abajo como una lista corta — todavía no es una credencial y no debería
- * ocupar el mismo lugar visual que una.
+ * abajo en su propia cinta (ver `Proximos.astro`) — todavía no es una
+ * credencial y no debería ocupar el mismo lugar visual que una.
  *
  * Los cursos sin certificado en el repo muestran una insignia generada, que
  * dice en la propia imagen que no es un certificado.
@@ -121,23 +122,8 @@ const nota = (c: CollectionEntry<'formacion'>) =>
       </Carrusel>
     </div>
 
-    {
-      proximos.length > 0 && (
-        <div class="mt-6 border-t border-borde pt-5">
-          <p class="font-mono text-[0.66rem] uppercase tracking-[0.14em] text-tenue">
-            {t('formacion.proximo')}
-          </p>
-          <ul class="mt-3 flex flex-wrap gap-x-7 gap-y-2">
-            {proximos.map((c) => (
-              <li class="text-sm">
-                <span class="font-medium">{c.data.titulo}</span>
-                <span class="ml-2 font-mono text-[0.66rem] text-tenue">{c.data.entidad}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )
-    }
+    <Proximos cursos={proximos} titulo={t('formacion.proximo')} />
+
   </div>
 </section>
 

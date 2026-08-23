@@ -1,0 +1,190 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+/**
+ * LO QUE VIENE — la cinta de lo que todavía no es una credencial.
+ *
+ * Antes esto era una lista de dos renglones abajo de los certificados. Va como
+ * cinta, con el mismo mecanismo que la del stack: tres copias, un carril con
+ * scroll propio y un salto de copia cuando te acercás a la punta, así es
+ * infinita la mueva la animación o la muevas vos con el dedo.
+ *
+ * NO lleva logos de marca. Ni PMI ni IBM están en `simple-icons`, y dibujar
+ * una aproximación de una marca ajena es peor que no ponerla — el mismo
+ * criterio que ya está escrito en `lib/logos.ts` para Power BI y Tableau. En su
+ * lugar va la sigla compuesta en tipografía, que es un crédito de texto y no
+ * una reproducción de un logotipo.
+ *
+ * Y va aparte de la fila de certificados a propósito: esto todavía no está
+ * hecho, y no puede ocupar el mismo lugar visual que algo que sí.
+ */
+
+interface Props {
+  cursos: CollectionEntry<'formacion'>[];
+  titulo: string;
+}
+
+const { cursos, titulo } = Astro.props;
+
+/** "PMP — Project Management…" → PMP · "LLMs aplicados a…" → LLM */
+const sigla = (t: string) => {
+  const m = t.match(/^([A-ZÁÉÍÓÚ]{2,5})s?\b/);
+  return (m ? m[1] : t.slice(0, 3)).toUpperCase();
+};
+
+// Con dos o tres cursos una sola tanda no llena la pantalla y la cinta se ve
+// cortada. Se repite hasta pasar los 1800 px estimados antes de triplicar.
+const minimo = Math.max(1, Math.ceil(7 / Math.max(cursos.length, 1)));
+const tanda = Array.from({ length: minimo }, () => cursos).flat();
+---
+
+{
+  cursos.length > 0 && (
+    <div class="proximos">
+      <p class="rotulo">{titulo}</p>
+
+      <div class="carril">
+        <div class="cinta">
+          {[0, 1, 2].map((copia) => (
+            <div class="tanda" aria-hidden={copia > 0 ? 'true' : undefined}>
+              {tanda.map((c) => (
+                <span class="chip">
+                  <span class="sigla">{sigla(c.data.titulo)}</span>
+                  <span class="texto">
+                    <b>{c.data.titulo}</b>
+                    <i>
+                      {c.data.entidad} · {c.data.periodo}
+                    </i>
+                  </span>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .proximos {
+    margin-top: 2.2rem;
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--color-borde);
+  }
+  .rotulo {
+    margin: 0 0 1rem;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-tenue);
+  }
+
+  .carril {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+  }
+  .cinta {
+    display: flex;
+    width: max-content;
+    animation: correr 64s linear infinite;
+  }
+  .carril:hover .cinta {
+    animation-play-state: paused;
+  }
+  @keyframes correr {
+    from { transform: translateX(0); }
+    /* Justo una copia de tres. */
+    to { transform: translateX(-33.3333%); }
+  }
+
+  .tanda {
+    display: flex;
+    gap: 0.6rem;
+    padding-right: 0.6rem;
+  }
+
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex: none;
+    padding: 0.6rem 0.95rem 0.6rem 0.6rem;
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    background: var(--color-panel);
+  }
+  /* La sigla, compuesta en tipografía: crédito de texto, no logotipo. */
+  .sigla {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 7px;
+    background: var(--color-panel-alto);
+    border: 1px solid var(--color-borde-vivo);
+    color: var(--color-herramienta);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .texto {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    white-space: nowrap;
+  }
+  .texto b {
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .texto i {
+    font-style: normal;
+    font-size: 0.62rem;
+    letter-spacing: 0.05em;
+    color: var(--color-tenue);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cinta { animation: none; }
+    .carril {
+      overflow-x: auto;
+      scrollbar-width: none;
+      overscroll-behavior-x: contain;
+    }
+    .carril::-webkit-scrollbar { display: none; }
+  }
+</style>
+
+<script>
+  // La vuelta de la cinta cuando no se anima: mismo mecanismo que el stack.
+  // Tres copias idénticas, así que saltar de una a la otra es invisible.
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    for (const carril of document.querySelectorAll<HTMLElement>('.proximos .carril')) {
+      const cinta = carril.querySelector<HTMLElement>('.cinta');
+      if (!cinta) continue;
+      const copia = () => cinta.scrollWidth / 3;
+      let acomodando = false;
+      const centrar = () => { carril.scrollLeft = copia(); };
+
+      carril.addEventListener('scroll', () => {
+        if (acomodando) return;          // el reacomodo dispara otro scroll
+        const c = copia();
+        if (c < 10) return;
+        const x = carril.scrollLeft;
+        if (x > c * 1.75 || x < c * 0.25) {
+          acomodando = true;
+          carril.scrollLeft = x > c * 1.75 ? x - c : x + c;
+          acomodando = false;
+        }
+      }, { passive: true });
+
+      centrar();
+      addEventListener('load', centrar);
+      addEventListener('resize', centrar, { passive: true });
+    }
+  }
+</script>
