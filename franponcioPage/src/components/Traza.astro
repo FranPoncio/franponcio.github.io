@@ -146,58 +146,69 @@ const estaciones = proyectos.map((p, i) => {
     left: 0;
     right: 0;
     top: 50%;
-    height: 14px;
-    margin-top: -7px;
-    border-radius: 5px;
-    /* La pared del caño va con el borde VIVO y con relleno propio: con el
-       borde tenue y fondo transparente, el tramo todavía vacío era invisible
-       —y al principio de la traza está vacío casi todo. */
-    border-top: 1px solid var(--color-borde-vivo);
-    border-bottom: 1px solid var(--color-borde-vivo);
+    height: 18px;
+    margin-top: -9px;
+    border-radius: 9px;
+    /* Un TUBO, no una barra: el degradado a lo ancho le da volumen —sombra
+       arriba y abajo, brillo al medio— así se lee como algo cilíndrico con un
+       adentro. Las juntas son líneas finas, no cortes. */
     background:
-      repeating-linear-gradient(90deg, transparent 0 96px, var(--color-borde-vivo) 96px 98px),
-      var(--color-panel-alto);
+      repeating-linear-gradient(90deg, transparent 0 118px, var(--color-borde-vivo) 118px 119px),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--color-borde-vivo) 85%, transparent) 0%,
+        var(--color-panel-alto) 38%,
+        var(--color-panel) 52%,
+        var(--color-panel-alto) 66%,
+        color-mix(in srgb, var(--color-borde-vivo) 85%, transparent) 100%
+      );
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-borde-vivo) 70%, transparent);
   }
   .via::after {
     content: '';
     position: absolute;
-    top: 1px;
-    bottom: 1px;
-    left: 0;
-    right: 0;
-    border-radius: 4px;
+    inset: 2px;
+    border-radius: 7px;
     transform: scaleX(var(--avance, 1));
     transform-origin: left center;
-    background: linear-gradient(
-      90deg,
-      var(--color-acento),
-      color-mix(in srgb, var(--color-acento) 55%, transparent)
-    );
-    box-shadow: 0 0 16px -6px var(--color-acento);
+    /* Mismo volumen que el tubo: el gas también es cilíndrico. */
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, #000 22%, var(--color-acento)) 0%,
+        var(--color-acento) 42%,
+        color-mix(in srgb, #fff 30%, var(--color-acento)) 52%,
+        var(--color-acento) 62%,
+        color-mix(in srgb, #000 22%, var(--color-acento)) 100%
+      );
+    box-shadow: 0 0 20px -6px var(--color-acento);
   }
-  /* Los pulsos que corren por el tramo cargado. */
+  /* El gas corriendo. La primera versión pintaba bandas de blanco al 90 % con
+     bordes duros: sobre verde eso son AGUJEROS, y el caño se leía como una
+     línea entrecortada. Ahora son ondas suaves de densidad —el mismo verde,
+     más claro y más oscuro— que es como se ve un fluido moviéndose. */
   .paquetes {
     position: absolute;
-    top: 1px;
-    bottom: 1px;
-    left: 0;
-    right: 0;
+    inset: 2px;
     z-index: 1;
-    border-radius: 4px;
+    border-radius: 7px;
     transform: scaleX(var(--avance, 1));
     transform-origin: left center;
     background-image: repeating-linear-gradient(
-      90deg,
-      transparent 0 58px,
-      rgba(255, 255, 255, 0.9) 58px 96px,
-      transparent 96px 150px
+      100deg,
+      rgba(255, 255, 255, 0) 0px,
+      rgba(255, 255, 255, 0.26) 46px,
+      rgba(255, 255, 255, 0) 92px,
+      rgba(0, 0, 0, 0.07) 128px,
+      rgba(255, 255, 255, 0) 168px
     );
-    background-size: 300px 100%;
-    animation: correr-gas 2.1s linear infinite;
+    background-size: 240px 100%;
+    animation: correr-gas 2.6s linear infinite;
+    mix-blend-mode: soft-light;
   }
   @keyframes correr-gas {
     from { background-position: 0 0; }
-    to { background-position: 300px 0; }
+    to { background-position: 240px 0; }
   }
 
   .pista {
@@ -502,38 +513,48 @@ const estaciones = proyectos.map((p, i) => {
       right: auto;
       top: 0;
       bottom: 0;
-      width: 16px;
+      width: 18px;
       height: auto;
       margin-top: 0;
-      margin-left: -8px;
-      border-top: 0;
-      border-bottom: 0;
-      border-left: 1px solid var(--color-borde-vivo);
-      border-right: 1px solid var(--color-borde-vivo);
+      margin-left: -9px;
+      border-radius: 9px;
       background:
-        repeating-linear-gradient(180deg, transparent 0 84px, var(--color-borde-vivo) 84px 86px),
-        var(--color-panel-alto);
+        repeating-linear-gradient(180deg, transparent 0 104px, var(--color-borde-vivo) 104px 105px),
+        linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--color-borde-vivo) 85%, transparent) 0%,
+          var(--color-panel-alto) 38%,
+          var(--color-panel) 52%,
+          var(--color-panel-alto) 66%,
+          color-mix(in srgb, var(--color-borde-vivo) 85%, transparent) 100%
+        );
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-borde-vivo) 70%, transparent);
     }
     .via::after {
       transform: scaleY(var(--avance, 1));
       transform-origin: top center;
       background: linear-gradient(
-        180deg,
-        var(--color-acento),
-        color-mix(in srgb, var(--color-acento) 55%, transparent)
+        90deg,
+        color-mix(in srgb, #000 22%, var(--color-acento)) 0%,
+        var(--color-acento) 42%,
+        color-mix(in srgb, #fff 30%, var(--color-acento)) 52%,
+        var(--color-acento) 62%,
+        color-mix(in srgb, #000 22%, var(--color-acento)) 100%
       );
     }
     .paquetes {
       transform: scaleY(var(--avance, 1));
       transform-origin: top center;
       background-image: repeating-linear-gradient(
-        180deg,
-        transparent 0 44px,
-        rgba(255, 255, 255, 0.9) 44px 74px,
-        transparent 74px 120px
+        190deg,
+        rgba(255, 255, 255, 0) 0px,
+        rgba(255, 255, 255, 0.26) 40px,
+        rgba(255, 255, 255, 0) 80px,
+        rgba(0, 0, 0, 0.07) 112px,
+        rgba(255, 255, 255, 0) 148px
       );
-      background-size: 100% 240px;
-      animation: correr-gas-abajo 2.1s linear infinite;
+      background-size: 100% 210px;
+      animation: correr-gas-abajo 2.6s linear infinite;
     }
 
     .pista {
@@ -601,7 +622,7 @@ const estaciones = proyectos.map((p, i) => {
 
   @keyframes correr-gas-abajo {
     from { background-position: 0 0; }
-    to { background-position: 0 240px; }
+    to { background-position: 0 210px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
