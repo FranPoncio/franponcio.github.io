@@ -6,6 +6,7 @@ import Traza from './Traza.astro';
 import Banda from './Banda.astro';
 import Herramientas from './Herramientas.astro';
 import Formacion from './Formacion.astro';
+import Planta from './Planta.astro';
 import { obtenerProyectos } from '../lib/proyectos';
 import { usarTraduccion, type Idioma } from '../i18n/ui';
 
@@ -129,6 +130,9 @@ const titulo =
     bajada={t('banda.formacion.bajada')}
   />
   <Formacion cursos={cursos} lang={lang} />
+
+  {/* El remate: la postal de industria, gas y datos, toda junta. */}
+  <Planta />
 
   <style>
     .hero {
