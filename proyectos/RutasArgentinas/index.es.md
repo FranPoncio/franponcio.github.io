@@ -1,56 +1,78 @@
 ---
 titulo: Rutas Argentinas
-resumen: Planificador de viajes a 413 puntos turísticos del país — rutea por 6 medios de transporte y cruza feeds GTFS oficiales para mostrar las líneas reales que pasan cerca.
+resumen: Planificador de viajes a 413 puntos turísticos del país — rutea por seis medios de transporte y cruza feeds GTFS oficiales para mostrar las líneas reales que pasan cerca de cada lugar.
 categoria: herramienta
-orden: 6
+orden: 2
 periodo: 2025 — 2026
-rol: Diseño y desarrollo
-stack: ['JavaScript', 'Leaflet', 'GTFS', 'Valhalla']
+rol: Diseño, datos y desarrollo
+stack: ['JavaScript', 'Leaflet', 'Valhalla', 'GTFS', 'OpenStreetMap']
 kpis:
-  - label: Puntos turísticos
+  - label: Puntos
     valor: '413'
-    nota: 'en 14 localidades'
-  - label: Medios
+    nota: 'en 14 localidades y 12 provincias'
+  - label: Transporte
     valor: '6'
-    nota: 'cada uno con su perfil de ruteo'
-  - label: Feeds GTFS
-    valor: '2'
-    nota: 'subte CABA e interurbano Córdoba'
+    nota: 'perfiles de ruteo distintos'
+  - label: Datos
+    valor: GTFS
+    nota: 'feeds oficiales, procesados offline'
+  - label: Dependencias
+    valor: '0'
+    nota: 'sin framework ni build'
 enlace:
   label: Abrir la app
   url: https://franponcio.github.io/Data/
-borrador: true
 ---
 
-> **Texto de relleno.** Reemplazalo por lo tuyo.
+## Qué resuelve
 
-## El problema
+Elegís un destino y la app arma la ruta desde donde estés, en el medio de
+transporte que uses. Da dos: **la más corta**, y una **escénica** que pasa por
+otro punto turístico ubicado de camino entre la salida y la llegada.
 
-Planificar una salida cruza dos preguntas que viven en lugares distintos:
-*adónde quiero ir* y *cómo llego*. Los datos existen —los puntos turísticos por
-un lado, los horarios de transporte por otro— pero nadie los junta.
+## Los datos son el trabajo
 
-## Las decisiones
+La app en sí son 660 líneas. **La base de datos son 5.300**: 413 puntos
+turísticos cargados a mano en 14 localidades de 12 provincias, cada uno con
+coordenadas, categoría, foto de Wikimedia, precio de entrada, cómo llegar en
+transporte público y una reseña histórica.
 
-- **Ruteo real, sin API key.** Valhalla sobre OpenStreetMap: soporta los seis
-  perfiles de transporte que necesitaba y no obliga a registrar una cuenta ni a
-  vigilar una cuota.
+Están las que se esperan —Buenos Aires, Bariloche, Mendoza, Salta, Ushuaia,
+Iguazú, El Calafate, Humahuaca— y los valles cordobeses de **Punilla** y
+**Calamuchita**, que no suelen aparecer en este tipo de listas.
 
-- **Degradación elegante.** Si el ruteador no responde, la app muestra una ruta
-  estimada en línea recta con una advertencia, en vez de romperse. Para una
-  herramienta que depende de un servicio gratuito, eso no es un detalle: es la
-  diferencia entre útil y frustrante.
+## Las decisiones técnicas
 
-- **GTFS de verdad.** El pipeline ingiere feeds oficiales y calcula qué paradas
-  y qué líneas pasan cerca de cada punto turístico. Eso es trabajo de datos, no
-  de mapas: hay que normalizar formatos, resolver calendarios de servicio y
-  cruzar geometrías.
+### Ruteo real, sin API key
 
-- **Todo vendorizado.** Leaflet y las tipografías viven en el repo. Sin CDN, sin
-  depender de que un tercero siga online dentro de dos años.
+El ruteo lo hace el servidor público de **Valhalla** de OpenStreetMap, que
+soporta justamente los seis perfiles que necesitaba: auto, moto, bicicleta,
+monopatín, colectivo y a pie. Cada modo recalcula distancia y tiempo con su
+propio perfil, no con una regla de tres sobre la distancia en línea recta.
 
-## Lo que aprendí
+**Si el ruteador no responde, la app no se rompe**: degrada a una ruta estimada
+con la velocidad típica del modo y lo dice.
 
-Que la parte visible —el mapa, los pines, las rutas dibujadas— fue la mitad del
-trabajo. La otra mitad, invisible, fue conseguir que los datos de transporte
-cerraran.
+### GTFS procesado antes, no en vivo
+
+El transporte público no sale de un texto escrito a mano: sale de **feeds GTFS
+oficiales**. Un script del repo los lee y, para cada punto turístico, resuelve
+las paradas y líneas reales que pasan dentro de un radio configurable —hoy
+650 metros—. El resultado se guarda como un JSON chico que la app carga de una.
+
+Es la misma decisión de siempre: **el cruce pesado se hace una vez, en el
+pipeline, no en el navegador de cada visitante.** Agregar una ciudad es agregar
+una línea al archivo de fuentes y volver a correr el script.
+
+### Sin framework
+
+No hay React, no hay build, no hay `node_modules` en producción. Leaflet para el
+mapa y JavaScript a secas. Para una app que es sobre todo datos y un mapa, un
+framework era peso sin contrapartida.
+
+## Honestidad sobre los datos
+
+Los precios de entrada y la información de transporte están marcados como
+**orientativos** dentro de la app. Argentina tiene inflación alta y las líneas
+de colectivo cambian: presentarlos como dato oficial sería mentir con formato de
+verdad.

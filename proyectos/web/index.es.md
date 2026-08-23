@@ -1,64 +1,76 @@
 ---
 titulo: Este portfolio
-resumen: El sitio que estás leyendo — Astro con el contenido separado del código, para que agregar un proyecto sea crear un archivo de texto.
+resumen: El sitio que estás leyendo — Astro con el contenido afuera del código, para que agregar un caso sea crear una carpeta con un archivo de texto adentro.
 categoria: herramienta
-orden: 8
+orden: 3
 periodo: '2026'
-rol: Diseño y desarrollo
+rol: Diseño, desarrollo y contenido
 stack: ['Astro', 'TypeScript', 'Tailwind', 'GitHub Actions']
 kpis:
   - label: JavaScript
-    valor: 0 KB
-    nota: 'en las páginas sin componentes'
+    valor: '2,6 KB'
+    nota: 'en el home, sin framework en el cliente'
+  - label: Páginas
+    valor: '22'
+    nota: '11 por idioma'
+  - label: Dependencias
+    valor: '0'
+    nota: 'pedidos a servicios externos'
   - label: Deploy
-    valor: ~35 s
-    nota: 'de push a publicado'
-  - label: Agregar proyecto
-    valor: 1 archivo
-    nota: 'sin tocar código'
+    valor: Automático
+    nota: 'cada push a main'
 enlace:
   label: Ver el código
   url: https://github.com/FranPoncio/franponcio.github.io
-borrador: true
 ---
 
-> **Texto de relleno.** Esta carpeta se llamaba `web` y no estaba definida — la
-> usé para el portfolio mismo. Si `web` era otro proyecto, renombrala.
+## La decisión que ordena todo
 
-## El problema
+**El contenido vive afuera del proyecto Astro.** Los casos están en
+`proyectos/`, los cursos en `formacion/`, y el sitio en otra carpeta que los
+levanta con el loader de contenido.
 
-Un portfolio se abandona cuando actualizarlo cuesta. Si agregar un proyecto
-implica abrir un editor de código, acordarse de una estructura y pelear con
-HTML, la próxima vez que termines algo no lo vas a subir.
+Suena a detalle y no lo es: para escribir un caso no hace falta entrar al
+código ni saber Astro. Se crea una carpeta con un `.md` adentro y sus imágenes
+al lado, y el home lo levanta solo. Es la diferencia entre un sitio que puedo
+mantener y uno que voy a abandonar.
 
-## La decisión de fondo
+## Un esquema que rompe a tiempo
 
-**El contenido no vive adentro del sitio.** El código Astro está en
-`franponcio/`, y los proyectos en `proyectos/`, una carpeta más arriba. El
-`content.config.ts` apunta afuera:
+Cada caso valida contra un esquema. Si falta un campo obligatorio, o una imagen
+va sin texto alternativo, **el build falla y dice cuál**. Es a propósito:
+prefiero que rompa al compilar y no que se publique a medias.
 
-```ts
-loader: glob({ pattern: '**/*.{md,mdx}', base: '../proyectos' })
-```
+Lo mismo con los dos idiomas. Los textos de interfaz están tipados: si agrego
+una clave en español y me la olvido en inglés, TypeScript lo marca antes de
+publicar. Si falta la traducción de un caso, la página en inglés muestra el
+español con un aviso, en vez de un 404 o un hueco.
 
-La consecuencia práctica: **para escribir un proyecto no hace falta entrar al
-código ni saber Astro.** Se crea una carpeta con un archivo de texto adentro y
-el sitio se rearma solo.
+## Casi nada de JavaScript
 
-## Lo que evita errores
+El home sirve **2,6 KB** de JavaScript, y no hay framework en el cliente. Todo
+lo que se mueve —la traza que se recorre de costado, el gas que llena el caño,
+las cifras que cuentan— corre sobre una variable de CSS que el script actualiza
+en cada frame de scroll. El resto lo resuelve el compositor: ni `transform` ni
+`clip-path` recalculan layout.
 
-- **El frontmatter está validado.** Si a un proyecto le falta un campo
-  obligatorio, el build falla y dice cuál. Es a propósito: mejor que rompa antes
-  de publicar que descubrirlo online.
-- **Una portada sin `alt` no compila.** El `alt` va adentro del objeto `portada`,
-  así el tipo garantiza que no puedan quedar separados.
-- **Los borradores se ven.** Con `borrador: true` el proyecto aparece igual,
-  pero con etiqueta y una banda de aviso. Es preferible ver el hueco a que algo
-  a medio escribir desaparezca sin que te enteres.
+Y todo degrada. Sin JavaScript la página se ve igual, sólo que quieta. Con
+`prefers-reduced-motion` no se mueve nada.
 
-## Sobre el rendimiento
+## Sin pedidos a terceros
 
-Las páginas sin componentes interactivos sirven **cero JavaScript**. Astro sólo
-manda JS para las "islas" —un componente React puntual— y el resto es HTML
-estático. Las imágenes se convierten a WebP en tres tamaños automáticamente, así
-que una foto de obra de 4 MB no se sirve entera en un celular.
+Las tipografías viajan en el repo, no se bajan de Google Fonts. Los logos de las
+herramientas se incrustan durante el build. **El sitio no le informa a nadie
+quién lo visita**, y no depende de que un CDN ajeno siga en pie.
+
+## Deploy
+
+Cada push a `main` dispara una GitHub Action que compila y publica. No hay paso
+manual, y por eso tampoco hay forma de que lo publicado y el repo se
+desincronicen.
+
+## Lo que me llevé
+
+Que la pregunta útil al armar una herramienta propia no es qué puede hacer, sino
+**qué tan barato es el gesto que voy a repetir mil veces.** Acá ese gesto es
+escribir un archivo de texto. Todo lo demás está subordinado a eso.
