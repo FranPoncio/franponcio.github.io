@@ -127,12 +127,10 @@ const estaciones = proyectos.map((p, i) => ({
     top: 50%;
     height: 1px;
     margin-top: -0.5px;
-    background: repeating-linear-gradient(
-      90deg,
-      var(--color-borde-vivo) 0 5px,
-      transparent 5px 11px
-    );
-    opacity: 0.75;
+    height: 3px;
+    margin-top: -1.5px;
+    background: var(--color-texto);
+    opacity: 1;
   }
 
 
@@ -161,14 +159,14 @@ const estaciones = proyectos.map((p, i) => ({
     left: var(--sangria);
     top: 50%;
     z-index: 4;
-    width: 17px;
-    height: 17px;
-    margin-top: -8.5px;
-    margin-left: -8.5px;
+    width: 22px;
+    height: 22px;
+    margin-top: -11px;
+    margin-left: -11px;
     border-radius: 50%;
-    border: 2.5px solid var(--c);
-    background: var(--color-fondo);
-    box-shadow: 0 0 0 4px var(--color-fondo);
+    border: 3px solid var(--color-texto);
+    background: var(--c);
+    box-shadow: 0 0 0 5px var(--color-fondo), 3px 3px 0 var(--color-texto);
     transition:
       transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
       box-shadow 0.3s ease;
@@ -206,10 +204,11 @@ const estaciones = proyectos.map((p, i) => ({
   }
   .pin-titulo {
     font-family: var(--font-titulo);
-    font-weight: 600;
-    font-size: 0.86rem;
-    line-height: 1.25;
-    letter-spacing: -0.02em;
+    font-weight: 400;
+    font-size: 1.18rem;
+    line-height: 0.98;
+    letter-spacing: -0.005em;
+    text-transform: uppercase;
   }
   .pin-dato {
     display: flex;
@@ -218,11 +217,16 @@ const estaciones = proyectos.map((p, i) => ({
     margin-top: 0.1rem;
   }
   .pin-dato b {
-    font-family: var(--font-mono);
-    font-size: 1.05rem;
-    font-weight: 700;
-    letter-spacing: -0.08em;
-    color: var(--c);
+    font-family: var(--font-titulo);
+    font-size: 1.9rem;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--color-texto);
+    background: var(--c);
+    border: 2.5px solid var(--color-texto);
+    border-radius: 8px;
+    padding: 0.05rem 0.4rem;
+    box-shadow: 3px 3px 0 var(--color-texto);
   }
   .pin-dato i {
     font-family: var(--font-mono);
@@ -242,13 +246,11 @@ const estaciones = proyectos.map((p, i) => ({
     flex-direction: column;
     gap: 0.5rem;
     width: 285px;
-    padding: 1rem 1.1rem;
-    border: 1px solid var(--c);
-    border-radius: 12px;
+    padding: 1rem 1.15rem;
+    border: 3px solid var(--color-texto);
+    border-radius: 14px;
     background: var(--color-panel);
-    box-shadow:
-      0 4px 10px rgba(14, 23, 20, 0.07),
-      0 30px 60px -24px color-mix(in srgb, var(--c) 65%, transparent);
+    box-shadow: var(--sombra-alta);
     opacity: 0;
     visibility: hidden;
     translate: 0 8px;
@@ -274,18 +276,24 @@ const estaciones = proyectos.map((p, i) => ({
   }
 
   .popup-rubro {
+    align-self: flex-start;
     font-family: var(--font-mono);
     font-size: 0.52rem;
-    letter-spacing: 0.17em;
+    font-weight: 700;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--c);
+    color: var(--color-texto);
+    background: var(--c);
+    border: 2px solid var(--color-texto);
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
   }
   .popup-titulo {
     font-family: var(--font-titulo);
-    font-weight: 700;
-    font-size: 0.95rem;
-    line-height: 1.28;
-    letter-spacing: -0.025em;
+    font-weight: 400;
+    font-size: 1.25rem;
+    line-height: 1;
+    text-transform: uppercase;
   }
   .popup-texto {
     font-size: 0.78rem;
@@ -303,10 +311,9 @@ const estaciones = proyectos.map((p, i) => ({
     flex-direction: column;
   }
   .popup-datos b {
-    font-family: var(--font-mono);
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: -0.07em;
+    font-family: var(--font-titulo);
+    font-size: 1.5rem;
+    line-height: 1;
   }
   .popup-datos i {
     font-family: var(--font-mono);
@@ -317,6 +324,7 @@ const estaciones = proyectos.map((p, i) => ({
     color: var(--color-tenue);
   }
   .popup-pie {
+    border-top-width: 2px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -338,14 +346,14 @@ const estaciones = proyectos.map((p, i) => ({
 
   /* ── Reacción al pasar por encima ─────────────────────────────────────── */
   @media (hover: hover) {
-    .parada:hover .pin { background: color-mix(in srgb, var(--c) 7%, transparent); }
+    .parada:hover .pin { transform: translateY(-3px); }
     .parada:hover .nodo,
     .parada.abierta .nodo {
-      transform: scale(1.55);
-      box-shadow: 0 0 0 4px var(--color-fondo), 0 0 24px -2px var(--c);
+      transform: scale(1.35) rotate(12deg);
+      box-shadow: 0 0 0 5px var(--color-fondo), 5px 5px 0 var(--color-texto);
     }
   }
-  .pin:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; }
+  .pin:focus-visible { outline: 3px solid var(--color-acento); outline-offset: 3px; }
   .ir:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; border-radius: 3px; }
 
   /* ── Entrada: cada estación se enciende cuando el gas la alcanza ──────── */
@@ -370,7 +378,7 @@ const estaciones = proyectos.map((p, i) => ({
   @media (hover: hover) {
     :global(.js-on) .parada.activa:hover .nodo,
     :global(.js-on) .parada.activa.abierta .nodo {
-      transform: scale(1.55);
+      transform: scale(1.35) rotate(12deg);
     }
   }
 
@@ -392,11 +400,9 @@ const estaciones = proyectos.map((p, i) => ({
       height: auto;
       margin-top: 0;
       margin-left: -0.5px;
-      background: repeating-linear-gradient(
-        180deg,
-        var(--color-borde-vivo) 0 5px,
-        transparent 5px 11px
-      );
+      width: 3px;
+      margin-left: -1.5px;
+      background: var(--color-texto);
     }
 
     .pista {
@@ -416,8 +422,8 @@ const estaciones = proyectos.map((p, i) => ({
     .pin-dato b { font-size: 1.3rem; }
 
     .nodo {
-      left: -1.95rem;
-      top: 1.75rem;
+      left: -2.05rem;
+      top: 1.7rem;
       margin-top: 0;
       margin-left: 0;
       z-index: 3;

@@ -99,46 +99,41 @@ const filas: { items: Ficha[]; sentido: string }[] = [
     align-items: center;
     gap: 0.5rem;
     flex: none;
-    height: 2.9rem;
-    padding: 0 0.95rem;
-    border: 1px solid var(--color-borde);
-    border-radius: 8px;
+    height: 3rem;
+    padding: 0 1rem;
+    border: 2.5px solid var(--color-texto);
+    border-radius: 10px;
     background: var(--color-panel);
-    color: var(--color-tenue);
-    transition:
-      color 0.25s ease,
-      border-color 0.25s ease;
+    color: var(--color-texto);
+    box-shadow: 3px 3px 0 var(--color-texto);
+    transition: transform 0.18s ease, background-color 0.18s ease;
   }
-  .ficha:hover {
-    color: var(--color-acento);
-    border-color: var(--color-acento);
-  }
+  /* Las fichas se pintan alternando los colores de la casa: una cinta de un
+     solo color seria una lista, no una cinta. */
+  .tanda > :nth-child(4n + 1) { background: var(--color-datos); }
+  .tanda > :nth-child(4n + 2) { background: var(--color-gestion); }
+  .tanda > :nth-child(4n + 3) { background: var(--color-herramienta); color: var(--color-panel); }
+  .tanda > :nth-child(4n + 3) svg { color: var(--color-panel); }
+  .ficha:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--color-texto); }
 
   .ficha svg {
     width: 1.25rem;
     height: 1.25rem;
     flex: none;
     color: var(--color-texto);
-    opacity: 0.75;
-  }
-  .ficha:hover svg {
-    color: inherit;
-    opacity: 1;
   }
 
   .pie,
   .sigla {
     font-family: var(--font-mono);
     font-size: 0.68rem;
+    font-weight: 700;
     letter-spacing: -0.045em;
     white-space: nowrap;
   }
   /* Las que no tienen logo se escriben más marcadas: la ficha no puede
      quedar más flaca sólo porque la marca no exista. */
-  .sigla {
-    color: var(--color-texto);
-    font-weight: 600;
-  }
+
 
   /* Sin movimiento la cinta se queda quieta y se puede scrollear con el dedo. */
   @media (prefers-reduced-motion: reduce) {
