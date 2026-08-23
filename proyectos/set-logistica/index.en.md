@@ -11,9 +11,12 @@ kpis:
   - label: Accidents
     valor: '0'
     nota: 'two consecutive years'
-  - label: Complaints
-    valor: '−40%'
-    nota: 'year over year'
+  # The "-40% year over year" was invented and is gone: it was the most
+  # prominent figure in the case and the only one with nothing behind it.
+  # The "< 5%" is real -it is the operation's own level- so it stays.
+  - label: Claims or scrap
+    valor: '< 5%'
+    nota: "the operation's level"
   - label: Standards
     valor: '3'
     nota: 'quality, environment and OH&S'
@@ -89,9 +92,9 @@ begin in gas infrastructure, it began here, in 2013**.
 - **Zero accidents across two consecutive years.** In a warehouse operation —
   forklifts, working at height, constant movement — that doesn't come from a
   poster on the wall. It comes from procedure and practice actually matching.
-- **Customer complaints down 40% year over year**, on an operation already
-  dispatching with **under 5% of orders drawing a claim or ending as scrap**. The
-  40% is how far it fell; the 5% is where it stood.
+- **Customer complaints fell year over year**, on an operation already
+  dispatching with **under 5% of orders drawing a claim or ending as scrap**.
+  That 5% is where the operation stood; the improvement was measured against it.
 - Certification and recertification of all three standards passed.
 
 ## What I took from it
