@@ -5,17 +5,20 @@ import { usarTraduccion, type Idioma } from '../i18n/ui';
 import type { Proyecto } from '../lib/proyectos';
 
 /**
- * LA TRAZA — el recorrido completo, de 2013 a hoy, leído de izquierda a
- * derecha sobre un caño horizontal.
+ * LA TRAZA — el recorrido de 2013 a hoy sobre un caño horizontal.
  *
- * Cómo se mueve: NO se secuestra la rueda del mouse. El bloque mide varias
- * pantallas de alto y adentro hay un panel `sticky`; el scroll vertical normal
- * —rueda, trackpad, teclado, barra— se traduce a desplazamiento horizontal de
- * la pista. Así funciona igual con cualquier forma de scrollear y no se rompe
- * la navegación por teclado.
+ * La traza muestra SÓLO los pines: año, título corto y la cifra. El detalle
+ * completo vive en un popup que sale al pasar el mouse o al tocar el pin. Antes
+ * cada estación arrastraba una ficha de 300 px siempre abierta y la traza era
+ * una pila de cajas; ahora es una línea que se lee de un vistazo y que se abre
+ * donde te interesa.
  *
- * En celular no hay nada que ganar con el gesto: el bloque se desarma y las
- * estaciones caen en una columna vertical común.
+ * Cómo se mueve: NO se secuestra la rueda. El bloque mide varias pantallas y
+ * adentro hay un panel `sticky`; el scroll vertical normal se traduce a
+ * desplazamiento horizontal. Anda con rueda, trackpad, teclado y barra.
+ *
+ * El pin es un <button> de verdad, así que se llega con Tab y el popup se abre
+ * con Enter. En celular todo cae en columna y el popup se abre al tocar.
  */
 
 interface Props {
@@ -27,13 +30,17 @@ const { proyectos, lang } = Astro.props;
 const t = usarTraduccion(lang);
 const base = lang === 'es' ? 'proyectos' : 'en/projects';
 
-// La traza va partida en dos tramos. La primera parada de cada uno arrastra
-// un rótulo: una válvula sobre el caño con el nombre del tramo y sus años.
 const anio = (periodo: string) => periodo.match(/\d{4}/)?.[0] ?? '';
 const rango = (tramo: 'laboral' | 'proyecto') => {
   const del = proyectos.filter((p) => p.data.tramo === tramo);
   const anios = del.flatMap((p) => p.data.periodo.match(/\d{4}/g) ?? []);
   return anios.length ? `${anio(del[0].data.periodo)} — ${anios.sort().at(-1)}` : '';
+};
+
+/** El título largo no entra en un pin: se corta en el primer corte natural. */
+const corto = (titulo: string) => {
+  const limpio = titulo.split(/\s+[—–]\s+/)[0];
+  return limpio.length > 34 ? limpio.slice(0, 32).trimEnd() + '…' : limpio;
 };
 
 let previo: string | null = null;
@@ -72,24 +79,39 @@ const estaciones = proyectos.map((p, i) => {
                 <em>{rotulo.bajada}</em>
               </span>
             )}
+
             <span class="nodo" aria-hidden="true" />
-            <span class="anio">{p.data.periodo}</span>
 
-            <a href={conBase(`${base}/${p.id}/`)} class="ficha group">
-              <span class="rubro">{p.data.categoria}</span>
-              <h3>{p.data.titulo}</h3>
-              <p>{p.data.resumen}</p>
-
+            {/* El pin: lo único que se ve siempre. */}
+            <button type="button" class="pin" aria-expanded="false">
+              <span class="pin-anio">{p.data.periodo}</span>
+              <span class="pin-titulo">{corto(p.data.titulo)}</span>
               {p.data.kpis[0] && (
-                <span class="dato">
+                <span class="pin-dato">
                   <b class="tabular-nums" data-cifra={p.data.kpis[0].valor}>
                     {p.data.kpis[0].valor}
                   </b>
                   <i>{p.data.kpis[0].label}</i>
                 </span>
               )}
+            </button>
 
-              <span class="pie">
+            {/* El detalle, sólo cuando lo pedís. */}
+            <span class="popup" role="group">
+              <span class="popup-rubro">{p.data.categoria}</span>
+              <span class="popup-titulo">{p.data.titulo}</span>
+              <span class="popup-texto">{p.data.resumen}</span>
+
+              <span class="popup-datos">
+                {p.data.kpis.slice(0, 2).map((k) => (
+                  <span>
+                    <b class="tabular-nums">{k.valor}</b>
+                    <i>{k.label}</i>
+                  </span>
+                ))}
+              </span>
+
+              <span class="popup-pie">
                 <span class="marcas" aria-hidden="true">
                   {marcas.map((m) => (
                     <svg viewBox="0 0 24 24" role="presentation">
@@ -97,9 +119,11 @@ const estaciones = proyectos.map((p, i) => {
                     </svg>
                   ))}
                 </span>
-                <span class="ir">{t('proyecto.ver')}</span>
+                <a href={conBase(`${base}/${p.id}/`)} class="ir">
+                  {t('proyecto.ver')}
+                </a>
               </span>
-            </a>
+            </span>
           </li>
         ))
       }
@@ -108,11 +132,7 @@ const estaciones = proyectos.map((p, i) => {
 </section>
 
 <style>
-  /* Cada parada consume ~50vh de scroll vertical. Más alto = se recorre más
-     despacio. El +100vh es la pantalla que el panel se queda pegado al final. */
-  .marco {
-    height: calc(var(--paradas) * 50vh + 100vh);
-  }
+  .marco { height: calc(var(--paradas) * 44vh + 100vh); }
   .pega {
     position: sticky;
     top: 0;
@@ -120,7 +140,7 @@ const estaciones = proyectos.map((p, i) => {
     overflow: hidden;
   }
 
-  /* El caño, con sus juntas. */
+  /* ── El caño ──────────────────────────────────────────────────────────── */
   .via {
     position: absolute;
     left: 0;
@@ -131,15 +151,26 @@ const estaciones = proyectos.map((p, i) => {
     border-radius: 5px;
     border-top: 1px solid var(--color-borde);
     border-bottom: 1px solid var(--color-borde);
-    background: repeating-linear-gradient(
-      90deg,
-      transparent 0 96px,
-      var(--color-borde) 96px 98px
-    );
+    background: repeating-linear-gradient(90deg, transparent 0 96px, var(--color-borde) 96px 98px);
   }
-  /* Los paquetes: pulsos claros que CORREN por el tramo ya cargado. Es lo que
-     hace que el caño se lea como una cañería con algo adentro y no como una
-     barra de progreso pintada. Sólo se anima background-position. */
+  .via::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    left: 0;
+    right: 0;
+    border-radius: 4px;
+    transform: scaleX(var(--avance, 1));
+    transform-origin: left center;
+    background: linear-gradient(
+      90deg,
+      var(--color-acento),
+      color-mix(in srgb, var(--color-acento) 55%, transparent)
+    );
+    box-shadow: 0 0 16px -6px var(--color-acento);
+  }
+  /* Los pulsos que corren por el tramo cargado. */
   .paquetes {
     position: absolute;
     top: 1px;
@@ -161,28 +192,7 @@ const estaciones = proyectos.map((p, i) => {
   }
   @keyframes correr-gas {
     from { background-position: 0 0; }
-    to   { background-position: 300px 0; }
-  }
-
-  /* El gas: se llena a medida que avanzás por la traza. */
-  .via::after {
-    content: '';
-    position: absolute;
-    top: 1px;
-    bottom: 1px;
-    left: 0;
-    right: 0;
-    border-radius: 4px;
-    transform: scaleX(var(--avance, 1));
-    transform-origin: left center;
-    background:
-      repeating-linear-gradient(
-        90deg,
-        transparent 0 95px,
-        color-mix(in srgb, #fff 55%, transparent) 95px 98px
-      ),
-      linear-gradient(90deg, var(--color-acento), color-mix(in srgb, var(--color-acento) 55%, transparent));
-    box-shadow: 0 0 16px -6px var(--color-acento);
+    to { background-position: 300px 0; }
   }
 
   .pista {
@@ -190,22 +200,215 @@ const estaciones = proyectos.map((p, i) => {
     inset: 0;
     display: flex;
     align-items: stretch;
-    padding-left: 4vw;
+    padding-left: 5vw;
     margin: 0;
     list-style: none;
     will-change: transform;
   }
 
+  /* ── La estación ──────────────────────────────────────────────────────── */
   .parada {
     position: relative;
     --sangria: 0px;
-    flex: 0 0 calc(clamp(300px, 25vw, 350px) + var(--sangria));
+    /* Mucho más angosta que antes: ahora entran seis en pantalla y la traza
+       se lee como una línea, no como una fila de cajas. */
+    flex: 0 0 calc(clamp(200px, 16vw, 245px) + var(--sangria));
   }
-  /* La parada que abre un tramo se corre entera —nodo, año y ficha— para
-     dejarle lugar al rótulo. */
   .abre-tramo { --sangria: clamp(190px, 15vw, 230px); }
 
-  /* El rótulo del tramo: una válvula sobre el caño y el nombre al lado. */
+  .nodo {
+    position: absolute;
+    left: var(--sangria);
+    top: 50%;
+    z-index: 3;
+    width: 17px;
+    height: 17px;
+    margin-top: -8.5px;
+    margin-left: -8.5px;
+    border-radius: 50%;
+    border: 2.5px solid var(--c);
+    background: var(--color-fondo);
+    box-shadow: 0 0 0 4px var(--color-fondo);
+    transition:
+      transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.3s ease;
+  }
+
+  /* El pin: año, título corto y la cifra. Nada más. */
+  .pin {
+    position: absolute;
+    left: calc(var(--sangria) + 18px);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+    width: clamp(160px, 13vw, 195px);
+    padding: 0.35rem 0.4rem;
+    margin: 0;
+    border: 0;
+    border-radius: 7px;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    transition: background-color 0.2s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .arriba .pin { bottom: calc(50% + 20px); }
+  .abajo .pin { top: calc(50% + 20px); }
+
+  .pin-anio {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    color: var(--color-tenue);
+  }
+  .pin-titulo {
+    font-family: var(--font-titulo);
+    font-weight: 600;
+    font-size: 0.86rem;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+  .pin-dato {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    margin-top: 0.1rem;
+  }
+  .pin-dato b {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.08em;
+    color: var(--c);
+  }
+  .pin-dato i {
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-size: 0.5rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--color-tenue);
+  }
+
+  /* ── El popup ─────────────────────────────────────────────────────────── */
+  .popup {
+    position: absolute;
+    left: calc(var(--sangria) + 4px);
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 285px;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--c);
+    border-radius: 12px;
+    background: var(--color-panel);
+    box-shadow:
+      0 4px 10px rgba(14, 23, 20, 0.07),
+      0 30px 60px -24px color-mix(in srgb, var(--c) 65%, transparent);
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 8px;
+    scale: 0.97;
+    transition:
+      opacity 0.22s ease,
+      translate 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+      scale 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0s linear 0.22s;
+  }
+  /* El popup sale del lado OPUESTO al pin: nunca lo tapa. */
+  .arriba .popup { top: calc(50% + 22px); }
+  .abajo .popup { bottom: calc(50% + 22px); }
+
+  .parada.abierta .popup,
+  .parada:hover .popup,
+  .parada:focus-within .popup {
+    opacity: 1;
+    visibility: visible;
+    translate: 0 0;
+    scale: 1;
+    transition-delay: 0s;
+  }
+
+  .popup-rubro {
+    font-family: var(--font-mono);
+    font-size: 0.52rem;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+    color: var(--c);
+  }
+  .popup-titulo {
+    font-family: var(--font-titulo);
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.28;
+    letter-spacing: -0.025em;
+  }
+  .popup-texto {
+    font-size: 0.78rem;
+    line-height: 1.55;
+    color: var(--color-tenue);
+  }
+  .popup-datos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.4rem;
+    margin-top: 0.15rem;
+  }
+  .popup-datos > span {
+    display: flex;
+    flex-direction: column;
+  }
+  .popup-datos b {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.07em;
+  }
+  .popup-datos i {
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-size: 0.5rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--color-tenue);
+  }
+  .popup-pie {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.35rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid var(--color-borde);
+  }
+  .marcas { display: flex; gap: 0.45rem; color: var(--color-texto); }
+  .marcas svg { width: 1rem; height: 1rem; opacity: 0.4; }
+  .ir {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: -0.03em;
+    color: var(--c);
+    text-decoration: none;
+  }
+  .ir:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+  /* ── Reacción al pasar por encima ─────────────────────────────────────── */
+  @media (hover: hover) {
+    .parada:hover .pin { background: color-mix(in srgb, var(--c) 7%, transparent); }
+    .parada:hover .nodo,
+    .parada.abierta .nodo {
+      transform: scale(1.55);
+      box-shadow: 0 0 0 4px var(--color-fondo), 0 0 24px -2px var(--c);
+    }
+  }
+  .pin:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; }
+  .ir:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; border-radius: 3px; }
+
+  /* ── El rótulo del tramo ──────────────────────────────────────────────── */
   .tramo {
     position: absolute;
     left: 0;
@@ -252,211 +455,153 @@ const estaciones = proyectos.map((p, i) => {
     color: var(--color-tenue);
   }
 
-  .nodo {
-    position: absolute;
-    left: var(--sangria);
-    top: 50%;
-    z-index: 2;
-    width: 17px;
-    height: 17px;
-    margin-top: -8.5px;
-    margin-left: -8.5px;
-    border-radius: 50%;
-    border: 2.5px solid var(--c);
-    background: var(--color-fondo);
-    box-shadow: 0 0 0 4px var(--color-fondo);
-  }
-
-  .anio {
-    position: absolute;
-    left: calc(var(--sangria) + 20px);
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
-    font-weight: 500;
-    letter-spacing: -0.04em;
-    color: var(--color-tenue);
-  }
-  .arriba .anio { top: calc(50% + 13px); }
-  .abajo .anio { top: calc(50% - 26px); }
-
-  /* Sin JavaScript todo se ve de una: la entrada sólo existe con `js-on`. */
-  :global(.js-on) .ficha {
+  /* ── Entrada: cada estación se enciende cuando el gas la alcanza ──────── */
+  :global(.js-on) .pin,
+  :global(.js-on) .anio,
+  :global(.js-on) .tramo {
     opacity: 0;
-    translate: 0 34px;
-    scale: 0.94;
+    translate: 0 14px;
+    transition: opacity 0.5s ease, translate 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  :global(.js-on) .parada.activa .ficha {
+  :global(.js-on) .parada.activa .pin,
+  :global(.js-on) .parada.activa .tramo {
     opacity: 1;
     translate: 0 0;
-    scale: 1;
   }
   :global(.js-on) .nodo {
-    transform: scale(0.35);
+    transform: scale(0.3);
     opacity: 0;
-    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
   }
   :global(.js-on) .parada.activa .nodo {
     transform: scale(1);
     opacity: 1;
   }
-  :global(.js-on) .anio,
-  :global(.js-on) .tramo {
-    opacity: 0;
-    transition: opacity 0.5s ease 0.15s;
-  }
-  :global(.js-on) .parada.activa .anio,
-  :global(.js-on) .parada.activa .tramo {
-    opacity: 1;
-  }
-
-  .ficha {
-    display: block;
-    position: absolute;
-    left: var(--sangria);
-    width: clamp(272px, 22vw, 300px);
-    padding: 1.1rem 1.2rem;
-    border: 1px solid var(--color-borde);
-    border-radius: 12px;
-    background: var(--color-panel);
-    box-shadow:
-      0 1px 2px rgba(14, 23, 20, 0.05),
-      0 10px 30px -18px rgba(14, 23, 20, 0.35);
-    transition:
-      opacity 0.55s ease,
-      translate 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-      scale 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-      transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-      border-color 0.25s ease,
-      box-shadow 0.25s ease;
-  }
-  .arriba .ficha { bottom: calc(50% + 40px); }
-  .abajo .ficha { top: calc(50% + 40px); }
-
   @media (hover: hover) {
-    .ficha:hover {
-      transform: translateY(-14px);
-      border-color: var(--c);
-      box-shadow:
-        0 3px 6px rgba(14, 23, 20, 0.08),
-        0 34px 60px -22px color-mix(in srgb, var(--c) 70%, transparent),
-        0 0 0 4px color-mix(in srgb, var(--c) 12%, transparent);
-    }
-    /* La estación también reacciona: el nodo crece mientras mirás su ficha.
-       Va con `.js-on .parada.activa` porque la regla de entrada tiene esa
-       misma especificidad y si no le ganaba. */
     :global(.js-on) .parada.activa:hover .nodo,
-    .parada:hover .nodo {
-      transform: scale(1.5);
-      box-shadow:
-        0 0 0 4px var(--color-fondo),
-        0 0 24px -2px var(--c);
-    }
-    .ficha:hover .dato b {
-      color: var(--c);
+    :global(.js-on) .parada.activa.abierta .nodo {
+      transform: scale(1.55);
     }
   }
-  .ficha:focus-visible { outline: 2px solid var(--c); outline-offset: 4px; }
 
-  .rubro {
-    font-family: var(--font-mono);
-    font-size: 0.55rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--c);
-  }
-  .ficha h3 {
-    margin-top: 0.5rem;
-    font-size: 0.98rem;
-    font-weight: 600;
-    line-height: 1.3;
-  }
-  .ficha p {
-    margin-top: 0.5rem;
-    font-size: 0.8rem;
-    line-height: 1.55;
-    color: var(--color-tenue);
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    overflow: hidden;
-  }
-
-  .dato {
-    margin-top: 0.85rem;
-    display: flex;
-    align-items: baseline;
-    gap: 0.45rem;
-  }
-  .dato b {
-    transition: color 0.3s ease;
-    font-family: var(--font-mono);
-    font-size: 1.2rem;
-    font-weight: 700;
-    letter-spacing: -0.08em;
-  }
-  .dato i {
-    font-family: var(--font-mono);
-    font-style: normal;
-    font-size: 0.52rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--color-tenue);
-  }
-
-  .pie {
-    margin-top: 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-  }
-  .marcas { display: flex; gap: 0.45rem; color: var(--color-texto); }
-  .marcas svg { width: 0.95rem; height: 0.95rem; opacity: 0.3; }
-  .ir {
-    font-family: var(--font-mono);
-    font-size: 0.55rem;
-    letter-spacing: -0.03em;
-    color: var(--c);
-    opacity: 0;
-    translate: -0.4rem 0;
-    transition: opacity 0.3s ease, translate 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  @media (hover: hover) {
-    .ficha:hover .ir { opacity: 1; translate: 0 0; }
-    .ficha:hover .marcas svg { opacity: 0.55; }
-  }
-
-  /* ── Celular: el gesto no aporta, se desarma en columna ───────────────── */
+  /* ── Celular: el MISMO caño, parado ───────────────────────────────────
+     Esto antes era `display:none` sobre la vía y una columna de tarjetas: o
+     sea, en el teléfono no había caño, ni gas, ni paquetes, ni nada que se
+     moviera. Ahora la traza baja en vertical con el gas corriendo hacia abajo,
+     y el popup se abre al tocar el pin. */
   @media (max-width: 900px) {
     .marco { height: auto; }
-    .pega { position: static; height: auto; overflow: visible; }
-    .via { display: none; }
+    .pega { position: relative; height: auto; overflow: visible; }
+
+    .via {
+      left: 1.55rem;
+      right: auto;
+      top: 0;
+      bottom: 0;
+      width: 13px;
+      height: auto;
+      margin-top: 0;
+      margin-left: -6.5px;
+      border-top: 0;
+      border-bottom: 0;
+      border-left: 1px solid var(--color-borde);
+      border-right: 1px solid var(--color-borde);
+      background: repeating-linear-gradient(
+        180deg,
+        transparent 0 84px,
+        var(--color-borde) 84px 86px
+      );
+    }
+    .via::after {
+      transform: scaleY(var(--avance, 1));
+      transform-origin: top center;
+      background: linear-gradient(
+        180deg,
+        var(--color-acento),
+        color-mix(in srgb, var(--color-acento) 55%, transparent)
+      );
+    }
+    .paquetes {
+      transform: scaleY(var(--avance, 1));
+      transform-origin: top center;
+      background-image: repeating-linear-gradient(
+        180deg,
+        transparent 0 44px,
+        rgba(255, 255, 255, 0.9) 44px 74px,
+        transparent 74px 120px
+      );
+      background-size: 100% 240px;
+      animation: correr-gas-abajo 2.1s linear infinite;
+    }
+
     .pista {
       position: static;
       flex-direction: column;
-      gap: 1rem;
-      padding: 0 1.25rem;
+      gap: 0;
+      padding: 0 1.15rem 0 3rem;
       transform: none !important;
     }
-    .parada { flex: none; padding-left: 1.1rem; padding-bottom: 0.2rem; border-left: 2px solid var(--color-borde); }
-    .abre-tramo { padding-left: 1.1rem; margin-top: 2rem; }
+    .parada {
+      --sangria: 0px;
+      flex: none;
+      padding: 0.95rem 0;
+      border-left: 0;
+    }
+    .abre-tramo { margin-top: 2.4rem; }
+
+    .nodo {
+      left: -1.45rem;
+      top: 1.9rem;
+      margin-top: 0;
+      margin-left: 0;
+      z-index: 3;
+    }
+
+    .pin { position: static; width: 100%; padding: 0; }
+    .pin-dato { margin-top: 0.15rem; }
+
+    /* En columna el popup no flota: se despliega abajo del pin y empuja. */
+    .popup {
+      position: static;
+      width: 100%;
+      height: 0;
+      margin-top: 0;
+      padding: 0;
+      border-width: 0;
+      overflow: hidden;
+      translate: 0 0;
+      scale: 1;
+      box-shadow: none;
+      transition: none;
+    }
+    .parada:hover .popup,
+    .parada:focus-within .popup { opacity: 0; visibility: hidden; }
+    .parada.abierta .popup {
+      opacity: 1;
+      visibility: visible;
+      height: auto;
+      margin-top: 0.85rem;
+      padding: 1rem 1.1rem;
+      border-width: 1px;
+    }
+
     .tramo {
       position: static;
       width: auto;
-      transform: none;
       padding-left: 0;
       margin-bottom: 1rem;
     }
     .valvula { display: none; }
     .tramo em { max-width: 34ch; }
-    .nodo { left: -1.5px; top: 1.4rem; margin: 0; }
-    .anio { position: static; display: block; margin-bottom: 0.35rem; }
-    .ficha { position: static; width: auto; }
+  }
+
+  @keyframes correr-gas-abajo {
+    from { background-position: 0 0; }
+    to { background-position: 0 240px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ficha, .ir { transition: none; }
+    .paquetes { animation: none; }
+    .pin, .nodo, .popup { transition: none; }
   }
 </style>
 
@@ -468,8 +613,8 @@ const estaciones = proyectos.map((p, i) => {
 
   /**
    * Cuenta una cifra hacia arriba respetando su formato: "12.000 km" cuenta el
-   * número y devuelve el resto tal cual, y "< 5 %" o "SPI / CPI" —que no tienen
-   * número que contar— se dejan quietas.
+   * número y devuelve el resto tal cual; "< 5 %" o "SPI / CPI" se dejan quietas
+   * porque no hay nada que contar.
    */
   function contar(el: HTMLElement) {
     const texto = (el.dataset.cifra ?? el.textContent ?? '').trim();
@@ -483,7 +628,6 @@ const estaciones = proyectos.map((p, i) => {
 
     const paso = (ahora: number) => {
       const p = Math.min((ahora - t0) / 900, 1);
-      // easeOutExpo: arranca rápido y frena, se siente mecánico
       const v = Math.round(destino * (p === 1 ? 1 : 1 - Math.pow(2, -10 * p)));
       el.textContent = antes + (separador ? v.toLocaleString('es-AR') : String(v)) + despues;
       if (p < 1) requestAnimationFrame(paso);
@@ -495,23 +639,39 @@ const estaciones = proyectos.map((p, i) => {
     const paradas = [...marco.querySelectorAll<HTMLElement>('.parada')].map((el) => ({
       el,
       nodo: el.querySelector<HTMLElement>('.nodo')!,
-      cifra: el.querySelector<HTMLElement>('.dato b'),
+      pin: el.querySelector<HTMLButtonElement>('.pin')!,
+      cifra: el.querySelector<HTMLElement>('.pin-dato b'),
       activa: false,
     }));
 
-    // Una estación se enciende cuando el gas la alcanza: cuando su nodo cruza
-    // el 62 % del ancho de pantalla. Ahí entra la ficha y la cifra cuenta.
-    const encender = (todo = false) => {
-      const umbral = window.innerWidth * 0.62;
+    // ── El popup: se abre al tocar el pin, y sólo uno a la vez ────────────
+    const cerrarTodos = (menos?: HTMLElement) => {
       for (const p of paradas) {
-        if (todo && !p.activa) {
-          p.activa = true;
-          p.el.classList.add('activa');
-          if (suave && p.cifra) contar(p.cifra);
-          continue;
-        }
+        if (p.el === menos) continue;
+        p.el.classList.remove('abierta');
+        p.pin.setAttribute('aria-expanded', 'false');
+      }
+    };
+    for (const p of paradas) {
+      p.pin.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const abre = !p.el.classList.contains('abierta');
+        cerrarTodos(p.el);
+        p.el.classList.toggle('abierta', abre);
+        p.pin.setAttribute('aria-expanded', String(abre));
+      });
+    }
+    document.addEventListener('click', () => cerrarTodos());
+    addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') cerrarTodos();
+    });
+
+    // ── El recorrido ──────────────────────────────────────────────────────
+    const encender = (todo = false) => {
+      const umbral = window.innerWidth * 0.68;
+      for (const p of paradas) {
         if (p.activa) continue;
-        if (p.nodo.getBoundingClientRect().left > umbral) continue;
+        if (!todo && p.nodo.getBoundingClientRect().left > umbral) continue;
         p.activa = true;
         p.el.classList.add('activa');
         if (suave && p.cifra) contar(p.cifra);
@@ -525,10 +685,8 @@ const estaciones = proyectos.map((p, i) => {
       pendiente = false;
       if (horizontal.matches) {
         const caja = marco.getBoundingClientRect();
-        // Lo que sobra del bloque por encima de la pantalla es el recorrido útil.
         const recorrido = caja.height - window.innerHeight;
         const avance = recorrido <= 0 ? 1 : Math.min(Math.max(-caja.top / recorrido, 0), 1);
-        // Cuánto tiene que correrse la pista para que su última ficha entre.
         const sobra = Math.max(pista.scrollWidth - window.innerWidth, 0);
         pista.style.transform = `translate3d(${(-sobra * avance).toFixed(1)}px,0,0)`;
         via.style.setProperty('--avance', avance.toFixed(4));
@@ -536,6 +694,15 @@ const estaciones = proyectos.map((p, i) => {
         return;
       }
       pista.style.transform = '';
+      // El caño vertical se llena con lo recorrido del bloque, igual que el
+      // horizontal. Sin esto quedaba en el fallback (1) y no se movía nunca.
+      // Misma cuenta que en horizontal: 0 cuando el bloque llega arriba de
+      // todo, 1 cuando su final toca el borde inferior. La primera version
+      // arrancaba al 69 % con la traza recien asomando.
+      const caja = marco.getBoundingClientRect();
+      const recorrido = caja.height - window.innerHeight;
+      const avance = recorrido <= 0 ? 1 : Math.min(Math.max(-caja.top / recorrido, 0), 1);
+      via.style.setProperty('--avance', avance.toFixed(4));
       encender();
     };
 
@@ -561,7 +728,7 @@ const estaciones = proyectos.map((p, i) => {
             obs.unobserve(e.target);
           }
         },
-        { rootMargin: '0px 0px -18% 0px' },
+        { rootMargin: '0px 0px -15% 0px' },
       );
       for (const p of paradas) obs.observe(p.el);
     }
