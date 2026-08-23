@@ -15,16 +15,18 @@ stack:
     'Fibre optics',
     'LNG',
   ]
-# PROVISIONAL FIGURES — replace once the records turn up:
-#   works: +35   ·   route: 320 km   ·   durations: 6 to 18 months
-# Order-of-magnitude estimates, not verified data.
+# Three invented figures used to live here —+35 projects, 320 km of route, 6 to
+# 18 month durations— parked as provisional until the records turned up. They
+# never did, so they are gone: an invented figure in a portfolio is not a
+# draft, it is a false claim for as long as it is published.
+# What is left is verifiable: the years come from the period, the four
+# disciplines are the ones the case itself names.
+# If the records ever do turn up, note that the project count and the route
+# kilometres are the employer's operational data, not mine.
 kpis:
-  - label: Projects
-    valor: '+35'
-    nota: 'tender to commissioning'
-  - label: Route worked
-    valor: '320 km'
-    nota: 'pipelines and branch lines'
+  - label: Years on site
+    valor: '7'
+    nota: '2016 — 2023, tender to commissioning'
   - label: Disciplines
     valor: '4'
     nota: 'mechanical, civil, electronic, environmental'
@@ -97,12 +99,11 @@ existing network is what will carry whatever comes next.
 
 ## Outcome
 
-Seven years, **more than 35 projects** taken from the tender package through to
-commissioning, and **320 km of route worked** across pipelines and branch lines.
-Individual projects ran **6 to 18 months** depending on the section and how many
-crossings it had.
+Seven years taking gas projects from the tender package through to
+commissioning, coordinating mechanical, civil, electronic and environmental
+work along the same route.
 
-What those numbers don't show is the part that took the most work: none of those
+And the part no number captures, which is the part that took the most work: none of those
 projects stalled on an argument between disciplines that the tender package
 should have settled.
 

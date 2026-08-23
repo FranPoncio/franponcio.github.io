@@ -15,19 +15,24 @@ stack:
     'Fibra óptica',
     'GNL',
   ]
-# CIFRAS PROVISORIAS — reemplazar cuando aparezca la documentación:
-#   obras: +35   ·   traza: 320 km   ·   plazos: 6 a 18 meses
-# Son estimaciones de orden de magnitud, no datos verificados.
+# Acá había tres cifras inventadas —+35 obras, 320 km de traza, 6 a 18 meses
+# de plazo— puestas como provisorias hasta encontrar la documentación. No
+# apareció, así que salen: una cifra inventada en un portfolio no es un
+# borrador, es una afirmación falsa mientras esté publicada.
+# Lo que quedó es todo verificable: los años salen del período, las cuatro
+# disciplinas son las que dice el propio caso.
+# Si algún día aparece la documentación, ojo igual: la cantidad de obras y los
+# kilómetros de traza son datos de operación del empleador, no míos.
 kpis:
-  - label: Obras
-    valor: '+35'
-    nota: 'de la licitación a la habilitación'
-  - label: Traza intervenida
-    valor: '320 km'
-    nota: 'gasoductos y ramales'
+  - label: Años de obra
+    valor: '7'
+    nota: '2016 — 2023, de la licitación a la habilitación'
   - label: Disciplinas
     valor: '4'
     nota: 'mecánica, civil, electrónica y ambiental'
+  - label: Alcance
+    valor: Obra pública
+    nota: 'gasoductos, ramales e instalaciones de superficie'
   - label: Alcance
     valor: 'A → Z'
     nota: 'el ciclo completo de la obra'
@@ -99,12 +104,12 @@ tradicional: la red existente es la que va a transportar lo que venga.
 
 ## Resultado
 
-Siete años, **más de 35 obras** llevadas de la carpeta de licitación a la
-habilitación, y **320 km de traza intervenida** entre gasoductos y ramales.
-Obras de **6 a 18 meses** según el tramo y la cantidad de cruces.
+Siete años llevando obra de gas de la carpeta de licitación a la habilitación,
+coordinando mecánica, civil, electrónica y ambiental sobre la misma traza.
 
-Lo que no se ve en esos números es lo que más costó: ninguna de esas obras se
-frenó por una discusión entre disciplinas que el pliego no hubiera previsto.
+Y lo que no entra en ningún número, que es lo que más costó: ninguna de esas
+obras se frenó por una discusión entre disciplinas que el pliego no hubiera
+previsto.
 
 ## Lo que me llevé
 

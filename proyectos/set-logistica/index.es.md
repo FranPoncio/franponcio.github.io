@@ -11,9 +11,12 @@ kpis:
   - label: Accidentes
     valor: '0'
     nota: 'dos años consecutivos'
-  - label: Reclamos
-    valor: '−40 %'
-    nota: 'interanual'
+  # El "−40 % interanual" era inventado y salio: era la cifra mas visible del
+  # caso y la unica sin respaldo. El "< 5 %" si es real —es el nivel de la
+  # operacion, dato propio— asi que ese queda y pasa a ser el KPI.
+  - label: Reclamos o scrap
+    valor: '< 5 %'
+    nota: 'nivel de la operacion'
   - label: Normas
     valor: '3'
     nota: 'calidad, ambiente y S&SO'
@@ -90,9 +93,9 @@ en la infraestructura de gas, arrancó acá, en 2013**.
 - **Cero accidentes durante dos años consecutivos.** En una operación de depósito
   —montacargas, altura, movimiento constante— eso no sale de un cartel: sale de
   que el procedimiento y la práctica coinciden.
-- **Reclamos de clientes reducidos un 40 % interanual**, sobre una operación que
-  ya despachaba con **menos del 5 % de pedidos con reclamo o scrap**. El 40 % es
-  cuánto bajó; el 5 % es dónde estaba parado.
+- **Los reclamos de clientes bajaron año contra año**, sobre una operación que
+  ya despachaba con **menos del 5 % de pedidos con reclamo o scrap**. Ese 5 % es
+  dónde estaba parada la operación; la mejora se midió contra esa base.
 - Certificación y recertificación de las tres normas superadas.
 
 ## Lo que me llevé
