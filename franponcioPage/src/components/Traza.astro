@@ -714,7 +714,7 @@ const estaciones = proyectos.map((p, i) => {
         bit: string | null; // si tiene, es un dígito; si no, es humo
       }
 
-      const MAX = 190;
+      const MAX = 420;
       const part: Part[] = [];
       let an = 0;
       let al = 0;
@@ -765,14 +765,21 @@ const estaciones = proyectos.map((p, i) => {
             : { x: s * an, y: al / 2 + desvio - subida };
 
         // Nacen sobre todo en el frente: ahí es donde está llegando el gas.
+        //
+        // El caudal es MUY superior al del boceto, y hay una razón: en el
+        // boceto el frente estaba quieto y las partículas se amontonaban en un
+        // punto hasta formar una nube. Acá el frente barre toda la traza
+        // mientras scrolleás, así que el humo se reparte a lo largo del
+        // recorrido y nunca se junta. Para que igual se lea como humo hay que
+        // emitir bastante más por frame.
         if (avanceActual > 0.004) {
-          for (let i = 0; i < 3; i++) nacer(avanceActual - Math.random() * 0.012, false);
+          for (let i = 0; i < 8; i++) nacer(avanceActual - Math.random() * 0.02, false);
           // El doble de dígitos: en esta paleta el humo pesa menos y son los
           // binarios los que hacen que se lea como flujo de datos.
           nacer(avanceActual - Math.random() * 0.02, true);
           if (Math.random() < 0.5) nacer(avanceActual - Math.random() * 0.03, true);
           // Y unas pocas repartidas atrás, para que el rastro no quede pelado.
-          if (Math.random() < 0.7) nacer(Math.random() * avanceActual, false);
+          for (let i = 0; i < 3; i++) nacer(Math.random() * avanceActual, false);
           if (Math.random() < 0.75) nacer(Math.random() * avanceActual, true);
         }
 
@@ -787,7 +794,7 @@ const estaciones = proyectos.map((p, i) => {
             continue;
           }
           q.desvio += q.deriva;
-          q.subida += q.bit ? 0.55 : 0.4;
+          q.subida += q.bit ? 0.8 : 0.72;
           q.r += q.crece;
 
           const p = q.vida / q.dura;
@@ -801,8 +808,8 @@ const estaciones = proyectos.map((p, i) => {
             ctx.fillText(q.bit, x, y);
           } else {
             const g = ctx.createRadialGradient(x, y, 0, x, y, q.r);
-            g.addColorStop(0, `rgba(96, 116, 132, ${(alfa * 0.26).toFixed(3)})`);
-            g.addColorStop(0.5, `rgba(96, 116, 132, ${(alfa * 0.12).toFixed(3)})`);
+            g.addColorStop(0, `rgba(96, 116, 132, ${(alfa * 0.34).toFixed(3)})`);
+            g.addColorStop(0.5, `rgba(96, 116, 132, ${(alfa * 0.16).toFixed(3)})`);
             g.addColorStop(1, 'rgba(96, 116, 132, 0)');
             ctx.fillStyle = g;
             ctx.beginPath();
