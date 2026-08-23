@@ -63,7 +63,6 @@ const estaciones = proyectos.map((p, i) => {
 <section class="marco" id="la-traza" style={`--paradas:${estaciones.length}`}>
   <div class="pega">
     <div class="via" aria-hidden="true"></div>
-    <canvas class="humo" aria-hidden="true"></canvas>
 
     <ol class="pista">
       {
@@ -160,14 +159,6 @@ const estaciones = proyectos.map((p, i) => {
     opacity: 0.75;
   }
 
-  .humo {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
 
   .pista {
     position: absolute;
@@ -550,7 +541,6 @@ const estaciones = proyectos.map((p, i) => {
 
   @media (prefers-reduced-motion: reduce) {
     .pin, .nodo, .popup { transition: none; }
-    .humo { display: none; }
   }
 </style>
 
@@ -690,140 +680,5 @@ const estaciones = proyectos.map((p, i) => {
 
     medir();
 
-    // ── EL HUMO ───────────────────────────────────────────────────────────
-    // Sale por donde el recorrido ya pasó y se deshace atrás. No es un tubo:
-    // son partículas grises que nacen en el frente, crecen, suben y se
-    // desvanecen, con dígitos binarios flotando entre ellas.
-    //
-    // Se guarda la posición de cada partícula en COORDENADA DE RECORRIDO
-    // (0 a 1 de la traza entera), no en píxeles de pantalla: así el humo queda
-    // anclado a su tramo y acompaña al scroll en vez de flotar suelto.
-    const lienzo = marco.querySelector<HTMLCanvasElement>('.humo');
-    const ctx = lienzo?.getContext('2d');
-
-    if (lienzo && ctx && suave) {
-      interface Part {
-        s: number;        // dónde nació sobre el recorrido, 0 a 1
-        desvio: number;   // cuánto se apartó de la línea
-        deriva: number;   // hacia dónde sigue apartándose
-        subida: number;
-        r: number;
-        crece: number;
-        vida: number;
-        dura: number;
-        bit: string | null; // si tiene, es un dígito; si no, es humo
-      }
-
-      const MAX = 420;
-      const part: Part[] = [];
-      let an = 0;
-      let al = 0;
-
-      const dimensionar = () => {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        an = lienzo.clientWidth;
-        al = lienzo.clientHeight;
-        lienzo.width = Math.round(an * dpr);
-        lienzo.height = Math.round(al * dpr);
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      };
-
-      const azar = (a: number, b: number) => a + Math.random() * (b - a);
-
-      const nacer = (s: number, esBit: boolean) => {
-        if (part.length >= MAX) part.shift();
-        part.push({
-          s,
-          desvio: azar(-6, 6),
-          deriva: azar(-0.32, 0.32),
-          subida: esBit ? azar(0.35, 0.75) : azar(0.18, 0.5),
-          r: esBit ? 0 : azar(9, 20),
-          crece: azar(0.16, 0.42),
-          vida: 0,
-          dura: esBit ? azar(150, 230) : azar(120, 210),
-          bit: esBit ? (Math.random() < 0.5 ? '0' : '1') : null,
-        });
-      };
-
-      const dibujarHumo = () => {
-        if (!an || !al) dimensionar();
-
-        // El avance se lee ACÁ, en el frame, y no en el evento de scroll: el
-        // otro bloque lo escribe dentro de un requestAnimationFrame, así que
-        // desde el listener siempre se leía el valor del frame anterior —o
-        // sea 0, y no nacía una sola partícula.
-        const avanceActual = parseFloat(via.style.getPropertyValue('--avance') || '0');
-        ctx.clearRect(0, 0, an, al);
-
-        const vertical = !horizontal.matches;
-        const caja = marco.getBoundingClientRect();
-
-        // De coordenada de recorrido a coordenada de pantalla.
-        const aPantalla = (s: number, desvio: number, subida: number) =>
-          vertical
-            ? { x: 23 + desvio + subida, y: caja.top + s * caja.height }
-            : { x: s * an, y: al / 2 + desvio - subida };
-
-        // Nacen sobre todo en el frente: ahí es donde está llegando el gas.
-        //
-        // El caudal es MUY superior al del boceto, y hay una razón: en el
-        // boceto el frente estaba quieto y las partículas se amontonaban en un
-        // punto hasta formar una nube. Acá el frente barre toda la traza
-        // mientras scrolleás, así que el humo se reparte a lo largo del
-        // recorrido y nunca se junta. Para que igual se lea como humo hay que
-        // emitir bastante más por frame.
-        if (avanceActual > 0.004) {
-          for (let i = 0; i < 8; i++) nacer(avanceActual - Math.random() * 0.02, false);
-          // El doble de dígitos: en esta paleta el humo pesa menos y son los
-          // binarios los que hacen que se lea como flujo de datos.
-          nacer(avanceActual - Math.random() * 0.02, true);
-          if (Math.random() < 0.5) nacer(avanceActual - Math.random() * 0.03, true);
-          // Y unas pocas repartidas atrás, para que el rastro no quede pelado.
-          for (let i = 0; i < 3; i++) nacer(Math.random() * avanceActual, false);
-          if (Math.random() < 0.75) nacer(Math.random() * avanceActual, true);
-        }
-
-        ctx.font = "600 12px 'Martian Mono', ui-monospace, monospace";
-        ctx.textAlign = 'center';
-
-        for (let i = part.length - 1; i >= 0; i--) {
-          const q = part[i];
-          q.vida += 1;
-          if (q.vida > q.dura) {
-            part.splice(i, 1);
-            continue;
-          }
-          q.desvio += q.deriva;
-          q.subida += q.bit ? 0.8 : 0.72;
-          q.r += q.crece;
-
-          const p = q.vida / q.dura;
-          // Entra rápido y se va lento: es como se disipa el humo.
-          const alfa = Math.sin(Math.pow(p, 0.65) * Math.PI);
-          const { x, y } = aPantalla(q.s, q.desvio, q.subida);
-          if (y < -80 || y > al + 80 || x < -80 || x > an + 80) continue;
-
-          if (q.bit) {
-            ctx.fillStyle = `rgba(40, 90, 125, ${(alfa * 0.68).toFixed(3)})`;
-            ctx.fillText(q.bit, x, y);
-          } else {
-            const g = ctx.createRadialGradient(x, y, 0, x, y, q.r);
-            g.addColorStop(0, `rgba(96, 116, 132, ${(alfa * 0.34).toFixed(3)})`);
-            g.addColorStop(0.5, `rgba(96, 116, 132, ${(alfa * 0.16).toFixed(3)})`);
-            g.addColorStop(1, 'rgba(96, 116, 132, 0)');
-            ctx.fillStyle = g;
-            ctx.beginPath();
-            ctx.arc(x, y, q.r, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-
-        requestAnimationFrame(dibujarHumo);
-      };
-
-      dimensionar();
-      addEventListener('resize', dimensionar, { passive: true });
-      requestAnimationFrame(dibujarHumo);
-    }
   }
 </script>
