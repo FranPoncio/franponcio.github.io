@@ -2,6 +2,7 @@
 titulo: Sistema de gestión trinorma — Set Logística SRL
 resumen: Implementación, certificación y recertificación de ISO 9001, 14001 y 45001 sobre una operación logística, con el ERP como columna vertebral del sistema.
 categoria: gestion
+tramo: laboral
 orden: 3
 periodo: 2013 — 2015
 rol: Project Manager · Business Analyst · Data Analyst

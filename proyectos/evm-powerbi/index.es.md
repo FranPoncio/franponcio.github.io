@@ -2,6 +2,7 @@
 titulo: Tablero EVM en Power BI
 resumen: Control de avance de obra por Earned Value Management sobre un gasoducto, con curva S, proyección de cierre y análisis de desvíos.
 categoria: datos
+tramo: proyecto
 orden: 2
 periodo: '2025'
 rol: Modelo de datos y diseño del tablero

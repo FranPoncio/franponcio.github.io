@@ -2,6 +2,7 @@
 titulo: PMI Toolbox
 resumen: App de control de proyectos con un motor completo de Earned Value Management — línea base congelada, Earned Schedule y auditoría de quién cargó cada corte.
 categoria: herramienta
+tramo: proyecto
 orden: 1
 periodo: 2025 — 2026
 rol: Diseño, desarrollo y pruebas

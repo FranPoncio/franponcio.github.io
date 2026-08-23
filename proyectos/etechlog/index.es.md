@@ -2,6 +2,7 @@
 titulo: Gestión de inventario y operación — E-Techlog SA
 resumen: Análisis integral de la operación de depósito con SAP y ERP — reducción de stock muerto, exactitud de inventario y gestión de seguridad y ambiente.
 categoria: datos
+tramo: laboral
 orden: 3
 periodo: 2015 — 2016
 rol: Business Analyst · Data Analyst · Project Manager
