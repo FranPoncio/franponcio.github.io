@@ -1,72 +1,69 @@
 ---
 /**
- * LA PLANTA — la escena del final de la página.
+ * LA PLANTA — el remate de la página.
  *
- * Una planta de gas de noche, en silueta, con el gas subiendo por las
- * chimeneas y los datos saliendo por una línea de producción que cruza el
- * pie de la pantalla. Es el remate del recorrido: arriba la traza cuenta
- * de dónde vengo, acá abajo queda la postal de qué es todo esto junto —
- * industria, gas y datos.
+ * El caño que baja por el medio de todo el sitio no se corta acá: sigue,
+ * dobla en un codo y entra a la planta. Los números que venías viendo flotar
+ * al costado de la traza terminan viajando por adentro del caño hasta ahí, y
+ * de la planta sale el gas. Ese es el cierre: todo lo de arriba desemboca en
+ * un solo lugar.
  *
- * Va en SVG y no en canvas, aunque el humo de la traza sí sea canvas. Acá no
- * hay cientos de partículas redibujándose: son treinta y pico de formas fijas
- * y un puñado de cosas que se mueven en línea recta. En SVG quedan nítidas a
- * cualquier resolución, se pintan con los tokens del sitio y las animaciones
- * las hace CSS sobre `transform` y `opacity`, o sea composición pura: ni un
- * `requestAnimationFrame` más en la página.
+ * Antes esto era una silueta de refinería entera —diez estructuras sueltas y
+ * una cinta de datos que pasaba de largo por el frente— y no decía nada: el
+ * caño de la página no llegaba a ninguna parte y la línea de producción no
+ * salía ni entraba a ningún lado. Una planta sola, con el caño entrando, se
+ * lee de una.
  *
- * Con `prefers-reduced-motion` no se apaga: se congela en una postal armada.
- * Cada cosa que se mueve tiene una posición de reposo distinta según su
- * índice, así que quieta se ve como una ilustración compuesta y no como el
- * primer cuadro de todo amontonado en el mismo lugar.
+ * Va en SVG y no en canvas: son treinta formas fijas y ocho cosas que se
+ * mueven en línea recta. Las animaciones son CSS sobre `transform` y
+ * `opacity`, o sea composición pura, sin un `requestAnimationFrame` más.
+ *
+ * Con `prefers-reduced-motion` no se apaga: se congela en una postal. Cada
+ * número tiene su posición de reposo calculada sobre el mismo recorrido, así
+ * que quietos quedan repartidos por el caño —algunos bajando, otros entrando—
+ * y no amontonados en el cuadro cero.
  */
 
 const azar = (semilla: number, a: number, b: number) => {
-  // Ruido determinista: el mismo dibujo en cada build, sin depender del reloj.
   const x = Math.sin(semilla * 12.9898) * 43758.5453;
   return a + (x - Math.floor(x)) * (b - a);
 };
 
-const estrellas = Array.from({ length: 46 }, (_, i) => ({
+const estrellas = Array.from({ length: 38 }, (_, i) => ({
   x: azar(i + 1, 0, 1600),
-  y: azar(i + 51, 8, 210),
+  y: azar(i + 51, 10, 230),
   r: azar(i + 101, 0.7, 1.9),
-  o: azar(i + 151, 0.22, 0.8),
+  o: azar(i + 151, 0.25, 0.8),
   i,
 }));
 
-/** Las chimeneas de las que sale gas: x, ancho, alto. */
-const chimeneas = [
-  { x: 352, w: 26, alto: 150 },
-  { x: 470, w: 20, alto: 116 },
-  { x: 1128, w: 30, alto: 168 },
-  // La torre de enfriamiento, que larga vapor por la boca.
-  { x: 112, w: 42, alto: 98 },
-];
+/* El recorrido del caño, en coordenadas del viewBox.
+   Baja por el centro (x = 800) hasta el codo y entra a la planta por la
+   izquierda. Estos tres números mandan sobre el dibujo Y sobre la animación:
+   si se mueve el codo, los números lo siguen solos. */
+const EJE_X = 800;
+const CODO_Y = 300;
+const ENTRADA_X = 1168;
 
-/** Las volutas: de qué chimenea sale cada una y con cuánto retardo. */
-const volutas = Array.from({ length: 12 }, (_, i) => {
-  const c = chimeneas[i % chimeneas.length];
-  return { x: c.x + c.w / 2 + azar(i + 201, -7, 7), y: 320 - c.alto, i };
+const BAJADA = CODO_Y + 40; // de cuánto más arriba de la pantalla vienen
+const TRAMO = ENTRADA_X - EJE_X - 24;
+/** Qué fracción del viaje se va bajando; el resto es el tramo horizontal. */
+const CORTE = 0.4;
+
+const CIFRAS = ['12.000', '413', '+35', '150', '500', '135', '46', '6.900'];
+const viajeros = CIFRAS.map((bit, i) => {
+  // Posición de reposo: la misma cuenta que hace la animación, pero congelada
+  // en el punto que le toca a cada uno. Es lo que usa el modo sin movimiento.
+  const t = i / CIFRAS.length;
+  const rx = t < CORTE ? 0 : ((t - CORTE) / (1 - CORTE)) * TRAMO;
+  const ry = t < CORTE ? -BAJADA * (1 - t / CORTE) : 0;
+  return { bit, i, rx: rx.toFixed(0), ry: ry.toFixed(0) };
 });
 
-/** Los paquetes de datos que salen por la línea de producción. */
-const CIFRAS = ['12.000', '413', '+35', '150', '500', '0', '135', '46', '6.900'];
-const paquetes = Array.from({ length: 9 }, (_, i) => ({
-  bit: CIFRAS[i % CIFRAS.length],
-  i,
-}));
-
-/** Números sueltos que suben desde la planta, como el humo de la traza. */
-/**
- * Los números que suben desde la planta. Van en los HUECOS entre estructuras
- * y no en cualquier x: repartidos al azar caían encima de las torres y se
- * leían como una etiqueta pegada al tanque en vez de algo que flota.
- */
-const HUECOS = [176, 528, 742, 942, 1182];
-const sueltos = HUECOS.map((x, i) => ({
-  x,
-  bit: CIFRAS[(i * 3) % CIFRAS.length],
+/* Doce volutas y no nueve: con el desenfoque puesto, menos de eso se ve como
+   manchitas sueltas en vez de una columna de gas. */
+const volutas = Array.from({ length: 12 }, (_, i) => ({
+  x: 1412 + azar(i + 201, -11, 11),
   i,
 }));
 ---
@@ -76,166 +73,155 @@ const sueltos = HUECOS.map((x, i) => ({
     <defs>
       <linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stop-color="#0f1110" />
-        <stop offset="0.62" stop-color="#151b19" />
+        <stop offset="0.6" stop-color="#151b19" />
         <stop offset="1" stop-color="#1d2624" />
       </linearGradient>
       <radialGradient id="luna">
-        <stop offset="0" stop-color="#dfdcd4" stop-opacity="0.30" />
-        <stop offset="0.45" stop-color="#dfdcd4" stop-opacity="0.09" />
+        <stop offset="0" stop-color="#dfdcd4" stop-opacity="0.28" />
+        <stop offset="0.45" stop-color="#dfdcd4" stop-opacity="0.08" />
         <stop offset="1" stop-color="#dfdcd4" stop-opacity="0" />
       </radialGradient>
-      {/* Mismo acero que el caño de la traza: el brillo cae al 38 %, no al
+      {/* El acero, en las dos orientaciones: el brillo cae al 38 %, no al
           medio, que es donde pega la luz en un cilindro. */}
-      <linearGradient id="tubo" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#101314" />
-        <stop offset="0.2" stop-color="#2b3133" />
-        <stop offset="0.38" stop-color="#596366" />
-        <stop offset="0.6" stop-color="#333a3b" />
-        <stop offset="1" stop-color="#0c0f10" />
+      <linearGradient id="acero-v" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#15191a" />
+        <stop offset="0.2" stop-color="#39413f" />
+        <stop offset="0.38" stop-color="#8b9699" />
+        <stop offset="0.62" stop-color="#525c56" />
+        <stop offset="1" stop-color="#101314" />
       </linearGradient>
-      {/* Sin difuminar, las volutas se ven como óvalos grises apilados. Un
-          desenfoque de verdad es lo que las convierte en gas. */}
-      <filter id="difuso" x="-70%" y="-70%" width="240%" height="240%">
-        <feGaussianBlur stdDeviation="11" />
-      </filter>
-      <linearGradient id="voluta" x1="0" y1="1" x2="0" y2="0">
-        <stop offset="0" stop-color="#c8cfd6" stop-opacity="0.42" />
-        <stop offset="1" stop-color="#c8cfd6" stop-opacity="0" />
+      <linearGradient id="acero-h" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#15191a" />
+        <stop offset="0.2" stop-color="#39413f" />
+        <stop offset="0.38" stop-color="#8b9699" />
+        <stop offset="0.62" stop-color="#525c56" />
+        <stop offset="1" stop-color="#101314" />
       </linearGradient>
+      {/* LA VOLUTA, con degradado radial y SIN filtro.
+          Antes el desenfoque iba como `filter` sobre el grupo entero, y ahí
+          estaba el error: la región del filtro se calcula sobre el bounding
+          box SIN transformar, así que las volutas —que las mueve una
+          animación CSS— se rasterizaban corridas y el gas aparecía lejos de
+          la chimenea, flotando en cualquier lado del cielo.
+          Un radial ya trae el borde suave adentro: sale igual de difuso, se
+          mueve donde tiene que moverse y no cuesta un filtro por frame. */}
+      <radialGradient id="voluta">
+        <stop offset="0" stop-color="#d4dae0" stop-opacity="0.5" />
+        <stop offset="0.45" stop-color="#d4dae0" stop-opacity="0.2" />
+        <stop offset="1" stop-color="#d4dae0" stop-opacity="0" />
+      </radialGradient>
     </defs>
 
     <rect width="1600" height="460" fill="url(#cielo)" />
 
-    {/* La luna, con su halo. */}
-    <circle cx="1315" cy="112" r="150" fill="url(#luna)" />
-    <circle cx="1315" cy="112" r="41" fill="#dfdcd4" opacity="0.82" />
-    <circle cx="1298" cy="100" r="7" fill="#0f1110" opacity="0.10" />
-    <circle cx="1330" cy="126" r="4.5" fill="#0f1110" opacity="0.08" />
+    <circle cx="286" cy="122" r="146" fill="url(#luna)" />
+    <circle cx="286" cy="122" r="40" fill="#dfdcd4" opacity="0.8" />
+    <circle cx="270" cy="110" r="6.5" fill="#0f1110" opacity="0.1" />
+    <circle cx="300" cy="136" r="4" fill="#0f1110" opacity="0.08" />
 
     <g class="estrellas">
-      {
-        estrellas.map((e) => (
-          <circle cx={e.x} cy={e.y} r={e.r} fill="#dfdcd4" opacity={e.o} style={`--i:${e.i}`} />
-        ))
-      }
+      {estrellas.map((e) => (
+        <circle cx={e.x} cy={e.y} r={e.r} fill="#dfdcd4" opacity={e.o} style={`--i:${e.i}`} />
+      ))}
     </g>
 
-    {/* Las sierras: primero lo lejano, más claro por la bruma. */}
+    {/* Las sierras */}
     <path
-      d="M0 322 L118 268 L212 300 L318 238 L430 292 L540 250 L648 300 L764 262 L880 306 L1000 258 L1128 300 L1252 254 L1380 296 L1500 262 L1600 300 L1600 460 L0 460 Z"
+      d="M0 348 L150 300 L290 336 L440 292 L600 340 L760 300 L920 344 L1080 302 L1240 340 L1400 300 L1600 342 L1600 460 L0 460 Z"
       fill="#1a211f"
     />
     <path
-      d="M0 344 L96 312 L206 340 L330 300 L452 338 L580 308 L700 342 L836 312 L960 344 L1090 310 L1220 342 L1350 314 L1478 344 L1600 320 L1600 460 L0 460 Z"
+      d="M0 372 L180 344 L340 370 L520 340 L700 372 L880 344 L1060 374 L1260 342 L1440 372 L1600 350 L1600 460 L0 460 Z"
       fill="#141a19"
     />
 
-    {/* ── LA PLANTA ──────────────────────────────────────────────────── */}
-    <g class="fabrica" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.5">
-      {/* Torres de destilación */}
-      <rect x="596" y="150" width="46" height="170" rx="3" />
-      <rect x="590" y="144" width="58" height="10" rx="2" />
-      <rect x="656" y="196" width="34" height="124" rx="3" />
-      <rect x="651" y="190" width="44" height="9" rx="2" />
-
-      {/* Esferas de almacenaje, sobre patas */}
-      <circle cx="812" cy="266" r="42" />
-      <path d="M786 298 L778 320 M838 298 L846 320 M812 308 L812 320" stroke-width="3" />
-      <circle cx="906" cy="280" r="29" />
-      <path d="M888 301 L882 320 M924 301 L930 320" stroke-width="2.6" />
-
-      {/* Tanques bajos */}
-      <rect x="960" y="256" width="96" height="64" rx="3" />
-      <rect x="240" y="248" width="80" height="72" rx="3" />
-
-      {/* Torre de enfriamiento: la silueta que le faltaba a la izquierda. */}
-      <path d="M96 320 L110 236 C110 222 146 222 146 236 L160 320 Z" />
-      <path d="M104 262 L152 262" stroke-width="2" opacity="0.5" />
-
-      {/* Y del lado derecho, un par de tanques más para que no quede pelado. */}
-      <rect x="1400" y="270" width="70" height="50" rx="3" />
-      <circle cx="1338" cy="292" r="22" />
-      <path d="M1324 309 L1319 320 M1352 309 L1357 320" stroke-width="2.4" />
-
-      {/* Chimeneas */}
-      {chimeneas.map((c) => (
-        <rect x={c.x} y={320 - c.alto} width={c.w} height={c.alto} rx="2" />
-      ))}
-
-      {/* Antorcha: el mechero siempre encendido */}
-      <rect x="1042" y="120" width="15" height="200" rx="2" />
-      <path d="M1035 120 L1064 120 L1058 108 L1041 108 Z" />
-
-      {/* Torre de celosía */}
-      <path d="M1216 320 L1240 168 L1264 320 M1223 278 L1257 278 M1229 240 L1251 240 M1234 204 L1246 204" stroke-width="2" fill="none" />
-
-      {/* Rack de cañerías: lo que une todo */}
-      <path d="M120 300 L1470 300 M120 312 L1470 312" stroke-width="2.5" opacity="0.5" fill="none" />
-      {Array.from({ length: 14 }, (_, i) => (
-        <path d={`M${140 + i * 100} 296 L${140 + i * 100} 320`} stroke-width="2" opacity="0.45" />
-      ))}
-    </g>
-
-    {/* Las luces de la planta */}
-    <g class="luces">
-      {[
-        [614, 196], [614, 236], [614, 276], [670, 232], [670, 272],
-        [268, 272], [296, 296], [988, 280], [1020, 300], [1240, 196],
-      ].map(([x, y], i) => (
-        <circle cx={x} cy={y} r="2.6" fill="#c08552" style={`--i:${i}`} />
-      ))}
-    </g>
-
-    {/* La llama de la antorcha */}
-    <g class="llama">
-      <path d="M1049 108 C1041 92 1055 84 1050 68 C1064 80 1068 96 1060 108 Z" fill="#c08552" opacity="0.92" />
-      <path d="M1050 106 C1046 96 1053 90 1051 80 C1058 89 1059 99 1055 106 Z" fill="#dfdcd4" opacity="0.55" />
-    </g>
-
-    {/* ── EL GAS ─────────────────────────────────────────────────────── */}
-    <g class="humo" filter="url(#difuso)">
-      {
-        volutas.map((v) => (
-          <ellipse
-            cx={v.x}
-            cy={v.y}
-            rx="17"
-            ry="21"
-            fill="url(#voluta)"
-            style={`--i:${v.i}`}
+    {/* ── LA PLANTA, una sola ────────────────────────────────────────── */}
+    <g class="fabrica">
+      {/* Nave con techo de diente de sierra */}
+      <rect x="1168" y="288" width="352" height="112" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.5" />
+      {[0, 1, 2, 3].map((i) => (
+        <g>
+          <path
+            d={`M${1168 + i * 88} 288 L${1168 + i * 88} 250 L${1168 + (i + 1) * 88} 288 Z`}
+            fill="#0b0e0d"
+            stroke="#3f4a45"
+            stroke-width="1.5"
           />
-        ))
-      }
-    </g>
-
-    {/* Números que suben desde la planta */}
-    <g class="sueltos">
-      {
-        sueltos.map((s) => (
-          <text x={s.x} y="300" style={`--i:${s.i}`}>{s.bit}</text>
-        ))
-      }
-    </g>
-
-    {/* ── LA LÍNEA DE PRODUCCIÓN ─────────────────────────────────────── */}
-    <g class="linea">
-      <rect x="0" y="392" width="1600" height="16" fill="url(#tubo)" />
-      {Array.from({ length: 11 }, (_, i) => (
-        <rect x={60 + i * 150} y="386" width="9" height="28" rx="1.5" fill="#69757a" />
+          {/* La cara vidriada del diente, que es por donde entra la luz. */}
+          <path
+            d={`M${1172 + i * 88} 285 L${1172 + i * 88} 256`}
+            stroke="#6fa39c"
+            stroke-width="3"
+            opacity="0.5"
+          />
+        </g>
       ))}
-      <rect x="0" y="408" width="1600" height="3" fill="#0b0e0d" opacity="0.7" />
+
+      {/* La chimenea */}
+      <rect x="1394" y="150" width="36" height="140" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.5" />
+      <rect x="1388" y="144" width="48" height="10" rx="2" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.5" />
+      <path d="M1394 186 L1430 186 M1394 224 L1430 224" stroke="#3f4a45" stroke-width="1.2" opacity="0.6" />
+
+      {/* Las ventanas encendidas */}
+      <g class="luces">
+        {[
+          [1198, 324], [1238, 324], [1278, 324], [1318, 324],
+          [1358, 324], [1398, 324], [1438, 324], [1478, 324],
+        ].map(([x, y], i) => (
+          <rect x={x} y={y} width="11" height="14" rx="1" fill="#c08552" opacity="0.8" style={`--i:${i}`} />
+        ))}
+      </g>
     </g>
 
-    {/* Los paquetes de datos, saliendo de la planta hacia la derecha */}
-    <g class="paquetes">
-      {
-        paquetes.map((p) => (
-          <g style={`--i:${p.i}`}>
-            <rect x="-26" y="368" width="52" height="22" rx="4" fill="#0f1110" stroke="#6fa39c" stroke-width="1.6" />
-            <text x="0" y="383">{p.bit}</text>
-          </g>
-        ))
-      }
+    {/* ── EL CAÑO: baja, dobla y entra ───────────────────────────────── */}
+    <g class="canio">
+      {/* Tramo vertical. Baja HASTA PASAR la esquina: el vertical y el
+          horizontal se solapan en el cuadrado del codo, así queda macizo.
+          El arco que tenía antes dejaba un escalón visible entre los dos. */}
+      <rect x={EJE_X - 7} y="0" width="14" height={CODO_Y + 22} fill="url(#acero-v)" />
+      {/* Tramo horizontal, desde el codo hasta la pared de la planta */}
+      <rect x={EJE_X - 7} y={CODO_Y + 8} width={ENTRADA_X - EJE_X + 7} height="14" fill="url(#acero-h)" />
+      {/* El redondeo exterior del codo, que es lo que lo hace parecer un codo
+          y no dos caños cruzados. */}
+      <path
+        d={`M${EJE_X - 7} ${CODO_Y + 8} A 15 15 0 0 1 ${EJE_X + 8} ${CODO_Y + 23} L${EJE_X - 7} ${CODO_Y + 23} Z`}
+        fill="#0f1110"
+      />
+
+      {/* Bridas del tramo horizontal */}
+      {[0, 1, 2].map((i) => (
+        <rect x={EJE_X + 78 + i * 100} y={CODO_Y - 4} width="9" height="24" rx="1.5" fill="#98a3a5" />
+      ))}
+
+      {/* Los caballetes que lo sostienen */}
+      {[0, 1].map((i) => {
+        const x = EJE_X + 120 + i * 170;
+        return (
+          <path
+            d={`M${x - 16} 400 L${x} ${CODO_Y + 16} L${x + 16} 400`}
+            fill="none"
+            stroke="#3f4a45"
+            stroke-width="2.5"
+          />
+        );
+      })}
+    </g>
+
+    {/* ── LOS NÚMEROS, viajando por el caño hasta la planta ──────────── */}
+    <g class="viajeros">
+      {viajeros.map((v) => (
+        <g style={`--i:${v.i}; --rx:${v.rx}px; --ry:${v.ry}px`}>
+          <rect x={EJE_X - 27} y={CODO_Y - 3} width="54" height="22" rx="4" fill="#0f1110" stroke="#6fa39c" stroke-width="1.6" />
+          <text x={EJE_X} y={CODO_Y + 12}>{v.bit}</text>
+        </g>
+      ))}
+    </g>
+
+    {/* ── EL GAS, saliendo de la chimenea ────────────────────────────── */}
+    <g class="humo">
+      {volutas.map((v) => (
+        <ellipse cx={v.x} cy="142" rx="26" ry="30" fill="url(#voluta)" style={`--i:${v.i}`} />
+      ))}
     </g>
   </svg>
 </section>
@@ -245,12 +231,11 @@ const sueltos = HUECOS.map((x, i) => ({
     position: relative;
     display: block;
     width: 100%;
-    height: clamp(240px, 30vw, 420px);
-    margin-top: 5rem;
+    height: clamp(250px, 31vw, 430px);
     overflow: hidden;
-    /* Se funde con la página por arriba: no hay borde donde empieza la escena. */
-    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 16%);
-    mask-image: linear-gradient(to bottom, transparent, #000 16%);
+    /* El caño de la página entra sin costura: arriba no hay borde. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 9%);
+    mask-image: linear-gradient(to bottom, transparent, #000 9%);
   }
   .planta svg {
     display: block;
@@ -258,107 +243,84 @@ const sueltos = HUECOS.map((x, i) => ({
     height: 100%;
   }
 
-  .sueltos text,
-  .paquetes text {
+  .viajeros text {
     font-family: var(--font-mono);
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 700;
     text-anchor: middle;
+    fill: var(--color-datos);
   }
-  .sueltos text { fill: var(--color-acento); }
-  .paquetes text { fill: var(--color-datos); font-size: 13px; }
 
-  /* ── Lo que se mueve ──────────────────────────────────────────────
-     Todo sobre `transform` y `opacity`: el navegador lo resuelve en el
-     compositor, sin recalcular ni repintar el resto de la escena. */
+  /* ── Lo que se mueve ───────────────────────────────────────────────
+     Todo sobre `transform` y `opacity`: lo resuelve el compositor. */
   .estrellas circle {
     animation: titilar 4.5s ease-in-out infinite;
-    animation-delay: calc(var(--i) * -0.31s);
+    animation-delay: calc(var(--i) * -0.29s);
   }
   @keyframes titilar {
-    0%, 100% { opacity: 0.22; }
+    0%, 100% { opacity: 0.25; }
     50% { opacity: 0.85; }
   }
 
-  .luces circle {
-    animation: parpadeo 3.4s ease-in-out infinite;
-    animation-delay: calc(var(--i) * -0.47s);
+  .luces rect {
+    animation: parpadeo 3.6s ease-in-out infinite;
+    animation-delay: calc(var(--i) * -0.44s);
   }
   @keyframes parpadeo {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.35; }
-  }
-
-  .llama {
-    transform-origin: 1052px 108px;
-    animation: arder 1.5s ease-in-out infinite;
-  }
-  @keyframes arder {
-    0%, 100% { transform: scaleY(1) scaleX(1); opacity: 0.95; }
-    35% { transform: scaleY(1.22) scaleX(0.9); opacity: 1; }
-    70% { transform: scaleY(0.88) scaleX(1.08); opacity: 0.8; }
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 0.4; }
   }
 
   .humo ellipse {
-    animation: subir 9s linear infinite;
-    animation-delay: calc(var(--i) * -0.75s);
+    /* SIN ESTO EL GAS SE DISPARA POR TODO EL CIELO.
+       En SVG, `transform-origin` no arranca en el centro del elemento sino en
+       el origen del lienzo. Con eso, un `scale(2.9)` no agranda la voluta en
+       el lugar: le multiplica la coordenada — cx 1412 se iba a 4095— y el
+       humo terminaba en cualquier lado menos sobre la chimenea.
+       `transform-box: fill-box` hace que el origen sea la caja del propio
+       elemento, y ahí `center` significa lo que uno espera. */
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: subir 8.5s linear infinite;
+    animation-delay: calc(var(--i) * -0.71s);
   }
   @keyframes subir {
-    from { transform: translateY(0) scale(0.5); opacity: 0; }
-    18% { opacity: 1; }
-    to { transform: translateY(-190px) scale(2.7); opacity: 0; }
+    from { transform: translateY(0) scale(0.4); opacity: 0; }
+    14% { opacity: 1; }
+    to { transform: translateY(-185px) scale(2.9); opacity: 0; }
   }
 
-  .sueltos text {
-    animation: flotar 11s linear infinite;
-    animation-delay: calc(var(--i) * -1.55s);
+  /* El viaje: primero baja por el caño, después dobla y entra a la planta.
+     Dos tramos en una sola animación — el quiebre del 40 % es el codo. */
+  .viajeros > g {
+    animation: viajar 9s linear infinite;
+    animation-delay: calc(var(--i) * -1.125s);
   }
-  @keyframes flotar {
-    from { transform: translateY(0); opacity: 0; }
-    15% { opacity: 0.9; }
-    75% { opacity: 0.55; }
-    to { transform: translateY(-215px); opacity: 0; }
-  }
-
-  /* La línea de producción: los paquetes salen de la planta y se van. */
-  .paquetes > g {
-    animation: producir 13s linear infinite;
-    animation-delay: calc(var(--i) * -1.44s);
-  }
-  /* Arrancan afuera por la izquierda y salen por la derecha: la línea cruza
-     el frente entero. Antes salían del medio —de la planta— y la mitad
-     izquierda del caño quedaba siempre vacía. */
-  @keyframes producir {
-    from { transform: translateX(-60px); opacity: 0; }
-    7% { opacity: 1; }
-    93% { opacity: 1; }
-    to { transform: translateX(1690px); opacity: 0; }
+  @keyframes viajar {
+    0% { transform: translate(0, -340px); opacity: 0; }
+    8% { opacity: 1; }
+    40% { transform: translate(0, 0); }
+    94% { opacity: 1; }
+    100% { transform: translate(344px, 0); opacity: 0; }
   }
 
-  /* ── Quieta ───────────────────────────────────────────────────────
-     No se apaga: se congela en una postal. Cada elemento tiene su propia
-     posición de reposo según el índice, así que la escena queda compuesta
-     —el humo repartido a distintas alturas, los paquetes a lo largo de toda
-     la línea— y no todo amontonado en el cuadro cero. */
+  /* ── Quieta ────────────────────────────────────────────────────────
+     No se apaga: se congela. Cada número queda en el punto del recorrido
+     que le toca —unos bajando, otros ya entrando—, así que la escena se ve
+     compuesta y no todo amontonado en el arranque. */
   @media (prefers-reduced-motion: reduce) {
     .estrellas circle,
-    .luces circle,
-    .llama,
+    .luces rect,
     .humo ellipse,
-    .sueltos text,
-    .paquetes > g {
+    .viajeros > g {
       animation: none;
     }
     .humo ellipse {
-      transform: translateY(calc(var(--i) * -15px)) scale(calc(0.7 + var(--i) * 0.16));
-      opacity: calc(0.85 - var(--i) * 0.06);
+      transform: translateY(calc(var(--i) * -17px)) scale(calc(0.6 + var(--i) * 0.2));
+      opacity: calc(0.9 - var(--i) * 0.08);
     }
-    .sueltos text {
-      transform: translateY(calc(var(--i) * -27px));
-      opacity: calc(0.85 - var(--i) * 0.07);
-    }
-    .paquetes > g {
-      transform: translateX(calc(30px + var(--i) * 178px));
+    .viajeros > g {
+      transform: translate(var(--rx), var(--ry));
     }
   }
 </style>
