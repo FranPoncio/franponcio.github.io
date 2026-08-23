@@ -13,6 +13,13 @@
  * Va en un canvas y no en SVG porque son cientos de elementos redibujados por
  * frame: en el DOM eso es inviable, en canvas es un solo elemento.
  *
+ * Acá vive TAMBIÉN el humo de la traza. Antes tenía su propio canvas adentro
+ * del panel `sticky` de la traza, que además lleva `overflow: hidden`: un
+ * `position: fixed` metido ahí adentro es de los casos que Safari de iPhone
+ * resuelve mal, y era la explicación más probable de que el humo se viera en
+ * mis pruebas y no en un teléfono. Acá el canvas cuelga del <body>, sin ningún
+ * ancestro que le pueda cambiar el bloque contenedor.
+ *
  * Es DECORATIVO: aria-hidden, sin eventos de puntero, y con
  * prefers-reduced-motion no se dibuja nada.
  */
@@ -35,12 +42,6 @@
 
   /* En una pantalla angosta no hay margen: los dígitos caen justo encima de la
      columna de lectura. Ahí el fondo baja — la legibilidad gana siempre. */
-  @media (max-width: 900px) {
-    /* El fondo baja fuerte. En el celular la animacion la lleva el caño —que
-       es un elemento propio, no el canvas— y el fondo sólo acompaña. Ponerlo
-       más arriba obliga a meter velos detrás del texto, y esos velos terminan
-       pareciendo las tarjetas que justamente sobran. */
-    #fondo { opacity: 0.28; }
   }
 </style>
 
@@ -73,9 +74,22 @@
 
     interface Pluma { x: number; y: number; r: number; vy: number; vida: number; }
     interface Columna { x: number; y: number; v: number; bits: string[]; paso: number; }
+    /** El humo de la traza. `s` es la posición sobre el recorrido, 0 a 1. */
+    interface Humo {
+      s: number;
+      desvio: number;
+      deriva: number;
+      subida: number;
+      r: number;
+      crece: number;
+      vida: number;
+      dura: number;
+      bit: string | null;
+    }
 
     let plumas: Pluma[] = [];
     let columnas: Columna[] = [];
+    const humo: Humo[] = [];
 
     const azar = (a: number, b: number) => a + Math.random() * (b - a);
 
@@ -170,6 +184,10 @@
       // ── Unos y ceros ────────────────────────────────────────────────────
       cx.font = "500 14px 'Martian Mono', ui-monospace, monospace";
       cx.textAlign = 'center';
+      // En pantalla angosta los dígitos caen sobre la columna de lectura: ahí
+      // van mucho más apagados. Antes se resolvía bajándole la opacidad al
+      // canvas entero, pero ahora ese canvas también lleva el humo.
+      const tenues = an < 900 ? 0.32 : 1;
       for (const c of columnas) {
         c.y += c.v + empuje * 0.85;
         const largo = c.bits.length * c.paso;
@@ -185,13 +203,95 @@
         }
         for (let i = 0; i < c.bits.length; i++) {
           // La cabeza de la columna es la más marcada y se apaga hacia atrás.
-          const alfa = (1 - i / c.bits.length) * 0.3;
+          const alfa = (1 - i / c.bits.length) * 0.3 * tenues;
           cx.fillStyle = rgba(i === 0 ? acento : tinta, alfa);
           cx.fillText(c.bits[i], c.x, c.y - i * c.paso);
         }
       }
 
+      dibujarHumo();
       requestAnimationFrame(pintar);
+    }
+
+    // ── EL HUMO DE LA TRAZA ─────────────────────────────────────────────
+    // Sale por donde el recorrido ya pasó y se deshace atrás, con dígitos
+    // binarios flotando entre las volutas. Cada partícula guarda su posición
+    // en coordenada de recorrido (0 a 1 de la traza entera) y no en píxeles:
+    // así queda anclada a su tramo y acompaña al scroll.
+    const MAX_HUMO = 420;
+
+    function nacerHumo(s: number, esBit: boolean) {
+      if (humo.length >= MAX_HUMO) humo.shift();
+      humo.push({
+        s,
+        desvio: azar(-9, 9),
+        deriva: azar(-0.4, 0.4),
+        subida: esBit ? azar(0.35, 0.75) : azar(0, 6),
+        r: esBit ? 0 : azar(18, 40),
+        crece: azar(0.5, 1.1),
+        vida: 0,
+        dura: esBit ? azar(170, 260) : azar(170, 280),
+        bit: esBit ? (Math.random() < 0.5 ? '0' : '1') : null,
+      });
+    }
+
+    function dibujarHumo() {
+      const marco = document.querySelector<HTMLElement>('#la-traza');
+      const via = marco?.querySelector<HTMLElement>('.via');
+      if (!marco || !via) return;
+
+      const caja = marco.getBoundingClientRect();
+      // Fuera de pantalla no se dibuja ni se emite: no tiene sentido gastar
+      // frames en humo que nadie ve.
+      const aLaVista = caja.bottom > -200 && caja.top < al + 200;
+      const avance = parseFloat(via.style.getPropertyValue('--avance') || '0');
+      const vertical = !matchMedia('(min-width: 901px)').matches;
+
+      if (aLaVista && avance > 0.004) {
+        for (let i = 0; i < 8; i++) nacerHumo(avance - Math.random() * 0.02, false);
+        nacerHumo(avance - Math.random() * 0.02, true);
+        if (Math.random() < 0.5) nacerHumo(avance - Math.random() * 0.03, true);
+        for (let i = 0; i < 3; i++) nacerHumo(Math.random() * avance, false);
+        if (Math.random() < 0.75) nacerHumo(Math.random() * avance, true);
+      }
+
+      cx.font = "600 12px 'Martian Mono', ui-monospace, monospace";
+      cx.textAlign = 'center';
+
+      for (let i = humo.length - 1; i >= 0; i--) {
+        const q = humo[i];
+        q.vida += 1;
+        if (q.vida > q.dura) {
+          humo.splice(i, 1);
+          continue;
+        }
+        if (!aLaVista) continue;
+
+        q.desvio += q.deriva;
+        q.subida += q.bit ? 0.8 : 0.72;
+        q.r += q.crece;
+
+        const p = q.vida / q.dura;
+        // Entra rápido y se va lento: es como se disipa el humo.
+        const alfa = Math.sin(Math.pow(p, 0.65) * Math.PI);
+        const x = vertical ? 23 + q.desvio + q.subida : q.s * an;
+        const y = vertical ? caja.top + q.s * caja.height : caja.top + caja.height / 2 + q.desvio - q.subida;
+        if (y < -120 || y > al + 120 || x < -120 || x > an + 120) continue;
+
+        if (q.bit) {
+          cx.fillStyle = `rgba(40, 90, 125, ${(alfa * 0.68).toFixed(3)})`;
+          cx.fillText(q.bit, x, y);
+        } else {
+          const g = cx.createRadialGradient(x, y, 0, x, y, q.r);
+          g.addColorStop(0, `rgba(96, 116, 132, ${(alfa * 0.34).toFixed(3)})`);
+          g.addColorStop(0.5, `rgba(96, 116, 132, ${(alfa * 0.16).toFixed(3)})`);
+          g.addColorStop(1, 'rgba(96, 116, 132, 0)');
+          cx.fillStyle = g;
+          cx.beginPath();
+          cx.arc(x, y, q.r, 0, Math.PI * 2);
+          cx.fill();
+        }
+      }
     }
 
     armar();
