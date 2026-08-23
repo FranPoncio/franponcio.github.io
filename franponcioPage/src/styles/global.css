@@ -56,6 +56,30 @@
   --font-mono: 'Roboto Variable', system-ui, ui-sans-serif, sans-serif;
 }
 
+/* ── EL ACERO ─────────────────────────────────────────────────────────────
+   El caño es de acero, y el acero es GRIS. Estuvo un rato en bronce y no
+   corresponde: un gasoducto es tubo de acero al carbono.
+
+   Los siete cortes son lo que da el volumen. Con dos el caño se ve plano,
+   como una cinta de color. El brillo especular NO va al medio: en un cilindro
+   iluminado desde arriba a la izquierda cae alrededor del 40 %, y ponerlo
+   centrado es lo que hace que un tubo dibujado parezca falso.
+   Se define una sola vez acá porque lo usan la traza, las bandas y el hero. */
+:root {
+  --acero: linear-gradient(
+    to right,
+    #1b1f20 0%,
+    #394143 12%,
+    #6e797c 30%,
+    #aab5b8 40%,
+    #7b8688 55%,
+    #454d4f 74%,
+    #272d2e 88%,
+    #15191a 100%
+  );
+  --acero-claro: #98a3a5;
+}
+
 html {
   scroll-behavior: smooth;
   color-scheme: dark;
