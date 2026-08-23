@@ -2,6 +2,7 @@
 titulo: Este portfolio
 resumen: El sitio que estás leyendo — Astro con el contenido afuera del código, para que agregar un caso sea crear una carpeta con un archivo de texto adentro.
 categoria: herramienta
+tramo: proyecto
 orden: 3
 periodo: '2026'
 rol: Diseño, desarrollo y contenido

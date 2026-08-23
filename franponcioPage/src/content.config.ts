@@ -21,6 +21,14 @@ const camposProyecto = ({ image }: { image: () => any }) =>
     /** Una línea. Es lo que se lee en la tarjeta del home. */
     resumen: z.string(),
     categoria: z.enum(['datos', 'gestion', 'herramienta']),
+    /**
+     * En qué tramo de la traza cae. Es un eje distinto al de `categoria`:
+     *   laboral  — trabajo pago, con empleador y responsabilidad formal
+     *   proyecto — software que escribí por mi cuenta
+     * La distinción importa: mezclarlos haría pasar un proyecto propio por
+     * experiencia laboral.
+     */
+    tramo: z.enum(['laboral', 'proyecto']).default('proyecto'),
     /** Menor = aparece antes dentro de su categoría. */
     orden: z.number().default(99),
     periodo: z.string(),

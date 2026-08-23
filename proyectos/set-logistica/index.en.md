@@ -2,6 +2,7 @@
 titulo: Tri-standard management system — Set Logística SRL
 resumen: Implementation, certification and recertification of ISO 9001, 14001 and 45001 across a logistics operation, with the ERP as the backbone of the system.
 categoria: gestion
+tramo: laboral
 orden: 3
 periodo: 2013 — 2015
 rol: Project Manager · Business Analyst · Data Analyst

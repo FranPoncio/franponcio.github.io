@@ -2,6 +2,7 @@
 titulo: Rutas Argentinas
 resumen: Planificador de viajes a 413 puntos turísticos del país — rutea por seis medios de transporte y cruza feeds GTFS oficiales para mostrar las líneas reales que pasan cerca de cada lugar.
 categoria: herramienta
+tramo: proyecto
 orden: 2
 periodo: 2025 — 2026
 rol: Diseño, datos y desarrollo

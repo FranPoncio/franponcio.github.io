@@ -2,6 +2,7 @@
 titulo: End-to-end works management — gas pipelines
 resumen: 'From the tender package to commissioning: project definition, contracting, and site supervision across mechanical, civil, electronic and environmental disciplines.'
 categoria: gestion
+tramo: laboral
 orden: 2
 periodo: 2016 — 2023
 rol: Project Manager · Business Analyst

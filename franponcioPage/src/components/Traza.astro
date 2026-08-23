@@ -27,11 +27,30 @@ const { proyectos, lang } = Astro.props;
 const t = usarTraduccion(lang);
 const base = lang === 'es' ? 'proyectos' : 'en/projects';
 
-const estaciones = proyectos.map((p, i) => ({
-  p,
-  arriba: i % 2 === 0,
-  marcas: logosDelStack(p.data.stack, 3),
-}));
+// La traza va partida en dos tramos. La primera parada de cada uno arrastra
+// un rótulo: una válvula sobre el caño con el nombre del tramo y sus años.
+const anio = (periodo: string) => periodo.match(/\d{4}/)?.[0] ?? '';
+const rango = (tramo: 'laboral' | 'proyecto') => {
+  const del = proyectos.filter((p) => p.data.tramo === tramo);
+  const anios = del.flatMap((p) => p.data.periodo.match(/\d{4}/g) ?? []);
+  return anios.length ? `${anio(del[0].data.periodo)} — ${anios.sort().at(-1)}` : '';
+};
+
+let previo: string | null = null;
+const estaciones = proyectos.map((p, i) => {
+  const abre = p.data.tramo !== previo ? p.data.tramo : null;
+  previo = p.data.tramo;
+  return {
+    p,
+    arriba: i % 2 === 0,
+    marcas: logosDelStack(p.data.stack, 3),
+    rotulo: abre && {
+      titulo: abre === 'laboral' ? t('tramo.laboral') : t('tramo.proyecto'),
+      bajada: abre === 'laboral' ? t('tramo.laboral.bajada') : t('tramo.proyecto.bajada'),
+      anios: rango(abre),
+    },
+  };
+});
 ---
 
 <section class="marco" id="traza" style={`--paradas:${estaciones.length}`}>
@@ -40,8 +59,19 @@ const estaciones = proyectos.map((p, i) => ({
 
     <ol class="pista">
       {
-        estaciones.map(({ p, arriba, marcas }) => (
-          <li class:list={['parada', arriba ? 'arriba' : 'abajo']} style={`--c: var(--color-${p.data.categoria})`}>
+        estaciones.map(({ p, arriba, marcas, rotulo }) => (
+          <li
+            class:list={['parada', arriba ? 'arriba' : 'abajo', rotulo && 'abre-tramo']}
+            style={`--c: var(--color-${p.data.categoria})`}
+          >
+            {rotulo && (
+              <span class="tramo">
+                <span class="valvula" aria-hidden="true" />
+                <b>{rotulo.titulo}</b>
+                <i>{rotulo.anios}</i>
+                <em>{rotulo.bajada}</em>
+              </span>
+            )}
             <span class="nodo" aria-hidden="true" />
             <span class="anio">{p.data.periodo}</span>
 
@@ -139,12 +169,63 @@ const estaciones = proyectos.map((p, i) => ({
 
   .parada {
     position: relative;
-    flex: 0 0 clamp(300px, 25vw, 350px);
+    --sangria: 0px;
+    flex: 0 0 calc(clamp(300px, 25vw, 350px) + var(--sangria));
+  }
+  /* La parada que abre un tramo se corre entera —nodo, año y ficha— para
+     dejarle lugar al rótulo. */
+  .abre-tramo { --sangria: clamp(190px, 15vw, 230px); }
+
+  /* El rótulo del tramo: una válvula sobre el caño y el nombre al lado. */
+  .tramo {
+    position: absolute;
+    left: 0;
+    bottom: calc(50% + 26px);
+    width: calc(var(--sangria) - 1.5rem);
+    padding-left: 1.1rem;
+  }
+  .valvula {
+    position: absolute;
+    left: 0;
+    bottom: -32px;
+    width: 11px;
+    height: 26px;
+    margin-left: -5.5px;
+    border-radius: 3px;
+    border: 2px solid var(--color-acento);
+    background: var(--color-fondo);
+    box-shadow: 0 0 0 4px var(--color-fondo);
+  }
+  .tramo b {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-acento);
+  }
+  .tramo i {
+    display: block;
+    margin-top: 0.2rem;
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-size: 0.58rem;
+    letter-spacing: -0.03em;
+    color: var(--color-tenue);
+  }
+  .tramo em {
+    display: block;
+    margin-top: 0.5rem;
+    font-style: normal;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    color: var(--color-tenue);
   }
 
   .nodo {
     position: absolute;
-    left: 0;
+    left: var(--sangria);
     top: 50%;
     z-index: 2;
     width: 17px;
@@ -159,7 +240,7 @@ const estaciones = proyectos.map((p, i) => ({
 
   .anio {
     position: absolute;
-    left: 20px;
+    left: calc(var(--sangria) + 20px);
     font-family: var(--font-mono);
     font-size: 0.62rem;
     font-weight: 500;
@@ -172,7 +253,7 @@ const estaciones = proyectos.map((p, i) => ({
   .ficha {
     display: block;
     position: absolute;
-    left: 0;
+    left: var(--sangria);
     width: clamp(272px, 22vw, 300px);
     padding: 1.1rem 1.2rem;
     border: 1px solid var(--color-borde);
@@ -282,6 +363,16 @@ const estaciones = proyectos.map((p, i) => ({
       transform: none !important;
     }
     .parada { flex: none; padding-left: 1.1rem; padding-bottom: 0.2rem; border-left: 2px solid var(--color-borde); }
+    .abre-tramo { padding-left: 1.1rem; margin-top: 2rem; }
+    .tramo {
+      position: static;
+      width: auto;
+      transform: none;
+      padding-left: 0;
+      margin-bottom: 1rem;
+    }
+    .valvula { display: none; }
+    .tramo em { max-width: 34ch; }
     .nodo { left: -1.5px; top: 1.4rem; margin: 0; }
     .anio { position: static; display: block; margin-bottom: 0.35rem; }
     .ficha { position: static; width: auto; }

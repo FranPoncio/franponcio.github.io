@@ -2,6 +2,7 @@
 titulo: Gestión integral de obra — gasoductos
 resumen: 'De la carpeta de licitación a la habilitación: armado del proyecto, contratación e inspección de obra en mecánica, civil, electrónica y ambiental.'
 categoria: gestion
+tramo: laboral
 orden: 2
 periodo: 2016 — 2023
 rol: Project Manager · Business Analyst

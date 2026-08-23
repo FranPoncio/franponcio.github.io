@@ -2,6 +2,7 @@
 titulo: Políticas de inventario sobre ERP y CRM
 resumen: Lo próximo que voy a construir — una capa de políticas de inventario sobre los datos del ERP y el CRM, para que las reglas de stock vivan escritas y no en la cabeza de alguien.
 categoria: herramienta
+tramo: proyecto
 orden: 4
 periodo: 2026 —
 rol: Diseño y desarrollo

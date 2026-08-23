@@ -2,6 +2,7 @@
 titulo: Bitácora Interior
 resumen: Progressive web app para escritura diaria — dictado por voz, entradas estructuradas y visualización de los propios datos a lo largo del tiempo.
 categoria: herramienta
+tramo: proyecto
 orden: 7
 periodo: 2025 — 2026
 rol: Diseño y desarrollo

@@ -2,6 +2,7 @@
 titulo: Inventory and operations management — E-Techlog SA
 resumen: End-to-end analysis of a warehouse operation using SAP and ERP — dead stock reduction, inventory accuracy, and safety and environmental management.
 categoria: datos
+tramo: laboral
 orden: 3
 periodo: 2015 — 2016
 rol: Business Analyst · Data Analyst · Project Manager

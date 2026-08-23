@@ -39,6 +39,10 @@ export const ui = {
     'formacion.insignia': 'insignia generada — no es un certificado',
     'formacion.proximo': 'Lo que viene',
     'nav.traza': 'La traza',
+    'tramo.laboral': 'Experiencia laboral',
+    'tramo.laboral.bajada': 'Diez años de trabajo pago: logística, sistemas de gestión e infraestructura de gas.',
+    'tramo.proyecto': 'Proyectos',
+    'tramo.proyecto.bajada': 'Software que escribí por mi cuenta, casi siempre para resolver algo que me faltaba en el trabajo.',
     'traza.pie': '↔ La traza se recorre de costado — 2013 → 2026',
     'herramientas.titulo': 'Stack',
     'herramientas.bajada':
@@ -90,6 +94,10 @@ export const ui = {
     'formacion.insignia': 'generated badge — not a certificate',
     'formacion.proximo': 'Coming up',
     'nav.traza': 'The route',
+    'tramo.laboral': 'Work experience',
+    'tramo.laboral.bajada': 'Ten years of paid work: logistics, management systems and gas infrastructure.',
+    'tramo.proyecto': 'Projects',
+    'tramo.proyecto.bajada': 'Software I built on my own, almost always to solve something the job was missing.',
     'traza.pie': '↔ The route runs sideways — 2013 → 2026',
     'herramientas.titulo': 'Stack',
     'herramientas.bajada':
