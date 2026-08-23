@@ -36,21 +36,10 @@ const otro = lang === 'es' ? 'en' : 'es';
     <Fondo />
     <slot />
 
-    <footer class="border-t border-borde mt-24">
-      <div
-        class="mx-auto max-w-5xl px-6 py-10 flex flex-wrap gap-4 items-center justify-between text-sm text-tenue"
-      >
-        <p class="font-mono">Francisco Poncio · Córdoba, Argentina · {anio}</p>
-        <nav class="flex gap-5">
-          <a class="hover:text-acento transition-colors" href="https://github.com/FranPoncio">
-            GitHub
-          </a>
-          <a class="hover:text-acento transition-colors" href="mailto:franponcioo@gmail.com">
-            Email
-          </a>
-        </nav>
-      </div>
-    </footer>
+    {/* Sin pie de página. Lo único que tenía —el nombre, la ciudad, el año y
+        los links a GitHub y mail— o ya está en la barra, que es pegajosa y te
+        sigue por toda la página, o no aportaba nada. Un pie que repite el
+        encabezado es un pie que sobra. */}
     <script>
       // Todo lo de acá es decorativo: si el script no corre, la página se ve
       // igual, sólo que sin las transiciones. Por eso la clase `js-on` se
