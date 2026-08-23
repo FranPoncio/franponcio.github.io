@@ -1,75 +1,92 @@
 ---
 titulo: PMI Toolbox
-resumen: App de control de proyectos con un motor completo de Earned Value Management — línea base congelada, earned schedule, WBS jerárquica y log de auditoría.
+resumen: App de control de proyectos con un motor completo de Earned Value Management — línea base congelada, Earned Schedule y auditoría de quién cargó cada corte.
 categoria: herramienta
-orden: 5
+orden: 1
 periodo: 2025 — 2026
-rol: Diseño y desarrollo
-stack: ['React', 'TypeScript', 'Dexie', 'Vitest', 'Tailwind']
+rol: Diseño, desarrollo y pruebas
+stack: ['React', 'TypeScript', 'Zustand', 'Dexie', 'Vitest', 'Tailwind']
 kpis:
   - label: Motor
-    valor: EVM
-    nota: 'SPI, CPI, EAC, ETC, VAC, TCPI'
-  - label: Tests
-    valor: Vitest
-    nota: 'suite sobre el core'
-  - label: Persistencia
-    valor: IndexedDB
-    nota: 'todo local, sin backend'
+    valor: EVM + ES
+    nota: 'PV, EV, AC, SPI, CPI, tres EAC, TCPI'
+  - label: Pruebas
+    valor: '135'
+    nota: 'casos, sobre 15 archivos'
+  - label: Código
+    valor: '6.900'
+    nota: 'líneas de TypeScript'
+  - label: Backend
+    valor: '0'
+    nota: 'todo en el navegador (IndexedDB)'
 enlace:
   label: Abrir la app
   url: https://franponcio.github.io/PMI-Toolbox/
-borrador: true
 ---
 
-> **Texto de relleno.** Acá va el **caso de estudio**, no el código: la app vive
-> en [su propio repo](https://github.com/FranPoncio/PMI-Toolbox). Ver la nota
-> del final.
+## Por qué existe
 
-## El problema
+Reporté avance de obra durante siete años. La herramienta que se usa casi
+siempre es una planilla, y la planilla tiene un problema estructural: **cuando
+alguien edita el plan, la línea base se mueve con él.** Al mes siguiente el
+proyecto "cumple", porque el plan contra el que se lo mide es otro.
 
-Las herramientas de control de proyectos que había a mano se dividían en dos
-grupos: las que hacían EVM de verdad y costaban una licencia por usuario, y las
-gratuitas que llamaban "avance" al porcentaje que uno escribía a mano.
+PMI Toolbox es la herramienta que me hubiera servido: un motor de Earned Value
+Management sobre una **línea base que no se puede tocar sin dejar rastro**.
 
-Ninguna servía para lo que necesitaba: cargar una obra, congelar una línea base
-y ver cómo se despega la ejecución del plan, sin subir datos de proyecto a un
-servidor ajeno.
+## Las decisiones que la definen
 
-## Las decisiones que importan
+### La línea base se congela
 
-- **El core no sabe que existe React.** Toda la lógica de EVM vive en
-  `src/core/` como funciones puras. Se testea sola, corre en milisegundos y no
-  se rompe cuando cambia el diseño. La UI es una capa encima, reemplazable.
+Aprobás una foto del plan —presupuesto, pesos y fechas de cada paquete— y el
+desempeño se mide contra esa foto. Editar un paquete después ya no la mueve.
+Cambiar el alcance exige una **versión nueva** de la base, con historial y aviso
+de divergencia. Es la diferencia entre un tablero que informa y uno que
+tranquiliza.
 
-- **`null` en vez de `Infinity`.** Un CPI con AC = 0 no es infinito: es "sin
-  información suficiente todavía". Decidirlo temprano evitó que la interfaz
-  tuviera que limpiar basura después, y es la clase de detalle que define si un
-  indicador se puede mostrar a un director sin aclaración.
+### El motor va aparte de la interfaz
 
-- **Línea base congelada.** El refactor de `WorkPackage` a `PlannedItem` fue
-  exactamente para esto: separar el plan vivo del plan de referencia. Sin esa
-  separación, comparar contra "el plan" no significa nada porque el plan se
-  mueve.
+`src/core/` no sabe que existe React. Calcula PV, EV, AC, las variaciones, los
+índices, las **tres variantes clásicas de EAC**, ETC, VAC y TCPI, y no dibuja
+nada. Por eso se puede probar de verdad: **135 casos de prueba** sobre el motor,
+el import de CSV, el almacenamiento y el estado.
 
-- **Todo local.** IndexedDB vía Dexie: sin cuenta, sin backend, sin subir datos
-  de obra a ningún lado. Para el caso de uso —datos de proyecto de un cliente—
-  eso no es una limitación, es el requisito.
+### Atraso en tiempo, no sólo en plata
 
-## Relación con el tablero de Power BI
+El EVM clásico dice cuánto dinero de trabajo falta, no cuándo se termina. La app
+suma **Earned Schedule**: traduce el avance ganado a tiempo sobre la curva S y
+proyecta una fecha de fin. Es la pregunta que hace el comité y que el EVM solo
+no contesta.
 
-Este proyecto y el [tablero EVM](/proyectos/evm-powerbi/) resuelven el mismo
-problema por dos caminos. Contar por qué existen los dos dice más que cualquiera
-de los dos por separado.
+### La conclusión antes que el gráfico
 
----
+Cada pantalla abre con un veredicto escrito, y arriba de todo va el panel
+**"Requiere decisión"**, ordenado por exposición económica y con el motivo
+explícito de cada paquete fuera de plan. Nada de donuts ni de velocímetros:
+texto, tablas y una curva S de líneas. Ningún número absoluto aparece sin su
+comparación contra el plan.
 
-### Por qué el código no está en esta carpeta
+### Sin servidor
 
-`PMI-Toolbox` tiene noventa y siete archivos, dependencias, tests y su propio
-CI. Copiarlo acá adentro genera **dos copias que se desincronizan** — que es
-exactamente lo que pasó con `pmtool/` dentro del repo `Data`, donde la copia
-vieja se quedó atrás sin que nadie se enterara.
+Todo vive en el navegador con IndexedDB, detrás de un puerto `Repository` con
+una cola de sincronización ya escrita. **La arquitectura para multi-dispositivo
+está lista; falta el servidor**, que un sitio estático no despliega. Está dicho
+en el README y no lo vendo como terminado.
 
-La carpeta se queda con el caso escrito y las capturas; el botón "Abrir la app"
-lleva al deploy real.
+## Qué hace, en concreto
+
+- Multiproyecto, con WBS jerárquica y roll-up de los paquetes hoja.
+- Cortes de avance, y el proyecto visto a cualquier fecha de corte histórica.
+- Import de cronograma desde CSV de Excel, MS Project o P6, tolerando fechas
+  `DD/MM/AAAA` y separadores de miles, con validación antes de importar.
+- Import de avances y costos reales — el patrón ERP → EVM.
+- Umbrales de SPI y CPI sensibles a la etapa del proyecto, criterio ISR / PMR.
+- Bitácora de auditoría: quién cargó qué corte y cuándo.
+- Export a CSV y reporte imprimible para comité, con riesgos, issues y próximos
+  pasos.
+
+## Lo que me llevé
+
+Que el trabajo difícil de una herramienta de control no es el cálculo —el EVM
+son diez fórmulas— sino **decidir qué no se puede hacer**. Que la base no se
+mueva sola es una restricción, y es exactamente lo que la vuelve útil.
