@@ -19,11 +19,10 @@ import { usarTraduccion, type Idioma } from '../i18n/ui';
 
 interface Props {
   cursos: CollectionEntry<'formacion'>[];
-  indice: string;
   lang: Idioma;
 }
 
-const { cursos, indice, lang } = Astro.props;
+const { cursos, lang } = Astro.props;
 const t = usarTraduccion(lang);
 
 const enFila = cursos
@@ -46,18 +45,9 @@ const nota = (c: CollectionEntry<'formacion'>) =>
   lang === 'en' ? (c.data.notaEn ?? c.data.nota) : c.data.nota;
 ---
 
-<section class="revelar scroll-mt-24 border-y border-borde bg-panel/50" id="formacion">
-  <div class="mx-auto max-w-5xl px-6 py-16">
-    <p class="indice">{indice}</p>
-    <div class="mt-2 flex items-baseline gap-4">
-      <h2 class="text-lg font-semibold sm:text-xl">{t('formacion.titulo')}</h2>
-      <span class="font-mono text-xs tabular-nums text-tenue">
-        {String(cursos.length).padStart(2, '0')}
-      </span>
-    </div>
-    <p class="mt-1.5 text-sm text-tenue">{t('formacion.bajada')}</p>
-
-    <div class="mt-8">
+<section class="revelar bg-panel/50">
+  <div class="mx-auto max-w-5xl px-6 py-14">
+    <div>
       <Carrusel
         etiqueta={t('formacion.titulo')}
         anterior={t('carrusel.anterior')}

@@ -1,6 +1,6 @@
 ---
 import { filaDatos, filaGestion, type Ficha } from '../lib/herramientas';
-import { usarTraduccion, type Idioma } from '../i18n/ui';
+import type { Idioma } from '../i18n/ui';
 
 /**
  * Cinta de herramientas: dos filas que corren en sentidos opuestos.
@@ -16,11 +16,9 @@ import { usarTraduccion, type Idioma } from '../i18n/ui';
 
 interface Props {
   lang: Idioma;
-  indice: string;
 }
 
-const { lang, indice } = Astro.props;
-const t = usarTraduccion(lang);
+const { lang } = Astro.props;
 
 const filas: { items: Ficha[]; sentido: string }[] = [
   { items: filaDatos, sentido: 'izquierda' },
@@ -28,14 +26,8 @@ const filas: { items: Ficha[]; sentido: string }[] = [
 ];
 ---
 
-<section class="revelar relative scroll-mt-24 border-y border-borde bg-panel/60" id="herramientas">
-  <div class="mx-auto max-w-5xl px-6 pt-14">
-    <p class="indice">{indice}</p>
-    <h2 class="mt-2 text-lg font-semibold sm:text-xl">{t('herramientas.titulo')}</h2>
-    <p class="mt-1.5 max-w-2xl text-sm text-tenue">{t('herramientas.bajada')}</p>
-  </div>
-
-  <div class="cinta-marco mt-9 pb-14">
+<section class="revelar relative bg-panel/60">
+  <div class="cinta-marco pt-12 pb-14" role="group" aria-label={lang === 'es' ? 'Herramientas y métodos' : 'Tools and methods'}>
     {
       filas.map((fila) => (
         <div class:list={['cinta', fila.sentido]}>

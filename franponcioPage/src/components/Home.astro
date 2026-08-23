@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Nav from './Nav.astro';
 import Traza from './Traza.astro';
+import Banda from './Banda.astro';
 import Herramientas from './Herramientas.astro';
 import Formacion from './Formacion.astro';
 import { obtenerProyectos } from '../lib/proyectos';
@@ -81,15 +82,32 @@ const titulo =
     </dl>
   </header>
 
+  <Banda
+    id="traza"
+    indice="01"
+    titulo={t('banda.traza')}
+    bajada={t('banda.traza.bajada')}
+  />
+
   <Traza proyectos={proyectos} lang={lang} />
 
   <p class="mx-auto max-w-[1400px] px-8 pb-10 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-tenue">
     {t('traza.pie')}
   </p>
 
-  <Herramientas lang={lang} indice="02" />
+  <Banda
+    id="herramientas"
+    indice="02"
+    titulo={t('herramientas.titulo')}
+    bajada={t('banda.stack.bajada')}
+  />
+  <Herramientas lang={lang} />
 
-  <div class="mt-16">
-    <Formacion cursos={cursos} indice="03" lang={lang} />
-  </div>
+  <Banda
+    id="formacion"
+    indice="03"
+    titulo={t('formacion.titulo')}
+    bajada={t('banda.formacion.bajada')}
+  />
+  <Formacion cursos={cursos} lang={lang} />
 </Base>

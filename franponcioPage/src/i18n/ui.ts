@@ -39,6 +39,13 @@ export const ui = {
     'formacion.insignia': 'insignia generada — no es un certificado',
     'formacion.proximo': 'Lo que viene',
     'nav.traza': 'La traza',
+    'banda.traza': 'La traza',
+    'banda.traza.bajada':
+      'El recorrido completo, de 2013 a hoy: primero los trabajos, después las herramientas que escribí. Tocá cualquier parada para abrirla.',
+    'banda.stack.bajada':
+      'Con qué trabajo. Arriba, datos y visualización; abajo, gestión y construcción. Pasá el mouse para frenar la cinta.',
+    'banda.formacion.bajada':
+      'Los certificados, uno al lado del otro. Tocá cualquiera para verlo en grande.',
     'tramo.laboral': 'Experiencia laboral',
     'tramo.laboral.bajada': 'Diez años de trabajo pago: logística, sistemas de gestión e infraestructura de gas.',
     'tramo.proyecto': 'Proyectos',
@@ -94,6 +101,13 @@ export const ui = {
     'formacion.insignia': 'generated badge — not a certificate',
     'formacion.proximo': 'Coming up',
     'nav.traza': 'The route',
+    'banda.traza': 'The route',
+    'banda.traza.bajada':
+      'The whole run, 2013 to today: the jobs first, then the tools I wrote. Tap any stop to open it.',
+    'banda.stack.bajada':
+      'What I work with. Data and visualisation on top; management and build below. Hover to stop the belt.',
+    'banda.formacion.bajada':
+      'The certificates, side by side. Tap any one to see it full size.',
     'tramo.laboral': 'Work experience',
     'tramo.laboral.bajada': 'Ten years of paid work: logistics, management systems and gas infrastructure.',
     'tramo.proyecto': 'Projects',
