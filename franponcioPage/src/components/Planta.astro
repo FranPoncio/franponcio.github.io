@@ -290,7 +290,13 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
     <g class="viajeros">
       {viajeros.map((v) => (
         <g style={`--i:${v.i}; --rx:${v.rx}px; --ry:${v.ry}px`}>
-          <rect x={EJE_X - 27} y={CODO_Y - 3} width="54" height="22" rx="4" fill="#0f1110" stroke="#6fa39c" stroke-width="1.6" />
+          {/* MOLÉCULA, no cajita. El dato que llega por el caño es la misma
+              partícula redonda que viene bajando por el fondo de toda la
+              página: si acá fuera un rectángulo, el viaje se cortaría justo
+              en el remate. */}
+          <circle cx={EJE_X} cy={CODO_Y + 8} r="21" fill="#0f1110" stroke="#6fa39c" stroke-width="1.6" />
+          <circle class="sat" cx={EJE_X + 27} cy={CODO_Y + 8} r="2.6" fill="#6fa39c" opacity="0.75" />
+          <circle class="sat sat-b" cx={EJE_X - 27} cy={CODO_Y + 8} r="2.6" fill="#6fa39c" opacity="0.75" />
           <text x={EJE_X} y={CODO_Y + 12}>{v.bit}</text>
         </g>
       ))}
@@ -335,7 +341,7 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
 
   .viajeros text {
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: 10px;
     font-weight: 700;
     text-anchor: middle;
     fill: var(--color-datos);
@@ -404,6 +410,19 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
   .humo ellipse {
     transform-box: fill-box;
     transform-origin: center;
+  }
+
+  /* Los satélites giran alrededor de su núcleo. El origen se pone a mano en
+     el centro del núcleo: `fill-box` acá no sirve, porque la caja del satélite
+     es el satélite y giraría sobre sí mismo. */
+  .sat {
+    transform-origin: 800px 308px;
+    animation: orbitar 3.2s linear infinite;
+  }
+  .sat-b { animation-delay: -1.6s; }
+  @keyframes orbitar {
+    from { rotate: 0deg; }
+    to { rotate: 360deg; }
   }
 
   .nubes > g {
@@ -488,6 +507,7 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
     :global(html:not([data-mov='on'])) .luces rect,
     :global(html:not([data-mov='on'])) .humo ellipse,
     :global(html:not([data-mov='on'])) .viajeros > g,
+    :global(html:not([data-mov='on'])) .sat,
     :global(html:not([data-mov='on'])) .nubes > g,
     :global(html:not([data-mov='on'])) .aves path,
     :global(html:not([data-mov='on'])) .fugaz,

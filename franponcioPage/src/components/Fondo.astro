@@ -261,7 +261,7 @@
     // binarios flotando entre las volutas. Cada partícula guarda su posición
     // en coordenada de recorrido (0 a 1 de la traza entera) y no en píxeles:
     // así queda anclada a su tramo y acompaña al scroll.
-    const MAX_HUMO = 340;
+    const MAX_HUMO = 360;
 
     /**
      * Lo que flota en el humo son NÚMEROS DE VERDAD, no unos y ceros: los que
@@ -315,12 +315,143 @@
       });
     }
 
+    /**
+     * UNA MOLÉCULA: núcleo redondo con la cifra adentro y dos satélites que
+     * giran alrededor.
+     *
+     * Antes el dato era la cifra suelta flotando en el aire, y sobre un fondo
+     * oscuro con humo se leía como texto perdido. Redondo se lee como una
+     * partícula — que es lo que es: la unidad en la que el gas se convierte
+     * en dato. Las cifras completas van grandes y en llama; los dígitos
+     * sueltos, chicos y en cian, así el fondo tiene jerarquía y no ruido.
+     */
+    function moleculaEn(x: number, y: number, q: Humo, alfa: number) {
+      const grande = !!q.fuerte;
+      const R = grande ? 21 : 11;
+      const col = grande ? acento : datos;
+
+      cx.beginPath();
+      cx.arc(x, y, R, 0, Math.PI * 2);
+      cx.fillStyle = rgba(col, alfa * 0.11);
+      cx.fill();
+      cx.lineWidth = grande ? 2 : 1.4;
+      cx.strokeStyle = rgba(col, alfa * 0.72);
+      cx.stroke();
+
+      // Los satélites. El ángulo sale de la vida de la partícula y de su
+      // posición, así que cada molécula gira con su propia fase.
+      const giro = q.vida * 0.045 + q.s * 11;
+      for (let k = 0; k < 2; k++) {
+        const a = giro + k * Math.PI;
+        cx.beginPath();
+        cx.arc(x + Math.cos(a) * (R + 6), y + Math.sin(a) * (R + 6), grande ? 2.7 : 1.9, 0, Math.PI * 2);
+        cx.fillStyle = rgba(col, alfa * 0.6);
+        cx.fill();
+      }
+
+      cx.font = `700 ${grande ? 10 : 8}px 'Roboto Variable', system-ui, sans-serif`;
+      cx.fillStyle = rgba(col, alfa);
+      cx.fillText(q.bit!, x, y + (grande ? 4 : 3));
+    }
+
     // Hay dos trazas —experiencia y herramientas propias—: el humo sale de la
     // que esté en pantalla.
     const trazas = () => [...document.querySelectorAll<HTMLElement>('.marco')];
 
     function dibujarHumo() {
+      dibujarPagina();
       for (const marco of trazas()) dibujarTraza(marco);
+    }
+
+    /**
+     * EL GAS DE TODA LA PÁGINA.
+     *
+     * Antes el humo existía sólo adentro de las dos trazas: el Stack, la
+     * Formación y todo lo que va entremedio quedaban con el caño pelado y el
+     * fondo liso. Ahora hay una columna que corre de punta a punta.
+     *
+     * Y hace el recorrido completo: arriba sale gas, y CUANTO MÁS ABAJO, más
+     * probable es que la partícula nazca ya convertida en dato. `s` es la
+     * fracción de página, así que `s^1.9` es casi cero al principio y casi
+     * uno al final — el gas se va volviendo número a medida que bajás, y
+     * llega a la planta hecho dato.
+     */
+    function dibujarPagina() {
+      const altoDoc = document.documentElement.scrollHeight;
+      if (altoDoc < al * 1.5) return;
+
+      const caja = { top: -window.scrollY, height: altoDoc };
+      const eje = an / 2;
+      // Despejar la columna central, que es por donde va el contenido.
+      const flanco = Math.max(an * 0.3, 165);
+
+      const sArriba = Math.max(window.scrollY / altoDoc, 0);
+      const sAbajo = Math.min((window.scrollY + al) / altoDoc, 1);
+      const tramo = Math.max(sAbajo - sArriba, 0.001);
+
+      // UNA por frame, no dos. Con dos, en las secciones sin traza las 400
+      // partículas del cupo iban todas a esta columna y el fondo pasaba de
+      // vacío a saturado — y medido costaba 15 fps. Con una queda poblado sin
+      // taparle nada al contenido.
+      const s = sArriba + Math.random() * tramo;
+      nacerHumo(document.body, s, Math.random() < Math.pow(s, 1.9), flanco);
+
+      pintarTramo(document.body, caja, eje, true);
+    }
+
+    /** Alto y posición de un tramo, sea una traza o la página entera. */
+    interface Tramo { top: number; height: number; }
+
+    /**
+     * Dibuja y envejece las partículas de UN tramo. Se extrajo de
+     * `dibujarTraza` para que la columna de toda la página use exactamente el
+     * mismo dibujado: si no, el gas de la página y el de la traza empezaban a
+     * divergir a la primera corrección.
+     */
+    function pintarTramo(marco: HTMLElement, caja: Tramo, eje: number, aLaVista: boolean) {
+
+      for (let i = humo.length - 1; i >= 0; i--) {
+        const q = humo[i];
+        if (q.marco !== marco) continue;   // cada traza dibuja lo suyo
+        q.vida += 1;
+        if (q.vida > q.dura) {
+          humo.splice(i, 1);
+          continue;
+        }
+        if (!aLaVista) continue;
+
+        q.desvio += q.deriva;
+        // Los numeros suben mas rapido que el humo: se despegan y se leen.
+        q.subida += (q.bit ? 1.15 : 0.72) * Math.max(1 - q.subida / 150, 0.1);
+        // El radio SE TOPEA. Sin tope, con `crece` ~1 y 240 frames de vida
+        // una voluta terminaba con 300 px de radio: son 600x600 px de mezcla
+        // por partícula y por frame, y con cientos vivas el fondo se comía la
+        // placa (23 fps medidos). A 105 px sigue leyéndose como humo y el
+        // dibujado baja como el cuadrado del radio.
+        q.r = Math.min(q.r + q.crece, 105);
+
+        const p = q.vida / q.dura;
+        // Entra rapido y se va lento: es como se disipa el humo.
+        const alfa = Math.sin(Math.pow(p, 0.65) * Math.PI);
+
+        // LA TRAZA ES VERTICAL Y CENTRADA. Cada particula guarda su posicion
+        // en coordenada de recorrido (`s`, de 0 a 1 del bloque entero) y no
+        // en pixeles: asi queda anclada a su tramo y acompaña al scroll.
+        // `s` -> altura de pagina; `subida` sube; `desvio` abre la pluma.
+        const x = eje + q.desvio;
+        const y = caja.top + q.s * caja.height - q.subida;
+        if (y < -120 || y > al + 120 || x < -140 || x > an + 140) continue;
+
+        if (q.bit) {
+          moleculaEn(x, y, q, alfa);
+        } else {
+          // Puede ir fuerte sin taparle nada al texto, porque el texto tambien
+          // es claro y esta por encima.
+          cx.globalAlpha = alfa * 0.4;
+          cx.drawImage(voluta, x - q.r, y - q.r, q.r * 2, q.r * 2);
+          cx.globalAlpha = 1;
+        }
+      }
     }
 
     function dibujarTraza(marco: HTMLElement) {
@@ -369,65 +500,7 @@
         }
       }
 
-      cx.textAlign = 'center';
-
-      for (let i = humo.length - 1; i >= 0; i--) {
-        const q = humo[i];
-        if (q.marco !== marco) continue;   // cada traza dibuja lo suyo
-        q.vida += 1;
-        if (q.vida > q.dura) {
-          humo.splice(i, 1);
-          continue;
-        }
-        if (!aLaVista) continue;
-
-        q.desvio += q.deriva;
-        // Los numeros suben mas rapido que el humo: se despegan y se leen.
-        q.subida += (q.bit ? 1.15 : 0.72) * Math.max(1 - q.subida / 150, 0.1);
-        // El radio SE TOPEA. Sin tope, con `crece` ~1 y 240 frames de vida
-        // una voluta terminaba con 300 px de radio: son 600x600 px de mezcla
-        // por partícula y por frame, y con cientos vivas el fondo se comía la
-        // placa (23 fps medidos). A 105 px sigue leyéndose como humo y el
-        // dibujado baja como el cuadrado del radio.
-        q.r = Math.min(q.r + q.crece, 105);
-
-        const p = q.vida / q.dura;
-        // Entra rapido y se va lento: es como se disipa el humo.
-        const alfa = Math.sin(Math.pow(p, 0.65) * Math.PI);
-
-        // LA TRAZA ES VERTICAL Y CENTRADA. Cada particula guarda su posicion
-        // en coordenada de recorrido (`s`, de 0 a 1 del bloque entero) y no
-        // en pixeles: asi queda anclada a su tramo y acompaña al scroll.
-        // `s` -> altura de pagina; `subida` sube; `desvio` abre la pluma.
-        const x = eje + q.desvio;
-        const y = caja.top + q.s * caja.height - q.subida;
-        if (y < -120 || y > al + 120 || x < -140 || x > an + 140) continue;
-
-        if (q.bit) {
-          // Las cifras completas van grandes y en llama; los digitos sueltos,
-          // chicos y en pantalla. Asi el humo tiene jerarquia en vez de ruido.
-          if (q.fuerte) {
-            // El resplandor NO va con shadowBlur: es de lo más caro que
-            // tiene canvas y acá se dibujaban decenas por frame. Se hace a
-            // mano con una pasada previa más grande y translúcida, que sale
-            // casi gratis y se ve igual.
-            cx.font = "700 26px 'Roboto Variable', system-ui, sans-serif";
-            cx.fillStyle = rgba(acento, alfa * 0.16);
-            cx.fillText(q.bit, x, y);
-            cx.fillStyle = rgba(acento, alfa);
-          } else {
-            cx.font = "700 14px 'Roboto Variable', system-ui, sans-serif";
-            cx.fillStyle = rgba(datos, alfa * 0.85);
-          }
-          cx.fillText(q.bit, x, y);
-        } else {
-          // Puede ir fuerte sin taparle nada al texto, porque el texto tambien
-          // es claro y esta por encima.
-          cx.globalAlpha = alfa * 0.4;
-          cx.drawImage(voluta, x - q.r, y - q.r, q.r * 2, q.r * 2);
-          cx.globalAlpha = 1;
-        }
-      }
+      pintarTramo(marco, caja, eje, aLaVista);
     }
 
     // ── MODO QUIETO ──────────────────────────────────────────────────────
@@ -481,6 +554,56 @@
       sembrado.add(marco);
     }
 
+    /** La misma columna de página, pero clavada. */
+    function dibujarPaginaQuieta() {
+      const altoDoc = document.documentElement.scrollHeight;
+      if (altoDoc < al * 1.5) return;
+      const eje = an / 2;
+      const flanco = Math.max(an * 0.3, 165);
+
+      if (!sembrado.has(document.body)) {
+        // Repartidas por toda la página, con la misma regla: arriba gas,
+        // abajo dato.
+        const cuantas = Math.round(Math.min(Math.max(altoDoc / 34, 60), 240));
+        for (let i = 0; i < cuantas; i++) {
+          const s = Math.random();
+          humo.push({
+            marco: document.body,
+            s,
+            desvio: (Math.random() < 0.5 ? -1 : 1) * azar(flanco, flanco * 1.7),
+            deriva: 0,
+            subida: 0,
+            r: azar(45, 100),
+            crece: 0,
+            vida: azar(0.4, 1),
+            dura: 1,
+            bit:
+              Math.random() < Math.pow(s, 1.9)
+                ? Math.random() < 0.62
+                  ? CIFRAS[Math.floor(Math.random() * CIFRAS.length)]
+                  : sueltos[Math.floor(Math.random() * 10)]
+                : null,
+            fuerte: Math.random() < 0.42,
+          });
+        }
+        sembrado.add(document.body);
+      }
+
+      cx.textAlign = 'center';
+      for (const q of humo) {
+        if (q.marco !== document.body) continue;
+        const x = eje + q.desvio;
+        const y = -window.scrollY + q.s * altoDoc;
+        if (y < -140 || y > al + 140) continue;
+        if (q.bit) moleculaEn(x, y, q, q.vida);
+        else {
+          cx.globalAlpha = q.vida * 0.3;
+          cx.drawImage(voluta, x - q.r, y - q.r, q.r * 2, q.r * 2);
+          cx.globalAlpha = 1;
+        }
+      }
+    }
+
     function dibujarTrazaQuieta(marco: HTMLElement) {
       const via = marco.querySelector<HTMLElement>('.via');
       if (!via) return;
@@ -529,6 +652,7 @@
       const redibujar = () => {
         pendiente = false;
         cx.clearRect(0, 0, an, al);
+        dibujarPaginaQuieta();
         for (const m of trazas()) dibujarTrazaQuieta(m);
       };
       const alScroll = () => {
