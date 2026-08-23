@@ -12,18 +12,23 @@ interface Props {
   indice: string;
   titulo: string;
   bajada: string;
+  /** El rango de años del tramo, si lo tiene. */
+  anios?: string;
   /** Ancla para el menú. */
   id?: string;
 }
 
-const { indice, titulo, bajada, id } = Astro.props;
+const { indice, titulo, bajada, anios, id } = Astro.props;
 ---
 
 <div class="banda" id={id}>
   <div class="dentro">
     <span class="num">{indice}</span>
     <div class="texto">
-      <h2>{titulo}</h2>
+      <h2>
+        {titulo}
+        {anios && <span class="anios">{anios}</span>}
+      </h2>
       <p>{bajada}</p>
     </div>
   </div>
@@ -62,6 +67,15 @@ const { indice, titulo, bajada, id } = Astro.props;
     font-size: 1.15rem;
     font-weight: 700;
     letter-spacing: -0.025em;
+  }
+  .anios {
+    margin-left: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--color-tenue);
+    vertical-align: middle;
   }
   p {
     margin: 0.3rem 0 0;

@@ -76,6 +76,7 @@
     interface Columna { x: number; y: number; v: number; bits: string[]; paso: number; }
     /** El humo de la traza. `s` es la posición sobre el recorrido, 0 a 1. */
     interface Humo {
+      marco: HTMLElement;
       s: number;
       desvio: number;
       deriva: number;
@@ -220,9 +221,10 @@
     // así queda anclada a su tramo y acompaña al scroll.
     const MAX_HUMO = 420;
 
-    function nacerHumo(s: number, esBit: boolean) {
+    function nacerHumo(marco: HTMLElement, s: number, esBit: boolean) {
       if (humo.length >= MAX_HUMO) humo.shift();
       humo.push({
+        marco,
         s,
         desvio: azar(-9, 9),
         deriva: azar(-0.4, 0.4),
@@ -230,15 +232,22 @@
         r: esBit ? 0 : azar(18, 40),
         crece: azar(0.5, 1.1),
         vida: 0,
-        dura: esBit ? azar(170, 260) : azar(170, 280),
+        dura: esBit ? azar(150, 230) : azar(150, 240),
         bit: esBit ? (Math.random() < 0.5 ? '0' : '1') : null,
       });
     }
 
+    // Hay dos trazas —experiencia y herramientas propias—: el humo sale de la
+    // que esté en pantalla.
+    const trazas = () => [...document.querySelectorAll<HTMLElement>('.marco')];
+
     function dibujarHumo() {
-      const marco = document.querySelector<HTMLElement>('#la-traza');
-      const via = marco?.querySelector<HTMLElement>('.via');
-      if (!marco || !via) return;
+      for (const marco of trazas()) dibujarTraza(marco);
+    }
+
+    function dibujarTraza(marco: HTMLElement) {
+      const via = marco.querySelector<HTMLElement>('.via');
+      if (!via) return;
 
       const caja = marco.getBoundingClientRect();
       // Fuera de pantalla no se dibuja ni se emite: no tiene sentido gastar
@@ -248,11 +257,11 @@
       const vertical = !matchMedia('(min-width: 901px)').matches;
 
       if (aLaVista && avance > 0.004) {
-        for (let i = 0; i < 8; i++) nacerHumo(avance - Math.random() * 0.02, false);
-        nacerHumo(avance - Math.random() * 0.02, true);
-        if (Math.random() < 0.5) nacerHumo(avance - Math.random() * 0.03, true);
-        for (let i = 0; i < 3; i++) nacerHumo(Math.random() * avance, false);
-        if (Math.random() < 0.75) nacerHumo(Math.random() * avance, true);
+        for (let i = 0; i < 8; i++) nacerHumo(marco, avance - Math.random() * 0.02, false);
+        nacerHumo(marco, avance - Math.random() * 0.02, true);
+        if (Math.random() < 0.5) nacerHumo(marco, avance - Math.random() * 0.03, true);
+        for (let i = 0; i < 3; i++) nacerHumo(marco, Math.random() * avance, false);
+        if (Math.random() < 0.75) nacerHumo(marco, Math.random() * avance, true);
       }
 
       cx.font = "600 12px 'Martian Mono', ui-monospace, monospace";
@@ -260,6 +269,7 @@
 
       for (let i = humo.length - 1; i >= 0; i--) {
         const q = humo[i];
+        if (q.marco !== marco) continue;   // cada traza dibuja lo suyo
         q.vida += 1;
         if (q.vida > q.dura) {
           humo.splice(i, 1);
@@ -268,7 +278,7 @@
         if (!aLaVista) continue;
 
         q.desvio += q.deriva;
-        q.subida += q.bit ? 0.8 : 0.72;
+        q.subida += (q.bit ? 0.8 : 0.72) * Math.max(1 - q.subida / 120, 0.08);
         q.r += q.crece;
 
         const p = q.vida / q.dura;
