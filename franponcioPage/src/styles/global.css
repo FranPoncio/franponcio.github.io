@@ -26,10 +26,13 @@
   --color-fondo: #0d1411;
   --color-panel: #16201b;
   --color-panel-alto: #1e2a23;
-  --color-borde: #e8e4d6;
-  --color-borde-vivo: #e8e4d6;
-  --color-texto: #e8e4d6;
-  --color-tenue: #93a298;
+  /* Los bordes NO van en hueso pleno: un contorno blanco puro sobre casi
+     negro es un golpe, y con 3px por todos lados el sitio vibraba. Van en un
+     verde grisado que pertenece a la paleta. */
+  --color-borde: #4a5a51;
+  --color-borde-vivo: #6d7f74;
+  --color-texto: #ddd8c8;
+  --color-tenue: #8d9c92;
   /* Llama de gas. */
   --color-acento: #ff8a3d;
   --color-acento-tenue: #5c3418;
@@ -43,8 +46,8 @@
   --color-herramienta: #9dc06a;
 
   /* Sobre oscuro una sombra negra no existe: la sombra dura va en la llama. */
-  --sombra: 5px 5px 0 var(--color-acento);
-  --sombra-alta: 9px 9px 0 var(--color-acento);
+  --sombra: 4px 4px 0 color-mix(in srgb, var(--color-acento) 62%, transparent);
+  --sombra-alta: 7px 7px 0 color-mix(in srgb, var(--color-acento) 62%, transparent);
 
   --font-titulo: 'Anton', 'Arial Narrow', ui-sans-serif, sans-serif;
   --font-display: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
@@ -71,12 +74,10 @@ body {
 }
 
 /* Trama fina de fondo — el "panel" de sala de control. */
-/* Lunares en vez de cuadrícula: la grilla técnica era del estilo anterior. */
+/* Sin trama. Los lunares competían con el humo, que es lo único que tiene que
+   verse moverse. El fondo es fondo. */
 .trama {
-  background-image: radial-gradient(rgba(232, 228, 214, 0.12) 1.15px, transparent 1.15px);
-  background-size: 26px 26px;
-  background-attachment: fixed;
-  opacity: 1;
+  background-image: none;
 }
 
 /* Prosa de los casos. El Markdown sale sin clases: se estila acá una vez. */

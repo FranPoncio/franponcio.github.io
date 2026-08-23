@@ -85,9 +85,10 @@
       crece: number;
       vida: number;
       dura: number;
-      /** null = humo · '0'/'1' = dato · 'brasa' = chispa de la llama */
+      /** null = humo · si tiene texto, es un número flotando */
       bit: string | null;
-      brasa?: boolean;
+      /** Los números grandes van más marcados que los sueltos. */
+      fuerte?: boolean;
     }
 
     /**
@@ -231,20 +232,38 @@
     // así queda anclada a su tramo y acompaña al scroll.
     const MAX_HUMO = 420;
 
-    function nacerHumo(marco: HTMLElement, s: number, esBit: boolean, brasa = false) {
+    /**
+     * Lo que flota en el humo son NÚMEROS DE VERDAD, no unos y ceros: los que
+     * salen de los casos del sitio. El humo sale de la traza, y lo que sube
+     * con él es exactamente lo que hay abajo.
+     */
+    const CIFRAS = [
+      '12.000', '413', '+35', '150', '500', '< 5 %', '0', '135', '2,6', '46',
+      '9001', '14001', '45001', '6.900', 'SPI', 'CPI', 'EVM', 'km', '%',
+    ];
+    const sueltos = '0123456789';
+
+    function nacerHumo(marco: HTMLElement, s: number, esBit: boolean) {
       if (humo.length >= MAX_HUMO) humo.shift();
       humo.push({
         marco,
-        brasa,
         s,
-        desvio: brasa ? azar(-4, 4) : azar(-9, 9),
-        deriva: brasa ? azar(-0.22, 0.22) : azar(-0.4, 0.4),
+        desvio: azar(-11, 11),
+        deriva: azar(-0.4, 0.4),
         subida: esBit ? azar(0.35, 0.75) : azar(0, 6),
-        r: esBit ? 0 : brasa ? azar(1.1, 2.6) : azar(18, 40),
-        crece: brasa ? azar(0.004, 0.02) : azar(0.5, 1.1),
+        r: esBit ? 0 : azar(18, 40),
+        crece: azar(0.5, 1.1),
         vida: 0,
-        dura: esBit ? azar(150, 230) : brasa ? azar(90, 170) : azar(150, 240),
-        bit: esBit ? (Math.random() < 0.5 ? '0' : '1') : null,
+        dura: esBit ? azar(190, 300) : azar(150, 240),
+        // Dos tercios son cifras completas y el resto dígitos sueltos: si
+        // fueran todas cifras se leería como una lista, y si fueran todos
+        // dígitos sueltos volvería a ser lluvia de matriz.
+        bit: esBit
+          ? Math.random() < 0.62
+            ? CIFRAS[Math.floor(Math.random() * CIFRAS.length)]
+            : sueltos[Math.floor(Math.random() * 10)]
+          : null,
+        fuerte: esBit && Math.random() < 0.62,
       });
     }
 
@@ -269,18 +288,12 @@
 
       if (aLaVista && avance > 0.004) {
         for (let i = 0; i < 8; i++) nacerHumo(marco, avance - Math.random() * 0.02, false);
-        nacerHumo(marco, avance - Math.random() * 0.02, true);
-        if (Math.random() < 0.5) nacerHumo(marco, avance - Math.random() * 0.03, true);
         for (let i = 0; i < 3; i++) nacerHumo(marco, Math.random() * avance, false);
-        // Brasas: chispas de la llama que suben con el humo. Chicas, brillantes
-        // y de vida corta — son el detalle que hace que el humo se lea CALIENTE
-        // y no como niebla.
-        for (let i = 0; i < 2; i++) nacerHumo(marco, avance - Math.random() * 0.03, false, true);
-        if (Math.random() < 0.6) nacerHumo(marco, Math.random() * avance, false, true);
-        if (Math.random() < 0.75) nacerHumo(marco, Math.random() * avance, true);
+        // Los números salen seguido: son lo que tiene que verse.
+        for (let i = 0; i < 2; i++) nacerHumo(marco, avance - Math.random() * 0.03, true);
+        if (Math.random() < 0.8) nacerHumo(marco, Math.random() * avance, true);
       }
 
-      cx.font = "700 13px 'Martian Mono', ui-monospace, monospace";
       cx.textAlign = 'center';
 
       for (let i = humo.length - 1; i >= 0; i--) {
@@ -295,7 +308,8 @@
 
         q.desvio += q.deriva;
         // Las brasas suben más rápido y no se frenan: son livianas.
-        q.subida += q.brasa ? 1.5 : (q.bit ? 0.8 : 0.72) * Math.max(1 - q.subida / 120, 0.08);
+        // Los números suben más rápido que el humo: se despegan y se leen.
+        q.subida += (q.bit ? 1.15 : 0.72) * Math.max(1 - q.subida / 150, 0.1);
         q.r += q.crece;
 
         const p = q.vida / q.dura;
@@ -313,17 +327,20 @@
         if (y < -120 || y > al + 120 || x < -120 || x > an + 120) continue;
 
         if (q.bit) {
-          cx.fillStyle = `rgba(79, 196, 176, ${(alfa * 0.95).toFixed(3)})`;
+          // Las cifras completas van grandes y en llama; los dígitos sueltos,
+          // chicos y en agua. Así el humo tiene jerarquía en vez de ruido.
+          if (q.fuerte) {
+            cx.font = "700 26px 'Martian Mono', ui-monospace, monospace";
+            cx.fillStyle = `rgba(255, 158, 92, ${alfa.toFixed(3)})`;
+            cx.shadowColor = `rgba(255, 138, 61, ${(alfa * 0.55).toFixed(3)})`;
+            cx.shadowBlur = 16;
+          } else {
+            cx.font = "700 14px 'Martian Mono', ui-monospace, monospace";
+            cx.fillStyle = `rgba(79, 196, 176, ${(alfa * 0.85).toFixed(3)})`;
+            cx.shadowBlur = 0;
+          }
           cx.fillText(q.bit, x, y);
-        } else if (q.brasa) {
-          const g = cx.createRadialGradient(x, y, 0, x, y, q.r * 3.4);
-          g.addColorStop(0, `rgba(255, 190, 120, ${alfa.toFixed(3)})`);
-          g.addColorStop(0.35, `rgba(255, 138, 61, ${(alfa * 0.75).toFixed(3)})`);
-          g.addColorStop(1, 'rgba(255, 138, 61, 0)');
-          cx.fillStyle = g;
-          cx.beginPath();
-          cx.arc(x, y, q.r * 3.4, 0, Math.PI * 2);
-          cx.fill();
+          cx.shadowBlur = 0;
         } else {
           const g = cx.createRadialGradient(x, y, 0, x, y, q.r);
           // Claro sobre tinta: es como se ve el humo de verdad, por dispersión
