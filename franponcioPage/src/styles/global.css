@@ -113,33 +113,8 @@ body {
 .prosa .isla a { text-decoration: none; }
 
 
-/* ── Resplandor del hero ──────────────────────────────────────────────────
-   Un halo verde muy tenue detrás del nombre. Da profundidad sin competir
-   con el texto. `pointer-events: none` para que no tape los links. */
-.halo::before {
-  content: '';
-  position: absolute;
-  inset: -20% 0 auto -10%;
-  height: 130%;
-  width: 70%;
-  pointer-events: none;
-  background: radial-gradient(
-    55% 50% at 30% 40%,
-    rgba(255, 45, 120, 0.06),
-    transparent 70%
-  );
-  animation: respirar 9s ease-in-out infinite;
-}
-
-/* El halo late despacio. 9 segundos es lento a propósito: se percibe como
-   que la página está viva, no como una animación que pide atención. */
-@keyframes respirar {
-  0%, 100% { opacity: 0.75; transform: scale(1); }
-  50%      { opacity: 1;    transform: scale(1.06); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .halo::before { animation: none; }
-}
+/* El resplandor del hero se elimino: con lunares, bloques de color, titulares
+   de 136px y el humo de la traza, un manchon rosa de fondo era ruido puro. */
 
 /* ── Revelado al hacer scroll ─────────────────────────────────────────────
    Animaciones guiadas por scroll, sin una línea de JavaScript. Los

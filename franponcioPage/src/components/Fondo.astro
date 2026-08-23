@@ -88,6 +88,16 @@
       bit: string | null;
     }
 
+    /**
+     * El fondo tenía DOS capas propias además del humo de la traza: plumas
+     * sueltas y una lluvia de dígitos por toda la pantalla. Sumadas a los
+     * lunares, al halo y al humo, el fondo era un ruido y encima le competía
+     * al humo, que es lo único que tiene que verse moverse.
+     *
+     * Quedan apagadas. Si algún día se quieren de vuelta, esto va en true.
+     */
+    const ambiente = false;
+
     let plumas: Pluma[] = [];
     let columnas: Columna[] = [];
     const humo: Humo[] = [];
@@ -156,8 +166,9 @@
       // El empuje se disipa solo: el fondo vuelve a su ritmo si dejás de scrollear.
       empuje *= 0.93;
 
-      // ── Humo ────────────────────────────────────────────────────────────
-      for (const p of plumas) {
+      // ── Humo ambiente ───────────────────────────────────────────────────
+      // (desactivado: ver la nota de arriba)
+      for (const p of ambiente ? plumas : []) {
         p.vida += 0.0018;
         if (p.vida > 1) {
           p.vida = 0;
@@ -185,11 +196,8 @@
       // ── Unos y ceros ────────────────────────────────────────────────────
       cx.font = "500 14px 'Martian Mono', ui-monospace, monospace";
       cx.textAlign = 'center';
-      // En pantalla angosta los dígitos caen sobre la columna de lectura: ahí
-      // van mucho más apagados. Antes se resolvía bajándole la opacidad al
-      // canvas entero, pero ahora ese canvas también lleva el humo.
       const tenues = an < 900 ? 0.32 : 1;
-      for (const c of columnas) {
+      for (const c of ambiente ? columnas : []) {
         c.y += c.v + empuje * 0.85;
         const largo = c.bits.length * c.paso;
         if (c.y - largo > al) {
@@ -284,8 +292,15 @@
         const p = q.vida / q.dura;
         // Entra rápido y se va lento: es como se disipa el humo.
         const alfa = Math.sin(Math.pow(p, 0.65) * Math.PI);
+        // EN HORIZONTAL LA LÍNEA ESTÁ EN EL MEDIO DE LA PANTALLA, no en el
+        // medio del bloque. El bloque mide varias pantallas de alto y adentro
+        // hay un panel `sticky`: la línea vive a media pantalla, siempre.
+        // Estaba usando el centro del bloque —caja.top + caja.height / 2— que
+        // con un bloque de 5.000 px cae en cualquier lado. Por eso el humo
+        // salía a 300 px de la traza, flotando solo: nunca estuvo sobre la
+        // línea, y por eso no se leía como gas saliendo del recorrido.
         const x = vertical ? 23 + q.desvio + q.subida : q.s * an;
-        const y = vertical ? caja.top + q.s * caja.height : caja.top + caja.height / 2 + q.desvio - q.subida;
+        const y = vertical ? caja.top + q.s * caja.height : al / 2 + q.desvio - q.subida;
         if (y < -120 || y > al + 120 || x < -120 || x > an + 120) continue;
 
         if (q.bit) {
