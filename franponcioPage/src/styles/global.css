@@ -19,30 +19,28 @@
  * La paleta acompaña a PMI-Toolbox para que todo se lea como la misma marca.
  */
 @theme {
-  /* Claro, apenas verdoso: da unidad sin que se note como "tema verde".
-     El verde sigue siendo la identidad, pero ahora oscuro sobre fondo claro
-     en vez de al revés. Todos los colores de texto pasan 4.5:1 sobre el fondo. */
-  --color-fondo: #f6f9f7;
+  /* Gris frío. El humo se lee por contraste contra el fondo, y sobre un blanco
+     verdoso el humo gris desaparecía. Este gris le da algo contra qué verse sin
+     irse a fondo oscuro. Todos los colores de texto pasan 4.5:1 sobre él. */
+  --color-fondo: #e9edf0;
   --color-panel: #ffffff;
-  --color-panel-alto: #edf3ef;
-  --color-borde: #dde6e1;
-  --color-borde-vivo: #b6c7bd;
-  --color-texto: #0d1a13;
-  --color-tenue: #566b60;
-  --color-acento: #0c7a45;
-  /* Ojo: en el tema oscuro este era MÁS oscuro que el acento. En claro es al
-     revés — es el verde suave para trazos secundarios. */
-  --color-acento-tenue: #7cc4a1;
+  --color-panel-alto: #dfe6ea;
+  --color-borde: #d2dae0;
+  --color-borde-vivo: #aab7c0;
+  --color-texto: #12181d;
+  --color-tenue: #5d6a74;
+  --color-acento: #0b6ea8;
+  /* En claro el "tenue" es el MÁS claro, no el más oscuro: es el azul suave de
+     los trazos secundarios. */
+  --color-acento-tenue: #86c3e2;
 
-  /* Un color por categoría, en su version oscura: sobre fondo claro las
-     versiones brillantes del tema anterior no se leian. */
-  --color-datos: #0369a1;
-  --color-gestion: #b45309;
+  /* Un color por categoría. 'datos' se corre de azul a verde azulado: con el
+     acento ahora en azul, los dos eran casi el mismo color y la categoría
+     dejaba de distinguirse del resto de la interfaz. */
+  --color-datos: #0f766e;
+  --color-gestion: #96450a;
   --color-herramienta: #7e22ce;
 
-  /* Los títulos y los datos hablan con la misma voz: una mono ancha y técnica.
-     El cuerpo lo lleva una grotesca neutra para que los casos se puedan leer
-     largo — la mono sirve para un titular, no para tres párrafos. */
   --font-titulo: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
   --font-display: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Martian Mono', ui-monospace, 'SF Mono', monospace;
@@ -70,8 +68,8 @@ body {
 /* Trama fina de fondo — el "panel" de sala de control. */
 .trama {
   background-image:
-    linear-gradient(to right, rgba(13,26,19,0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(13,26,19,0.045) 1px, transparent 1px);
+    linear-gradient(to right, rgba(18,24,29,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(18,24,29,0.05) 1px, transparent 1px);
   background-size: 44px 44px;
 }
 
@@ -83,7 +81,7 @@ body {
   margin-top: 2.75rem; padding-top: 1.5rem; border-top: 1px solid var(--color-borde);
 }
 .prosa h3 { font-size: 0.96rem; font-weight: 600; margin-top: 2rem; color: var(--color-acento); }
-.prosa p, .prosa li { color: #2b3a33; }
+.prosa p, .prosa li { color: #2c3841; }
 .prosa strong { color: var(--color-texto); font-weight: 600; }
 .prosa a { color: var(--color-acento); text-decoration: underline; text-underline-offset: 3px; }
 .prosa ul, .prosa ol { padding-left: 1.3rem; }
@@ -127,7 +125,7 @@ body {
   pointer-events: none;
   background: radial-gradient(
     55% 50% at 30% 40%,
-    rgba(12, 122, 69, 0.13),
+    rgba(11, 110, 168, 0.12),
     transparent 70%
   );
   animation: respirar 9s ease-in-out infinite;

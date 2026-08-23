@@ -767,10 +767,13 @@ const estaciones = proyectos.map((p, i) => {
         // Nacen sobre todo en el frente: ahí es donde está llegando el gas.
         if (avanceActual > 0.004) {
           for (let i = 0; i < 3; i++) nacer(avanceActual - Math.random() * 0.012, false);
-          if (Math.random() < 0.55) nacer(avanceActual - Math.random() * 0.02, true);
+          // El doble de dígitos: en esta paleta el humo pesa menos y son los
+          // binarios los que hacen que se lea como flujo de datos.
+          nacer(avanceActual - Math.random() * 0.02, true);
+          if (Math.random() < 0.5) nacer(avanceActual - Math.random() * 0.03, true);
           // Y unas pocas repartidas atrás, para que el rastro no quede pelado.
           if (Math.random() < 0.7) nacer(Math.random() * avanceActual, false);
-          if (Math.random() < 0.3) nacer(Math.random() * avanceActual, true);
+          if (Math.random() < 0.75) nacer(Math.random() * avanceActual, true);
         }
 
         ctx.font = "600 12px 'Martian Mono', ui-monospace, monospace";
@@ -794,13 +797,13 @@ const estaciones = proyectos.map((p, i) => {
           if (y < -80 || y > al + 80 || x < -80 || x > an + 80) continue;
 
           if (q.bit) {
-            ctx.fillStyle = `rgba(88, 104, 96, ${(alfa * 0.5).toFixed(3)})`;
+            ctx.fillStyle = `rgba(40, 90, 125, ${(alfa * 0.68).toFixed(3)})`;
             ctx.fillText(q.bit, x, y);
           } else {
             const g = ctx.createRadialGradient(x, y, 0, x, y, q.r);
-            g.addColorStop(0, `rgba(120, 132, 126, ${(alfa * 0.2).toFixed(3)})`);
-            g.addColorStop(0.55, `rgba(120, 132, 126, ${(alfa * 0.09).toFixed(3)})`);
-            g.addColorStop(1, 'rgba(120, 132, 126, 0)');
+            g.addColorStop(0, `rgba(96, 116, 132, ${(alfa * 0.26).toFixed(3)})`);
+            g.addColorStop(0.5, `rgba(96, 116, 132, ${(alfa * 0.12).toFixed(3)})`);
+            g.addColorStop(1, 'rgba(96, 116, 132, 0)');
             ctx.fillStyle = g;
             ctx.beginPath();
             ctx.arc(x, y, q.r, 0, Math.PI * 2);
