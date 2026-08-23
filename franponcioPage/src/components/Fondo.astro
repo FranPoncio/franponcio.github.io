@@ -20,8 +20,10 @@
  * mis pruebas y no en un teléfono. Acá el canvas cuelga del <body>, sin ningún
  * ancestro que le pueda cambiar el bloque contenedor.
  *
- * Es DECORATIVO: aria-hidden, sin eventos de puntero, y con
- * prefers-reduced-motion no se dibuja nada.
+ * Es DECORATIVO: aria-hidden y sin eventos de puntero. Con
+ * prefers-reduced-motion NO se apaga: se dibuja clavado (ver "modo quieto"
+ * más abajo). Apagarlo entero era dejar sin fondo a quien tiene esa
+ * preferencia prendida, que es mucha gente y ni se entera.
  */
 ---
 
@@ -40,9 +42,6 @@
     opacity: 1;
   }
 
-  /* En una pantalla angosta no hay margen: los dígitos caen justo encima de la
-     columna de lectura. Ahí el fondo baja — la legibilidad gana siempre. */
-  }
 </style>
 
 <script>
@@ -50,7 +49,7 @@
   const ctx = lienzo?.getContext('2d', { alpha: true });
   const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  if (lienzo && ctx && !quieto) {
+  if (lienzo && ctx) {
     const cx = ctx;
     const raiz = getComputedStyle(document.documentElement);
     // Se resuelven los tokens a componentes RGB UNA vez. Antes se armaba un
@@ -428,8 +427,132 @@
       }
     }
 
-    armar();
-    addEventListener('resize', armar, { passive: true });
-    requestAnimationFrame(pintar);
+    // ── MODO QUIETO ──────────────────────────────────────────────────────
+    /**
+     * Con `prefers-reduced-motion: reduce` el fondo entero no se dibujaba: ni
+     * humo, ni números, ni nada. El canvas ni siquiera se dimensionaba —se
+     * quedaba en los 300x150 por defecto— y quien tuviera esa preferencia
+     * prendida veía el sitio pelado, sin enterarse de que le faltaba algo.
+     *
+     * La intención era buena. La ejecución era todo o nada, y estaba mal: la
+     * preferencia pide que NO SE MUEVA NADA, no que no haya contenido.
+     *
+     * Así que acá el humo y los números se dibujan igual, pero clavados: se
+     * siembran una vez a lo largo de todo el recorrido, no se animan nunca, y
+     * acompañan a la página igual que el texto. No hay un solo píxel que se
+     * desplace solo, y tampoco hay nada atado a cuánto scrolleaste: hacer
+     * aparecer cosas según el scroll también es movimiento.
+     */
+    const sembrado = new Set<HTMLElement>();
+
+    function sembrarQuieto(marco: HTMLElement, flanco: number, largo: number) {
+      // La densidad sale del largo del recorrido y no de un número fijo: una
+      // traza de dos estaciones no lleva lo mismo que una de seis.
+      const cuantas = Math.round(Math.min(Math.max(largo / 24, 45), 200));
+      for (let i = 0; i < cuantas; i++) {
+        const esBit = Math.random() < 0.38;
+        humo.push({
+          marco,
+          s: Math.random(),
+          // Sin animación no hay pluma que se abra sola, así que la apertura
+          // se siembra ya hecha: el humo repartido cerca del eje y los
+          // números afuera de la ficha, que es donde terminarían.
+          desvio: esBit
+            ? (Math.random() < 0.5 ? -1 : 1) * azar(flanco, flanco * 1.9)
+            : azar(-95, 95),
+          deriva: 0,
+          subida: 0,
+          r: esBit ? 0 : azar(45, 105),
+          crece: 0,
+          // En quieto `vida` no cuenta frames: guarda el alfa fijo.
+          vida: azar(0.4, 1),
+          dura: 1,
+          bit: esBit
+            ? Math.random() < 0.62
+              ? CIFRAS[Math.floor(Math.random() * CIFRAS.length)]
+              : sueltos[Math.floor(Math.random() * 10)]
+            : null,
+          fuerte: esBit && Math.random() < 0.42,
+        });
+      }
+      sembrado.add(marco);
+    }
+
+    function dibujarTrazaQuieta(marco: HTMLElement) {
+      const via = marco.querySelector<HTMLElement>('.via');
+      if (!via) return;
+      const caja = marco.getBoundingClientRect();
+      if (caja.bottom < -200 || caja.top > al + 200) return;
+
+      const vcaja = via.getBoundingClientRect();
+      const eje = vcaja.left + vcaja.width / 2;
+      const fcaja = marco.querySelector('.ficha')?.getBoundingClientRect();
+      const media = fcaja ? fcaja.width / 2 : 310;
+      const flanco = Math.min(media + 30, Math.max(an * 0.5 - 40, 60));
+
+      if (!sembrado.has(marco)) sembrarQuieto(marco, flanco, caja.height);
+
+      cx.textAlign = 'center';
+      for (const q of humo) {
+        if (q.marco !== marco) continue;
+        const x = eje + q.desvio;
+        const y = caja.top + q.s * caja.height;
+        if (y < -130 || y > al + 130) continue;
+        const alfa = q.vida;
+
+        if (q.bit) {
+          if (q.fuerte) {
+            cx.font = "700 26px 'Martian Mono', ui-monospace, monospace";
+            cx.fillStyle = rgba(acento, alfa * 0.16);
+            cx.fillText(q.bit, x, y);
+            cx.fillStyle = rgba(acento, alfa);
+          } else {
+            cx.font = "700 14px 'Martian Mono', ui-monospace, monospace";
+            cx.fillStyle = rgba(datos, alfa * 0.85);
+          }
+          cx.fillText(q.bit, x, y);
+        } else {
+          cx.globalAlpha = alfa * 0.3;
+          cx.drawImage(voluta, x - q.r, y - q.r, q.r * 2, q.r * 2);
+          cx.globalAlpha = 1;
+        }
+      }
+    }
+
+    if (quieto) {
+      // Nada de bucle continuo: se repinta sólo cuando cambió lo que se ve.
+      armar();
+      let pendiente = false;
+      const redibujar = () => {
+        pendiente = false;
+        cx.clearRect(0, 0, an, al);
+        for (const m of trazas()) dibujarTrazaQuieta(m);
+      };
+      const alScroll = () => {
+        if (pendiente) return;
+        pendiente = true;
+        requestAnimationFrame(redibujar);
+      };
+      addEventListener('scroll', alScroll, { passive: true });
+      addEventListener(
+        'resize',
+        () => {
+          // Al cambiar el ancho cambia el flanco, así que se siembra de nuevo.
+          armar();
+          humo.length = 0;
+          sembrado.clear();
+          redibujar();
+        },
+        { passive: true },
+      );
+      // Las fuentes y las imágenes cambian el alto del bloque después del
+      // primer pintado: hay que volver a medir cuando termina de cargar.
+      addEventListener('load', redibujar);
+      redibujar();
+    } else {
+      armar();
+      addEventListener('resize', armar, { passive: true });
+      requestAnimationFrame(pintar);
+    }
   }
 </script>
