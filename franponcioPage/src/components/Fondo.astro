@@ -85,7 +85,9 @@
       crece: number;
       vida: number;
       dura: number;
+      /** null = humo · '0'/'1' = dato · 'brasa' = chispa de la llama */
       bit: string | null;
+      brasa?: boolean;
     }
 
     /**
@@ -229,18 +231,19 @@
     // así queda anclada a su tramo y acompaña al scroll.
     const MAX_HUMO = 420;
 
-    function nacerHumo(marco: HTMLElement, s: number, esBit: boolean) {
+    function nacerHumo(marco: HTMLElement, s: number, esBit: boolean, brasa = false) {
       if (humo.length >= MAX_HUMO) humo.shift();
       humo.push({
         marco,
+        brasa,
         s,
-        desvio: azar(-9, 9),
-        deriva: azar(-0.4, 0.4),
+        desvio: brasa ? azar(-4, 4) : azar(-9, 9),
+        deriva: brasa ? azar(-0.22, 0.22) : azar(-0.4, 0.4),
         subida: esBit ? azar(0.35, 0.75) : azar(0, 6),
-        r: esBit ? 0 : azar(18, 40),
-        crece: azar(0.5, 1.1),
+        r: esBit ? 0 : brasa ? azar(1.1, 2.6) : azar(18, 40),
+        crece: brasa ? azar(0.004, 0.02) : azar(0.5, 1.1),
         vida: 0,
-        dura: esBit ? azar(150, 230) : azar(150, 240),
+        dura: esBit ? azar(150, 230) : brasa ? azar(90, 170) : azar(150, 240),
         bit: esBit ? (Math.random() < 0.5 ? '0' : '1') : null,
       });
     }
@@ -269,6 +272,11 @@
         nacerHumo(marco, avance - Math.random() * 0.02, true);
         if (Math.random() < 0.5) nacerHumo(marco, avance - Math.random() * 0.03, true);
         for (let i = 0; i < 3; i++) nacerHumo(marco, Math.random() * avance, false);
+        // Brasas: chispas de la llama que suben con el humo. Chicas, brillantes
+        // y de vida corta — son el detalle que hace que el humo se lea CALIENTE
+        // y no como niebla.
+        for (let i = 0; i < 2; i++) nacerHumo(marco, avance - Math.random() * 0.03, false, true);
+        if (Math.random() < 0.6) nacerHumo(marco, Math.random() * avance, false, true);
         if (Math.random() < 0.75) nacerHumo(marco, Math.random() * avance, true);
       }
 
@@ -286,7 +294,8 @@
         if (!aLaVista) continue;
 
         q.desvio += q.deriva;
-        q.subida += (q.bit ? 0.8 : 0.72) * Math.max(1 - q.subida / 120, 0.08);
+        // Las brasas suben más rápido y no se frenan: son livianas.
+        q.subida += q.brasa ? 1.5 : (q.bit ? 0.8 : 0.72) * Math.max(1 - q.subida / 120, 0.08);
         q.r += q.crece;
 
         const p = q.vida / q.dura;
@@ -304,14 +313,27 @@
         if (y < -120 || y > al + 120 || x < -120 || x > an + 120) continue;
 
         if (q.bit) {
-          cx.fillStyle = `rgba(255, 45, 120, ${(alfa * 0.85).toFixed(3)})`;
+          cx.fillStyle = `rgba(79, 196, 176, ${(alfa * 0.95).toFixed(3)})`;
           cx.fillText(q.bit, x, y);
+        } else if (q.brasa) {
+          const g = cx.createRadialGradient(x, y, 0, x, y, q.r * 3.4);
+          g.addColorStop(0, `rgba(255, 190, 120, ${alfa.toFixed(3)})`);
+          g.addColorStop(0.35, `rgba(255, 138, 61, ${(alfa * 0.75).toFixed(3)})`);
+          g.addColorStop(1, 'rgba(255, 138, 61, 0)');
+          cx.fillStyle = g;
+          cx.beginPath();
+          cx.arc(x, y, q.r * 3.4, 0, Math.PI * 2);
+          cx.fill();
         } else {
           const g = cx.createRadialGradient(x, y, 0, x, y, q.r);
-          // Tinta sobre crema: el humo se ve por ser MAS OSCURO que el fondo.
-          g.addColorStop(0, `rgba(20, 18, 16, ${(alfa * 0.3).toFixed(3)})`);
-          g.addColorStop(0.5, `rgba(20, 18, 16, ${(alfa * 0.13).toFixed(3)})`);
-          g.addColorStop(1, 'rgba(20, 18, 16, 0)');
+          // Claro sobre tinta: es como se ve el humo de verdad, por dispersión
+          // de luz sobre un fondo oscuro. Y acá sí puede ir fuerte sin taparle
+          // nada al texto, porque el texto también es claro y está por encima.
+          // Hueso tibio, no gris: el humo de una llama de gas arrastra el
+          // color de la llama.
+          g.addColorStop(0, `rgba(214, 206, 186, ${(alfa * 0.42).toFixed(3)})`);
+          g.addColorStop(0.5, `rgba(190, 186, 168, ${(alfa * 0.2).toFixed(3)})`);
+          g.addColorStop(1, 'rgba(190, 186, 168, 0)');
           cx.fillStyle = g;
           cx.beginPath();
           cx.arc(x, y, q.r, 0, Math.PI * 2);

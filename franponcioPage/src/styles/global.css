@@ -17,28 +17,34 @@
  * La paleta acompaña a PMI-Toolbox para que todo se lea como la misma marca.
  */
 @theme {
-  /* Neo-brutal con onda: crema cálido, tinta casi negra, y un color pleno por
-     bloque. El sistema son tres cosas — borde grueso, sombra dura despegada y
-     color saturado — y todo lo demás se subordina a eso. */
-  --color-fondo: #fdf6e8;
-  --color-panel: #fffdf7;
-  --color-panel-alto: #f4ead6;
-  --color-borde: #141210;
-  --color-borde-vivo: #141210;
-  --color-texto: #141210;
-  --color-tenue: #6b6459;
-  --color-acento: #ff2d78;
-  --color-acento-tenue: #ffc2d8;
+  /* INDUSTRIAL Y NATURALEZA, de noche.
+     Dos mundos que en la práctica son el mismo: un gasoducto cruza el campo.
+     De lo industrial vienen el óxido, el latón y el acero; de la naturaleza,
+     el musgo, el agua y el verde profundo del bosque sin luz. El acento es el
+     naranja de la llama de gas, que pertenece a los dos.
+     Nada de gris neutro: hasta los oscuros tienen verde adentro. */
+  --color-fondo: #0d1411;
+  --color-panel: #16201b;
+  --color-panel-alto: #1e2a23;
+  --color-borde: #e8e4d6;
+  --color-borde-vivo: #e8e4d6;
+  --color-texto: #e8e4d6;
+  --color-tenue: #93a298;
+  /* Llama de gas. */
+  --color-acento: #ff8a3d;
+  --color-acento-tenue: #5c3418;
 
-  /* Un color por categoría, pleno. Sobre estos colores el texto va en tinta,
-     no en blanco: son claros a propósito. */
-  --color-datos: #4cc4ff;
-  --color-gestion: #d8ff3e;
-  --color-herramienta: #9b7bff;
+  /* Una categoría, un material:
+       datos        agua        el teal del río y de la pantalla
+       gestión      latón       el metal de las válvulas
+       herramienta  liquen      lo que crece sobre el caño */
+  --color-datos: #4fc4b0;
+  --color-gestion: #e3ab41;
+  --color-herramienta: #9dc06a;
 
-  /* El gesto de la casa. Si algo lleva borde, lleva esta sombra. */
-  --sombra: 5px 5px 0 var(--color-texto);
-  --sombra-alta: 9px 9px 0 var(--color-texto);
+  /* Sobre oscuro una sombra negra no existe: la sombra dura va en la llama. */
+  --sombra: 5px 5px 0 var(--color-acento);
+  --sombra-alta: 9px 9px 0 var(--color-acento);
 
   --font-titulo: 'Anton', 'Arial Narrow', ui-sans-serif, sans-serif;
   --font-display: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
@@ -47,7 +53,7 @@
 
 html {
   scroll-behavior: smooth;
-  color-scheme: light;
+  color-scheme: dark;
   /* Que el ancla no quede tapada por el header pegajoso. */
   scroll-padding-top: 5rem;
 }
@@ -67,7 +73,7 @@ body {
 /* Trama fina de fondo — el "panel" de sala de control. */
 /* Lunares en vez de cuadrícula: la grilla técnica era del estilo anterior. */
 .trama {
-  background-image: radial-gradient(var(--color-texto) 1.15px, transparent 1.15px);
+  background-image: radial-gradient(rgba(232, 228, 214, 0.12) 1.15px, transparent 1.15px);
   background-size: 26px 26px;
   background-attachment: fixed;
   opacity: 1;
@@ -81,7 +87,7 @@ body {
   margin-top: 2.75rem; padding-top: 1.5rem; border-top: 1px solid var(--color-borde);
 }
 .prosa h3 { font-size: 0.96rem; font-weight: 600; margin-top: 2rem; color: var(--color-acento); }
-.prosa p, .prosa li { color: #2e2a24; }
+.prosa p, .prosa li { color: #cfd6ce; }
 .prosa strong { color: var(--color-texto); font-weight: 600; }
 .prosa a { color: var(--color-acento); text-decoration: underline; text-underline-offset: 3px; }
 .prosa ul, .prosa ol { padding-left: 1.3rem; }

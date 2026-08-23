@@ -166,7 +166,7 @@ const estaciones = proyectos.map((p, i) => ({
     border-radius: 50%;
     border: 3px solid var(--color-texto);
     background: var(--c);
-    box-shadow: 0 0 0 5px var(--color-fondo), 3px 3px 0 var(--color-texto);
+    box-shadow: 0 0 0 5px var(--color-fondo), 3px 3px 0 var(--color-acento);
     transition:
       transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
       box-shadow 0.3s ease;
@@ -221,12 +221,12 @@ const estaciones = proyectos.map((p, i) => ({
     font-size: 1.9rem;
     line-height: 1;
     letter-spacing: -0.01em;
-    color: var(--color-texto);
+    color: #14120f;
     background: var(--c);
     border: 2.5px solid var(--color-texto);
     border-radius: 8px;
     padding: 0.05rem 0.4rem;
-    box-shadow: 3px 3px 0 var(--color-texto);
+    box-shadow: 3px 3px 0 var(--color-acento);
   }
   .pin-dato i {
     font-family: var(--font-mono);
@@ -282,7 +282,7 @@ const estaciones = proyectos.map((p, i) => ({
     font-weight: 700;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--color-texto);
+    color: #14120f;
     background: var(--c);
     border: 2px solid var(--color-texto);
     border-radius: 999px;
@@ -350,7 +350,7 @@ const estaciones = proyectos.map((p, i) => ({
     .parada:hover .nodo,
     .parada.abierta .nodo {
       transform: scale(1.35) rotate(12deg);
-      box-shadow: 0 0 0 5px var(--color-fondo), 5px 5px 0 var(--color-texto);
+      box-shadow: 0 0 0 5px var(--color-fondo), 5px 5px 0 var(--color-acento);
     }
   }
   .pin:focus-visible { outline: 3px solid var(--color-acento); outline-offset: 3px; }
