@@ -62,6 +62,21 @@ const viajeros = CIFRAS.map((bit, i) => {
 
 /* Doce volutas y no nueve: con el desenfoque puesto, menos de eso se ve como
    manchitas sueltas en vez de una columna de gas. */
+/* Nubes altas, que cruzan lento. Anchos distintos para que no se lean como
+   tres copias de la misma. */
+const nubes = [
+  { y: 96, e: 1.0, i: 0 },
+  { y: 168, e: 0.68, i: 1 },
+  { y: 62, e: 1.35, i: 2 },
+];
+
+/* Los pájaros: tres, en bandada floja. */
+const aves = [
+  { dx: 0, dy: 0, e: 1, i: 0 },
+  { dx: 26, dy: 14, e: 0.8, i: 1 },
+  { dx: 48, dy: -8, e: 0.9, i: 2 },
+];
+
 const volutas = Array.from({ length: 12 }, (_, i) => ({
   x: 1412 + azar(i + 201, -11, 11),
   i,
@@ -105,6 +120,25 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
           la chimenea, flotando en cualquier lado del cielo.
           Un radial ya trae el borde suave adentro: sale igual de difuso, se
           mueve donde tiene que moverse y no cuesta un filtro por frame. */}
+      {/* Un relleno plano con opacidad NO es un resplandor: se ve como un
+          disco marrón pegado encima. Lo que lo vuelve luz es que se apague
+          hacia el borde, y eso lo hace un radial. Va para el halo de la
+          antorcha, el brillo del suelo y las nubes. */}
+      <radialGradient id="halo">
+        <stop offset="0" stop-color="#c08552" stop-opacity="0.4" />
+        <stop offset="0.4" stop-color="#c08552" stop-opacity="0.13" />
+        <stop offset="1" stop-color="#c08552" stop-opacity="0" />
+      </radialGradient>
+      <radialGradient id="brillo-suelo">
+        <stop offset="0" stop-color="#c08552" stop-opacity="0.22" />
+        <stop offset="0.55" stop-color="#c08552" stop-opacity="0.07" />
+        <stop offset="1" stop-color="#c08552" stop-opacity="0" />
+      </radialGradient>
+      <radialGradient id="nube">
+        <stop offset="0" stop-color="#dfdcd4" stop-opacity="0.075" />
+        <stop offset="0.6" stop-color="#dfdcd4" stop-opacity="0.03" />
+        <stop offset="1" stop-color="#dfdcd4" stop-opacity="0" />
+      </radialGradient>
       <radialGradient id="voluta">
         <stop offset="0" stop-color="#d4dae0" stop-opacity="0.5" />
         <stop offset="0.45" stop-color="#d4dae0" stop-opacity="0.2" />
@@ -122,6 +156,39 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
     <g class="estrellas">
       {estrellas.map((e) => (
         <circle cx={e.x} cy={e.y} r={e.r} fill="#dfdcd4" opacity={e.o} style={`--i:${e.i}`} />
+      ))}
+    </g>
+
+    {/* Nubes altas: le dan cielo al cielo. */}
+    <g class="nubes">
+      {nubes.map((n) => (
+        <g style={`--i:${n.i}; --e:${n.e}`}>
+          <ellipse cx="0" cy={n.y} rx="132" ry="26" fill="url(#nube)" />
+          <ellipse cx="78" cy={n.y - 10} rx="92" ry="20" fill="url(#nube)" />
+          <ellipse cx="-72" cy={n.y + 6} rx="74" ry="17" fill="url(#nube)" />
+        </g>
+      ))}
+    </g>
+
+    {/* La estrella fugaz: pasa cada tanto y nada más. Si pasara seguido
+        dejaría de ser un hallazgo y sería un tic. */}
+    <g class="fugaz">
+      <path d="M0 0 L58 26" stroke="#dfdcd4" stroke-width="2" stroke-linecap="round" opacity="0.85" />
+      <circle cx="58" cy="26" r="2.4" fill="#dfdcd4" />
+    </g>
+
+    {/* Los pájaros, en bandada floja. */}
+    <g class="aves">
+      {aves.map((a) => (
+        <path
+          d={`M${a.dx - 9} ${a.dy} q 9 -7 9 0 q 0 -7 9 0`}
+          fill="none"
+          stroke="#dfdcd4"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          opacity="0.42"
+          style={`--i:${a.i}; --e:${a.e}`}
+        />
       ))}
     </g>
 
@@ -157,10 +224,28 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
         </g>
       ))}
 
+      {/* El resplandor de la planta sobre el suelo: es lo que la apoya en el
+          piso en vez de dejarla flotando recortada. */}
+      <ellipse cx="1344" cy="398" rx="330" ry="46" fill="url(#brillo-suelo)" />
+
+      {/* La antorcha: el mechero que nunca se apaga. */}
+      <rect x="1196" y="196" width="13" height="94" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.4" />
+      <path d="M1190 196 L1215 196 L1211 186 L1194 186 Z" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.4" />
+
       {/* La chimenea */}
       <rect x="1394" y="150" width="36" height="140" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.5" />
       <rect x="1388" y="144" width="48" height="10" rx="2" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.5" />
       <path d="M1394 186 L1430 186 M1394 224 L1430 224" stroke="#3f4a45" stroke-width="1.2" opacity="0.6" />
+
+      {/* La llama, y su halo sobre el cielo. */}
+      <circle class="halo-llama" cx="1202" cy="166" r="82" fill="url(#halo)" />
+      <g class="llama">
+        <path d="M1202 186 C1193 168 1209 158 1203 140 C1219 154 1223 172 1214 186 Z" fill="#c08552" opacity="0.92" />
+        <path d="M1203 184 C1199 172 1207 166 1204 154 C1212 165 1213 176 1209 184 Z" fill="#dfdcd4" opacity="0.5" />
+      </g>
+
+      {/* La baliza de la chimenea: obligatoria en una torre, y le da pulso. */}
+      <circle class="baliza" cx="1412" cy="138" r="4.5" fill="#e8604a" />
 
       {/* Las ventanas encendidas */}
       <g class="luces">
@@ -211,12 +296,23 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
       ))}
     </g>
 
+    {/* El destello de la pared: cada vez que un dato entra, la planta lo
+        acusa. Es el remate de todo el recorrido — el número llega a algún
+        lado en vez de desvanecerse. */}
+    <circle class="ingreso" cx={ENTRADA_X} cy={CODO_Y + 8} r="15" fill="#6fa39c" />
+
     {/* ── EL GAS, saliendo de la chimenea ────────────────────────────── */}
     <g class="humo">
       {volutas.map((v) => (
         <ellipse cx={v.x} cy="142" rx="26" ry="30" fill="url(#voluta)" style={`--i:${v.i}`} />
       ))}
     </g>
+    {/* Primer plano: una loma oscura al ras. Sin esto la escena es un fondo
+        y una planta; con esto hay un adelante y un atrás. */}
+    <path
+      d="M0 432 L140 418 L300 430 L470 414 L640 428 L820 412 L1000 428 L1180 414 L1360 430 L1520 416 L1600 426 L1600 460 L0 460 Z"
+      fill="#0a0d0c"
+    />
   </svg>
 </section>
 
@@ -298,6 +394,87 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
     100% { transform: translate(344px, 0); opacity: 0; }
   }
 
+  /* Todo lo que escala o rota lleva `transform-box: fill-box`: en SVG el
+     origen por defecto es el del lienzo, no el del elemento, y sin esto la
+     forma no se agranda en el lugar — se dispara por el cuadro. */
+  .llama,
+  .halo-llama,
+  .baliza,
+  .ingreso,
+  .humo ellipse {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .nubes > g {
+    animation: cruzar 90s linear infinite;
+    animation-delay: calc(var(--i) * -30s);
+    transform: scale(var(--e));
+  }
+  @keyframes cruzar {
+    from { transform: translateX(-260px) scale(var(--e)); }
+    to { transform: translateX(1860px) scale(var(--e)); }
+  }
+
+  .aves path {
+    animation: volar 26s linear infinite, aletear 0.9s ease-in-out infinite;
+    animation-delay: calc(var(--i) * -0.5s), calc(var(--i) * -0.22s);
+  }
+  @keyframes volar {
+    from { transform: translate(-90px, 210px) scale(var(--e)); }
+    to { transform: translate(1700px, 78px) scale(var(--e)); }
+  }
+  /* El aleteo es un achatado vertical: con dos trazos alcanza. */
+  @keyframes aletear {
+    0%, 100% { scale: 1 1; }
+    50% { scale: 1 0.55; }
+  }
+
+  .fugaz {
+    transform: translate(180px, 40px);
+    opacity: 0;
+    animation: fugarse 17s linear infinite;
+  }
+  @keyframes fugarse {
+    0%, 88% { transform: translate(180px, 40px); opacity: 0; }
+    89% { opacity: 0.9; }
+    97%, 100% { transform: translate(620px, 232px); opacity: 0; }
+  }
+
+  .llama {
+    animation: arder 1.4s ease-in-out infinite;
+  }
+  @keyframes arder {
+    0%, 100% { transform: scaleY(1) scaleX(1); }
+    32% { transform: scaleY(1.24) scaleX(0.88); }
+    68% { transform: scaleY(0.86) scaleX(1.1); }
+  }
+  .halo-llama {
+    animation: latir-halo 1.4s ease-in-out infinite;
+  }
+  @keyframes latir-halo {
+    0%, 100% { opacity: 0.75; transform: scale(1); }
+    32% { opacity: 1; transform: scale(1.1); }
+  }
+
+  .baliza {
+    animation: balizar 2.6s ease-in-out infinite;
+  }
+  @keyframes balizar {
+    0%, 62%, 100% { opacity: 0.18; transform: scale(0.85); }
+    72% { opacity: 1; transform: scale(1.25); }
+  }
+
+  /* El destello de ingreso late al mismo ritmo con el que llegan los datos:
+     un ciclo de 9 s dividido por los 8 que viajan. */
+  .ingreso {
+    animation: acusar 1.125s ease-out infinite;
+  }
+  @keyframes acusar {
+    0% { opacity: 0.55; transform: scale(0.35); }
+    70%, 100% { opacity: 0; transform: scale(1.5); }
+  }
+
   /* ── Quieta ────────────────────────────────────────────────────────
      No se apaga: se congela. Cada número queda en el punto del recorrido
      que le toca —unos bajando, otros ya entrando—, así que la escena se ve
@@ -310,7 +487,14 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
     :global(html:not([data-mov='on'])) .estrellas circle,
     :global(html:not([data-mov='on'])) .luces rect,
     :global(html:not([data-mov='on'])) .humo ellipse,
-    :global(html:not([data-mov='on'])) .viajeros > g {
+    :global(html:not([data-mov='on'])) .viajeros > g,
+    :global(html:not([data-mov='on'])) .nubes > g,
+    :global(html:not([data-mov='on'])) .aves path,
+    :global(html:not([data-mov='on'])) .fugaz,
+    :global(html:not([data-mov='on'])) .llama,
+    :global(html:not([data-mov='on'])) .halo-llama,
+    :global(html:not([data-mov='on'])) .baliza,
+    :global(html:not([data-mov='on'])) .ingreso {
       animation: none;
     }
     :global(html:not([data-mov='on'])) .humo ellipse {
@@ -320,5 +504,18 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
     :global(html:not([data-mov='on'])) .viajeros > g {
       transform: translate(var(--rx), var(--ry));
     }
+    /* Cada cosa nueva, con su pose de reposo: la escena quieta tiene que
+       verse compuesta, no congelada en el cuadro cero. */
+    :global(html:not([data-mov='on'])) .nubes > g {
+      transform: translateX(calc(240px + var(--i) * 520px)) scale(var(--e));
+    }
+    :global(html:not([data-mov='on'])) .aves path {
+      transform: translate(calc(430px + var(--i) * 44px), calc(150px - var(--i) * 12px))
+        scale(var(--e));
+    }
+    :global(html:not([data-mov='on'])) .fugaz { opacity: 0; }
+    :global(html:not([data-mov='on'])) .halo-llama { opacity: 0.88; }
+    :global(html:not([data-mov='on'])) .baliza { opacity: 1; }
+    :global(html:not([data-mov='on'])) .ingreso { opacity: 0.3; }
   }
 </style>
