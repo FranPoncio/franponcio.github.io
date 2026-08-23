@@ -149,9 +149,14 @@ const estaciones = proyectos.map((p, i) => {
     height: 14px;
     margin-top: -7px;
     border-radius: 5px;
-    border-top: 1px solid var(--color-borde);
-    border-bottom: 1px solid var(--color-borde);
-    background: repeating-linear-gradient(90deg, transparent 0 96px, var(--color-borde) 96px 98px);
+    /* La pared del caño va con el borde VIVO y con relleno propio: con el
+       borde tenue y fondo transparente, el tramo todavía vacío era invisible
+       —y al principio de la traza está vacío casi todo. */
+    border-top: 1px solid var(--color-borde-vivo);
+    border-bottom: 1px solid var(--color-borde-vivo);
+    background:
+      repeating-linear-gradient(90deg, transparent 0 96px, var(--color-borde-vivo) 96px 98px),
+      var(--color-panel-alto);
   }
   .via::after {
     content: '';
@@ -493,23 +498,21 @@ const estaciones = proyectos.map((p, i) => {
     .pega { position: relative; height: auto; overflow: visible; }
 
     .via {
-      left: 1.55rem;
+      left: 1.45rem;
       right: auto;
       top: 0;
       bottom: 0;
-      width: 13px;
+      width: 16px;
       height: auto;
       margin-top: 0;
-      margin-left: -6.5px;
+      margin-left: -8px;
       border-top: 0;
       border-bottom: 0;
-      border-left: 1px solid var(--color-borde);
-      border-right: 1px solid var(--color-borde);
-      background: repeating-linear-gradient(
-        180deg,
-        transparent 0 84px,
-        var(--color-borde) 84px 86px
-      );
+      border-left: 1px solid var(--color-borde-vivo);
+      border-right: 1px solid var(--color-borde-vivo);
+      background:
+        repeating-linear-gradient(180deg, transparent 0 84px, var(--color-borde-vivo) 84px 86px),
+        var(--color-panel-alto);
     }
     .via::after {
       transform: scaleY(var(--avance, 1));
@@ -537,27 +540,29 @@ const estaciones = proyectos.map((p, i) => {
       position: static;
       flex-direction: column;
       gap: 0;
-      padding: 0 1.15rem 0 3rem;
+      padding: 0 1.15rem 0 3.4rem;
       transform: none !important;
     }
     .parada {
       --sangria: 0px;
       flex: none;
-      padding: 0.95rem 0;
+      padding: 1.05rem 0;
       border-left: 0;
     }
+    .pin-titulo { font-size: 0.95rem; }
+    .pin-dato b { font-size: 1.3rem; }
     .abre-tramo { margin-top: 2.4rem; }
 
     .nodo {
-      left: -1.45rem;
-      top: 1.9rem;
+      left: -1.95rem;
+      top: 1.75rem;
       margin-top: 0;
       margin-left: 0;
       z-index: 3;
     }
 
     .pin { position: static; width: 100%; padding: 0; }
-    .pin-dato { margin-top: 0.15rem; }
+    .pin-dato { margin-top: 0.2rem; }
 
     /* En columna el popup no flota: se despliega abajo del pin y empuja. */
     .popup {

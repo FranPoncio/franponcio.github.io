@@ -29,8 +29,18 @@
     z-index: -2;
     pointer-events: none;
     /* Antes iba a 0.5 con alfas de 0.05: 2.5% real, o sea invisible.
-       Ahora se ve. Sigue detrás del texto y sigue sin competir con él. */
+       Ahora se ve. */
     opacity: 1;
+  }
+
+  /* En una pantalla angosta no hay margen: los dígitos caen justo encima de la
+     columna de lectura. Ahí el fondo baja — la legibilidad gana siempre. */
+  @media (max-width: 900px) {
+    /* El fondo baja fuerte. En el celular la animacion la lleva el caño —que
+       es un elemento propio, no el canvas— y el fondo sólo acompaña. Ponerlo
+       más arriba obliga a meter velos detrás del texto, y esos velos terminan
+       pareciendo las tarjetas que justamente sobran. */
+    #fondo { opacity: 0.28; }
   }
 </style>
 
@@ -174,7 +184,7 @@
         }
         for (let i = 0; i < c.bits.length; i++) {
           // La cabeza de la columna es la más marcada y se apaga hacia atrás.
-          const alfa = (1 - i / c.bits.length) * 0.42;
+          const alfa = (1 - i / c.bits.length) * 0.3;
           ctx.fillStyle = rgba(i === 0 ? acento : tinta, alfa);
           ctx.fillText(c.bits[i], c.x, c.y - i * c.paso);
         }
