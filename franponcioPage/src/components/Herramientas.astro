@@ -34,8 +34,8 @@ const filas: { items: Ficha[]; sentido: string }[] = [
           {/* Dos copias: la segunda es la que hace que el ciclo cierre. */}
           {[0, 1].map((copia) => (
             <div class="tanda" aria-hidden={copia === 1 ? 'true' : undefined}>
-              {fila.items.map((f) => (
-                <span class="ficha">
+              {fila.items.map((f, i) => (
+                <span class:list={['ficha', `tono-${i % 4}`]}>
                   {f.path ? (
                     <svg viewBox="0 0 24 24" role="presentation" aria-hidden="true">
                       <path d={f.path} fill="currentColor" />
@@ -108,12 +108,13 @@ const filas: { items: Ficha[]; sentido: string }[] = [
     box-shadow: 3px 3px 0 color-mix(in srgb, var(--color-acento) 55%, transparent);
     transition: transform 0.18s ease, background-color 0.18s ease;
   }
-  /* Las fichas se pintan alternando los colores de la casa: una cinta de un
-     solo color seria una lista, no una cinta. */
-  .tanda > :nth-child(4n + 1) { background: var(--color-datos); }
-  .tanda > :nth-child(4n + 2) { background: var(--color-gestion); }
-  .tanda > :nth-child(4n + 3) { background: var(--color-herramienta); color: var(--color-panel); }
-  .tanda > :nth-child(4n + 3) svg { color: var(--color-panel); }
+  /* El tono va por ficha, no por posición en el DOM: ver la nota del código. */
+  .tono-0 { background: var(--color-datos); color: #0d1411; }
+  .tono-1 { background: var(--color-gestion); color: #0d1411; }
+  .tono-2 { background: var(--color-herramienta); color: #0d1411; }
+  .tono-0 svg,
+  .tono-1 svg,
+  .tono-2 svg { color: #0d1411; }
   .ficha:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--color-acento); }
 
   .ficha svg {
