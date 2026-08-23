@@ -224,43 +224,8 @@ const estaciones = proyectos.map((p) => {
     margin-left: -7px;
     --avance: 0;
   }
-  /* La traza marcada: por acá va a ir el caño. */
-  .via::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    margin-left: -1px;
-    /* Va en el borde VIVO: con --color-borde (#333a36) sobre un fondo casi
-       negro el punteado no se distinguía, y entonces el tramo que todavía no
-       tiene caño parecía vacío en vez de marcado. */
-    background: repeating-linear-gradient(
-      to bottom,
-      var(--color-borde-vivo) 0 9px,
-      transparent 9px 18px
-    );
-    opacity: 0.75;
-  }
-
-  /* ── LA TAPA DEL FINAL ────────────────────────────────────────────────
-     Cada traza termina en una tapa ciega. No es adorno: es lo que separa una
-     corrida de la siguiente. Los trabajos y las herramientas propias son dos
-     recorridos distintos, y sin la tapa el caño seguía de largo por la banda
-     y las dos trazas se leían como una sola tirada. */
-  .via::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    bottom: 0;
-    width: 26px;
-    height: 7px;
-    margin-left: -13px;
-    border-radius: 2px;
-    background: var(--acero-claro);
-    box-shadow: 0 3px 10px -3px rgba(0, 0, 0, 0.85);
-  }
+  /* Acá iba un punteado de zanjeo. Sobra: el tronco de la página ya pasa por
+     detrás, y son dos caños dibujados en el mismo lugar. */
 
   .frente {
     position: absolute;

@@ -35,7 +35,8 @@ const filas: { items: Ficha[]; sentido: string }[] = [
 ];
 ---
 
-<section class="revelar relative bg-panel/60">
+{/* Sin fondo propio: un panel opaco de lado a lado cortaba el caño. */}
+<section class="revelar relative">
   <div class="cinta-marco pt-12 pb-14" role="group" aria-label={lang === 'es' ? 'Herramientas y métodos' : 'Tools and methods'}>
     {
       filas.map((fila) => (

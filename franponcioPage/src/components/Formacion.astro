@@ -51,7 +51,8 @@ const nota = (c: CollectionEntry<'formacion'>) =>
   lang === 'en' ? (c.data.notaEn ?? c.data.nota) : c.data.nota;
 ---
 
-<section class="revelar bg-panel/50">
+{/* Sin fondo propio: un panel opaco de lado a lado cortaba el caño. */}
+<section class="revelar">
   <div class="mx-auto max-w-5xl px-6 py-14">
     <div>
       <Carrusel

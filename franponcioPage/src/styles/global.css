@@ -78,6 +78,19 @@
     #15191a 100%
   );
   --acero-claro: #98a3a5;
+  /* El mismo caño, sin luz encima. Es el que corre por toda la página; el
+     `--acero` pleno queda para el tramo ya recorrido y para la ferretería. */
+  --acero-apagado: linear-gradient(
+    to right,
+    #0e1011 0%,
+    #1b1f1f 12%,
+    #333a3b 30%,
+    #48514f 40%,
+    #363d3e 55%,
+    #22282a 74%,
+    #14181a 88%,
+    #0b0d0e 100%
+  );
 }
 
 html {
