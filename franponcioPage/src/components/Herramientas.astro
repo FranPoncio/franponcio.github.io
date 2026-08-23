@@ -101,11 +101,11 @@ const filas: { items: Ficha[]; sentido: string }[] = [
     flex: none;
     height: 3rem;
     padding: 0 1rem;
-    border: 2.5px solid var(--color-texto);
+    border: 2px solid var(--color-borde-vivo);
     border-radius: 10px;
     background: var(--color-panel);
     color: var(--color-texto);
-    box-shadow: 3px 3px 0 var(--color-texto);
+    box-shadow: 3px 3px 0 color-mix(in srgb, var(--color-acento) 55%, transparent);
     transition: transform 0.18s ease, background-color 0.18s ease;
   }
   /* Las fichas se pintan alternando los colores de la casa: una cinta de un
@@ -114,7 +114,7 @@ const filas: { items: Ficha[]; sentido: string }[] = [
   .tanda > :nth-child(4n + 2) { background: var(--color-gestion); }
   .tanda > :nth-child(4n + 3) { background: var(--color-herramienta); color: var(--color-panel); }
   .tanda > :nth-child(4n + 3) svg { color: var(--color-panel); }
-  .ficha:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--color-texto); }
+  .ficha:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--color-acento); }
 
   .ficha svg {
     width: 1.25rem;

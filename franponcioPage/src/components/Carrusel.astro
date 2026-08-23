@@ -86,14 +86,14 @@ const { etiqueta, anterior, siguiente } = Astro.props;
     height: 2.4rem;
     margin-top: -1.2rem;
     border-radius: 50%;
-    border: 3px solid var(--color-texto);
+    border: 2px solid var(--color-acento);
     background: var(--color-acento);
     color: var(--color-panel);
     cursor: pointer;
-    box-shadow: 3px 3px 0 var(--color-texto);
+    box-shadow: 3px 3px 0 color-mix(in srgb, var(--color-acento) 55%, transparent);
     transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
   }
-  .flecha:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--color-texto); }
+  .flecha:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--color-acento); }
   .flecha:focus-visible { outline: 2px solid var(--color-acento); outline-offset: 2px; }
   .flecha[disabled] { opacity: 0.28; cursor: default; }
   .izq { left: -0.6rem; }
