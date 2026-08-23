@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import '@fontsource/anton';
+@import '@fontsource-variable/syne';
 @import '@fontsource-variable/instrument-sans';
 @import '@fontsource/martian-mono/latin-400.css';
 @import '@fontsource/martian-mono/latin-700.css';
@@ -17,39 +17,49 @@
  * La paleta acompaña a PMI-Toolbox para que todo se lea como la misma marca.
  */
 @theme {
-  /* INDUSTRIAL Y NATURALEZA, de noche.
-     Dos mundos que en la práctica son el mismo: un gasoducto cruza el campo.
-     De lo industrial vienen el óxido, el latón y el acero; de la naturaleza,
-     el musgo, el agua y el verde profundo del bosque sin luz. El acento es el
-     naranja de la llama de gas, que pertenece a los dos.
-     Nada de gris neutro: hasta los oscuros tienen verde adentro. */
-  --color-fondo: #0d1411;
-  --color-panel: #16201b;
-  --color-panel-alto: #1e2a23;
-  /* Los bordes NO van en hueso pleno: un contorno blanco puro sobre casi
-     negro es un golpe, y con 3px por todos lados el sitio vibraba. Van en un
-     verde grisado que pertenece a la paleta. */
-  --color-borde: #4a5a51;
-  --color-borde-vivo: #6d7f74;
-  --color-texto: #ddd8c8;
-  --color-tenue: #8d9c92;
-  /* Llama de gas. */
-  --color-acento: #ff8a3d;
-  --color-acento-tenue: #5c3418;
+  /* NOCHE DE RUTA.
+     Industrial y naturaleza siguen estando, pero ya no de día ni en verde
+     bosque: es la noche de un viaje por ruta. El azul profundo del cielo sin
+     luna, el naranja sodio de las luminarias y de la llama piloto, el cian de
+     una pantalla encendida adentro del auto, el violeta de un fichín, y el
+     liquen que crece sobre el caño.
+     Viajar, los jueguitos, el gas y los datos, todo en la misma paleta.
+     Ningún gris neutro: los oscuros tienen azul adentro. */
+  --color-fondo: #0a0d18;
+  --color-panel: #131a2c;
+  --color-panel-alto: #1d2540;
+  --color-borde: #333e63;
+  --color-borde-vivo: #5f6d9e;
+  --color-texto: #ece7da;
+  --color-tenue: #8d97bd;
+
+  /* Sodio: la luminaria de la ruta y la llama del piloto son el mismo naranja. */
+  --color-acento: #ff8a2b;
+  --color-acento-tenue: #4a2a10;
 
   /* Una categoría, un material:
-       datos        agua        el teal del río y de la pantalla
+       datos        pantalla    el cian del monitor encendido
        gestión      latón       el metal de las válvulas
-       herramienta  liquen      lo que crece sobre el caño */
-  --color-datos: #4fc4b0;
-  --color-gestion: #e3ab41;
-  --color-herramienta: #9dc06a;
+       herramienta  liquen      lo que crece sobre el caño
+       juego        fichín      el violeta del tubo de rayos catódicos
+       ruta         asfalto     el azul de la señalización */
+  --color-datos: #3ae0cf;
+  --color-gestion: #ffc44d;
+  --color-herramienta: #a6e262;
+  --color-juego: #c07bff;
+  --color-ruta: #6d8cff;
 
-  /* Sobre oscuro una sombra negra no existe: la sombra dura va en la llama. */
+  /* Sobre azul noche una sombra negra no existe: la sombra dura va en el sodio. */
   --sombra: 4px 4px 0 color-mix(in srgb, var(--color-acento) 62%, transparent);
   --sombra-alta: 7px 7px 0 color-mix(in srgb, var(--color-acento) 62%, transparent);
 
-  --font-titulo: 'Anton', 'Arial Narrow', ui-sans-serif, sans-serif;
+  /* Syne reemplaza a Anton. Anton es condensada, de un solo peso y sólo sirve
+     en mayúscula y en tamaño grande: por eso todos los títulos del sitio
+     estaban forzados a MAYÚSCULA y en caja baja se caían.
+     Syne es lo contrario —ancha, variable de 400 a 800— así que los títulos
+     pueden ir en caja mixta, con el peso justo en cada tamaño, y siguen
+     teniendo carácter. Es una tipografía de estudio de diseño, no de póster. */
+  --font-titulo: 'Syne Variable', ui-sans-serif, system-ui, sans-serif;
   --font-display: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Martian Mono', ui-monospace, 'SF Mono', monospace;
 }
@@ -88,7 +98,7 @@ body {
   margin-top: 2.75rem; padding-top: 1.5rem; border-top: 1px solid var(--color-borde);
 }
 .prosa h3 { font-size: 0.96rem; font-weight: 600; margin-top: 2rem; color: var(--color-acento); }
-.prosa p, .prosa li { color: #cfd6ce; }
+.prosa p, .prosa li { color: #c8cee0; }
 .prosa strong { color: var(--color-texto); font-weight: 600; }
 .prosa a { color: var(--color-acento); text-decoration: underline; text-underline-offset: 3px; }
 .prosa ul, .prosa ol { padding-left: 1.3rem; }
@@ -248,15 +258,13 @@ body {
    Martian Mono es MUY ancha: a tamaño normal un título ocupa el doble que en
    una grotesca. El tracking negativo fuerte es lo que la vuelve usable en
    titulares — sin eso no entra nada. */
-/* Anton viene en un solo peso y está pensada para mayúsculas y tamaños
-   grandes: en caja baja y chica pierde todo. Por eso los títulos van siempre
-   en mayúscula y bien apretados. */
 h1, h2, h3, .titular {
   font-family: var(--font-titulo);
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: -0.005em;
-  line-height: 0.95;
+  /* 750 es el peso donde Syne tiene más personalidad: las terminaciones se
+     achatan y la letra se vuelve casi una placa. En 800 se empasta. */
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  line-height: 0.98;
 }
 /* Los rótulos en mayúscula van al revés: abiertos, para que se lean como
    etiquetas de instrumento y no como una palabra apretada. */

@@ -109,12 +109,12 @@ const filas: { items: Ficha[]; sentido: string }[] = [
     transition: transform 0.18s ease, background-color 0.18s ease;
   }
   /* El tono va por ficha, no por posición en el DOM: ver la nota del código. */
-  .tono-0 { background: var(--color-datos); color: #0d1411; }
-  .tono-1 { background: var(--color-gestion); color: #0d1411; }
-  .tono-2 { background: var(--color-herramienta); color: #0d1411; }
+  .tono-0 { background: var(--color-datos); color: var(--color-fondo); }
+  .tono-1 { background: var(--color-gestion); color: var(--color-fondo); }
+  .tono-2 { background: var(--color-herramienta); color: var(--color-fondo); }
   .tono-0 svg,
   .tono-1 svg,
-  .tono-2 svg { color: #0d1411; }
+  .tono-2 svg { color: var(--color-fondo); }
   .ficha:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--color-acento); }
 
   .ficha svg {
