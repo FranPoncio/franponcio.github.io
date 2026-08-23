@@ -57,6 +57,30 @@ const anioDe = (periodo: string) => periodo.match(/\d{4}/)?.[0] ?? '';
  */
 const sinFlecha = (s: string) => s.replace(/\s*[→>]+\s*$/, '');
 
+/**
+ * El chip de la ficha lleva el ROL y no la categoría.
+ *
+ * La categoría decía `datos`, `gestion` o `herramienta`, y ahí estaba media
+ * confusión de la página: "herramienta" nombraba a la vez la categoría de una
+ * ficha, la sección de los proyectos propios y el stack de la sección 03. Tres
+ * cosas distintas con la misma palabra.
+ *
+ * El rol, además, dice algo que no dice nada más: qué hice ahí. Y separa solo
+ * los dos tramos —en los trabajos dice "Project Manager", en los proyectos
+ * propios dice "Diseño y desarrollo"— sin necesidad de repetir en cada ficha a
+ * qué sección pertenece.
+ *
+ * La categoría no se va: sigue siendo el COLOR de la estación.
+ */
+const primerRol = (rol: string) => {
+  const uno = rol.split(/\s*·\s*/)[0];
+  // El chip vive arriba de una ficha de 500 px: pasado cierto largo deja de
+  // leerse como etiqueta y empieza a competir con el título. Se corta en la
+  // última palabra entera que entre.
+  if (uno.length <= 27) return uno;
+  return uno.slice(0, uno.lastIndexOf(' ', 26)) + '…';
+};
+
 const estaciones = proyectos.map((p) => ({
   p,
   anio: anioDe(p.data.periodo),
@@ -96,7 +120,7 @@ const estaciones = proyectos.map((p) => ({
                   fondo ya lo dice, y repetirlo era la mitad del contenido de
                   una ficha que de por sí tiene poco. El rango completo pasa
                   al detalle, donde hay lugar y no compite con nada. */}
-              <span class="rubro">{p.data.categoria}</span>
+              <span class="rubro">{primerRol(p.data.rol)}</span>
 
               <span class="titulo">{corto(p.data.titulo)}</span>
 
@@ -217,9 +241,9 @@ const estaciones = proyectos.map((p) => ({
     position: absolute;
     left: 50%;
     bottom: 0;
-    width: 34px;
-    height: 9px;
-    margin-left: -17px;
+    width: 26px;
+    height: 7px;
+    margin-left: -13px;
     border-radius: 2px;
     background: var(--acero-claro);
     box-shadow: 0 3px 10px -3px rgba(0, 0, 0, 0.85);
@@ -289,11 +313,11 @@ const estaciones = proyectos.map((p) => ({
     border-radius: 50%;
     border: 3px solid var(--color-acento);
     background:
-      radial-gradient(circle, var(--color-acento) 0 2.5px, transparent 2.5px),
+      radial-gradient(circle, var(--color-acento) 0 2px, transparent 2px),
       repeating-conic-gradient(
         from 45deg,
-        var(--color-acento) 0 5deg,
-        transparent 5deg 90deg
+        var(--color-acento) 0 6deg,
+        transparent 6deg 90deg
       );
     box-shadow: 0 0 16px 1px color-mix(in srgb, var(--color-acento) 55%, transparent);
   }
@@ -352,8 +376,8 @@ const estaciones = proyectos.map((p) => ({
   .nodo {
     position: relative;
     z-index: 3;
-    width: 46px;
-    height: 28px;
+    width: 34px;
+    height: 20px;
   }
   /* Las dos placas con sus cuatro bulones. La franja del medio va
      transparente: por ahí se ve pasar el caño. */
@@ -363,15 +387,15 @@ const estaciones = proyectos.map((p) => ({
     inset: 0;
     border-radius: 2px;
     background:
-      radial-gradient(circle at 9px 5px, #c8d1d3 2px, transparent 2px),
-      radial-gradient(circle at 37px 5px, #c8d1d3 2px, transparent 2px),
-      radial-gradient(circle at 9px 23px, #c8d1d3 2px, transparent 2px),
-      radial-gradient(circle at 37px 23px, #c8d1d3 2px, transparent 2px),
+      radial-gradient(circle at 7px 3.5px, #c8d1d3 1.5px, transparent 1.5px),
+      radial-gradient(circle at 27px 3.5px, #c8d1d3 1.5px, transparent 1.5px),
+      radial-gradient(circle at 7px 16.5px, #c8d1d3 1.5px, transparent 1.5px),
+      radial-gradient(circle at 27px 16.5px, #c8d1d3 1.5px, transparent 1.5px),
       linear-gradient(
         to bottom,
-        var(--acero-claro) 0 10px,
-        transparent 10px 18px,
-        var(--acero-claro) 18px 28px
+        var(--acero-claro) 0 7px,
+        transparent 7px 13px,
+        var(--acero-claro) 13px 20px
       );
     box-shadow: 0 3px 10px -3px rgba(0, 0, 0, 0.85);
   }
@@ -382,9 +406,9 @@ const estaciones = proyectos.map((p) => ({
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 24px;
-    height: 9px;
-    margin: -4.5px 0 0 -12px;
+    width: 18px;
+    height: 7px;
+    margin: -3.5px 0 0 -9px;
     border-radius: 2px;
     background: var(--c);
     box-shadow: 0 0 13px 0 color-mix(in srgb, var(--c) 70%, transparent);

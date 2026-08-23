@@ -9,11 +9,20 @@ import type { CollectionEntry } from 'astro:content';
  * scroll propio y un salto de copia cuando te acercás a la punta, así es
  * infinita la mueva la animación o la muevas vos con el dedo.
  *
- * NO lleva logos de marca. Ni PMI ni IBM están en `simple-icons`, y dibujar
- * una aproximación de una marca ajena es peor que no ponerla — el mismo
- * criterio que ya está escrito en `lib/logos.ts` para Power BI y Tableau. En su
- * lugar va la sigla compuesta en tipografía, que es un crédito de texto y no
- * una reproducción de un logotipo.
+ * LA CHAPA, en vez de un logo de marca.
+ *
+ * Ni PMI ni IBM están en `simple-icons`. Dibujar de memoria una aproximación
+ * de un logotipo ajeno da algo que NO es su logo: es una versión falsa, y eso
+ * es peor que no poner nada — el mismo criterio que ya está escrito en
+ * `lib/logos.ts` para Power BI y Tableau. Y en una fila de cosas que todavía
+ * no están hechas, un logo institucional falso además sugiere un respaldo que
+ * no existe.
+ *
+ * Así que la insignia es propia: una chapa de equipo, de las que van
+ * remachadas a un caño, con la sigla estampada. Está en el mismo lenguaje que
+ * el resto del sitio —el acero de la traza—, no se parece a un certificado ni
+ * a un logotipo, y el nombre de la entidad va al lado en texto, que es un
+ * crédito y no una reproducción.
  *
  * Y va aparte de la fila de certificados a propósito: esto todavía no está
  * hecho, y no puede ocupar el mismo lugar visual que algo que sí.
@@ -43,13 +52,54 @@ const tanda = Array.from({ length: minimo }, () => cursos).flat();
     <div class="proximos">
       <p class="rotulo">{titulo}</p>
 
+      {/* El degradado de la chapa se define UNA vez y lo referencian todas:
+          con tres copias de la cinta hay dos docenas de chapas, y repetir el
+          <defs> en cada una serían dos docenas de ids duplicados. */}
+      <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+        <defs>
+          <linearGradient id="chapa-acero" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#596366" />
+            <stop offset="0.4" stop-color="#aab5b8" />
+            <stop offset="1" stop-color="#39413f" />
+          </linearGradient>
+        </defs>
+      </svg>
+
       <div class="carril">
         <div class="cinta">
           {[0, 1, 2].map((copia) => (
             <div class="tanda" aria-hidden={copia > 0 ? 'true' : undefined}>
               {tanda.map((c) => (
                 <span class="chip">
-                  <span class="sigla">{sigla(c.data.titulo)}</span>
+                  <svg class="chapa" viewBox="0 0 44 44" role="presentation" aria-hidden="true">
+                    <rect
+                      x="2.5" y="2.5" width="39" height="39" rx="7"
+                      fill="url(#chapa-acero)" stroke="#141819" stroke-width="1.4"
+                    />
+                    <rect
+                      x="5.5" y="5.5" width="33" height="33" rx="5"
+                      fill="none" stroke="#141819" stroke-opacity="0.28"
+                    />
+                    {/* Los cuatro remaches. */}
+                    {[
+                      [9, 9], [35, 9], [9, 35], [35, 35],
+                    ].map(([cx, cy]) => (
+                      <circle cx={cx} cy={cy} r="1.7" fill="#141819" fill-opacity="0.5" />
+                    ))}
+                    {/* La sigla, estampada: hundida en oscuro con una luz abajo. */}
+                    <text
+                      x="22" y="27.6" text-anchor="middle"
+                      font-family="'Roboto Variable', system-ui, sans-serif"
+                      font-size="12.5" font-weight="800" letter-spacing="-0.3"
+                      fill="#ffffff" fill-opacity="0.22"
+                    >{sigla(c.data.titulo)}</text>
+                    <text
+                      x="22" y="27" text-anchor="middle"
+                      font-family="'Roboto Variable', system-ui, sans-serif"
+                      font-size="12.5" font-weight="800" letter-spacing="-0.3"
+                      fill="#14181a"
+                    >{sigla(c.data.titulo)}</text>
+                  </svg>
                   <span class="texto">
                     <b>{c.data.titulo}</b>
                     <i>
@@ -116,20 +166,12 @@ const tanda = Array.from({ length: minimo }, () => cursos).flat();
     border-radius: 10px;
     background: var(--color-panel);
   }
-  /* La sigla, compuesta en tipografía: crédito de texto, no logotipo. */
-  .sigla {
-    display: grid;
-    place-items: center;
+  /* La chapa de equipo. Insignia propia, no un logotipo ajeno. */
+  .chapa {
     flex: none;
     width: 2.5rem;
     height: 2.5rem;
-    border-radius: 7px;
-    background: var(--color-panel-alto);
-    border: 1px solid var(--color-borde-vivo);
-    color: var(--color-herramienta);
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
   }
   .texto {
     display: flex;

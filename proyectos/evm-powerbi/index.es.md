@@ -5,7 +5,7 @@ categoria: datos
 tramo: proyecto
 orden: 2
 periodo: '2026'
-rol: Modelo de datos y diseño del tablero
+rol: Modelo de datos y tablero
 stack: ['Power BI', 'DAX', 'PBIP', 'TMDL', 'EVM']
 kpis:
   - label: Medidas DAX
