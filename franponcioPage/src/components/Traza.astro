@@ -81,11 +81,24 @@ const primerRol = (rol: string) => {
   return uno.slice(0, uno.lastIndexOf(' ', 26)) + '…';
 };
 
-const estaciones = proyectos.map((p) => ({
+/*
+ * El año gigante del fondo se escribe UNA VEZ POR AÑO, no una vez por
+ * estación. Con varios proyectos del mismo año quedaba "2026" repetido tres
+ * veces seguidas, una abajo de la otra, y en vez de ubicarte en el tiempo
+ * parecía un error de maquetado. Si la estación repite el año de la anterior,
+ * va sin año: el que sigue arriba se entiende que sigue valiendo.
+ */
+let anioPrevio = '';
+const estaciones = proyectos.map((p) => {
+  const propio = anioDe(p.data.periodo);
+  const anio = propio === anioPrevio ? '' : propio;
+  anioPrevio = propio;
+  return {
   p,
-  anio: anioDe(p.data.periodo),
+  anio,
   marcas: logosDelStack(p.data.stack, 4),
-}));
+  };
+});
 ---
 
 <section class="marco" id={id}>
@@ -109,7 +122,7 @@ const estaciones = proyectos.map((p) => ({
         <li class="parada" style={`--c: var(--color-${p.data.categoria})`}>
           {/* El año gigante, en hueco, detrás de la ficha: la ficha se apoya
               adentro del número y se lee el año por arriba y por abajo. */}
-          <span class="anio-fondo" aria-hidden="true">{anio}</span>
+          {anio && <span class="anio-fondo" aria-hidden="true">{anio}</span>}
 
           <span class="nodo" aria-hidden="true" />
           <span class="tallo" aria-hidden="true" />
@@ -311,9 +324,9 @@ const estaciones = proyectos.map((p) => ({
     height: 19px;
     margin-left: -9.5px;
     border-radius: 50%;
-    border: 3px solid var(--color-acento);
+    border: 2.5px solid var(--color-acento);
     background:
-      radial-gradient(circle, var(--color-acento) 0 2px, transparent 2px),
+      radial-gradient(circle, var(--color-acento) 0 1.6px, transparent 1.6px),
       repeating-conic-gradient(
         from 45deg,
         var(--color-acento) 0 6deg,
@@ -693,6 +706,10 @@ const estaciones = proyectos.map((p) => ({
   }
 
   @media (prefers-reduced-motion: reduce) {
+    /* Cada regla de acá va colgada de `html:not([data-mov='on'])`: si el
+       visitante prendió el movimiento a mano con el botón de la barra, su
+       decisión gana sobre la del sistema y nada de esto se aplica. */
+
     .ficha, .chevron, .mas, .mas-dentro > * { transition: none; }
     :global(.js-on) .parada > *:not(.nodo) { opacity: 1; translate: none; transition: none; }
     :global(.js-on) .parada .anio-fondo { translate: -50% 0; }
@@ -706,12 +723,12 @@ const estaciones = proyectos.map((p) => ({
        esté congelada. Así que se mantiene el mismo momento de siempre (cuando
        la válvula llega) pero la brida se enciende nomás: cambia la opacidad y
        no se corre ni un píxel. Sin `scaleX`, que sí sería movimiento. */
-    :global(.js-on) .parada .nodo {
+    :global(html:not([data-mov='on'])) :global(.js-on) .parada .nodo {
       opacity: 0;
       transform: none;
       transition: opacity 0.5s ease;
     }
-    :global(.js-on) .parada.bridada .nodo {
+    :global(html:not([data-mov='on'])) :global(.js-on) .parada.bridada .nodo {
       opacity: 1;
       transform: none;
     }
@@ -722,7 +739,9 @@ const estaciones = proyectos.map((p) => ({
   // Hay más de una traza en la página —los trabajos y las herramientas son
   // dos secciones separadas—, así que todo esto corre por cada una.
   const trazas = [...document.querySelectorAll<HTMLElement>('.marco')];
-  const suave = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const suave =
+    !matchMedia('(prefers-reduced-motion: reduce)').matches ||
+    document.documentElement.dataset.mov === 'on';
 
   /**
    * Cuenta una cifra hacia arriba respetando su formato: "12.000 km" cuenta el

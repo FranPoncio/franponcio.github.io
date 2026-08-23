@@ -4,10 +4,15 @@
  *
  * El scroll lo hace el navegador —scroll-snap-type y scroll-behavior—, así que
  * anda con el dedo, con la rueda y con el teclado aunque el script no corra.
- * El script sólo agrega las flechas y las apaga cuando no hay a dónde ir.
+ * El script agrega las flechas y, si el contenido viene triplicado
+ * (`data-vueltas`), hace que la cinta no se termine nunca: salta de una copia
+ * a la equivalente al acercarse a cualquiera de las dos puntas. Como las
+ * copias son idénticas, el salto no se ve.
  */
 
 interface Props {
+  /** true = el contenido viene en tres copias y la cinta da la vuelta. */
+  vueltas?: boolean;
   /** Para el lector de pantalla: qué hay adentro. */
   etiqueta: string;
   /** Texto de las flechas para el lector de pantalla. */
@@ -15,10 +20,10 @@ interface Props {
   siguiente: string;
 }
 
-const { etiqueta, anterior, siguiente } = Astro.props;
+const { etiqueta, anterior, siguiente, vueltas = false } = Astro.props;
 ---
 
-<div class="carrusel" data-carrusel>
+<div class="carrusel" data-carrusel data-vueltas={vueltas ? "" : undefined}>
   <div class="pista" tabindex="0" role="group" aria-label={etiqueta}>
     <slot />
   </div>
@@ -130,7 +135,12 @@ const { etiqueta, anterior, siguiente } = Astro.props;
     const revisar = () => {
       const tope = pista.scrollWidth - pista.clientWidth - 2;
       for (const f of flechas) {
-        f.disabled = Number(f.dataset.paso) < 0 ? pista.scrollLeft <= 2 : pista.scrollLeft >= tope;
+        // Si da vueltas nunca se llega al final, así que no se apagan nunca.
+        f.disabled = carrusel.hasAttribute('data-vueltas')
+          ? false
+          : Number(f.dataset.paso) < 0
+            ? pista.scrollLeft <= 2
+            : pista.scrollLeft >= tope;
       }
       // Si entra todo, el carrusel no es un carrusel: no van flechas.
       const sobra = pista.scrollWidth > pista.clientWidth + 4;
@@ -144,8 +154,50 @@ const { etiqueta, anterior, siguiente } = Astro.props;
         pista.scrollBy({ left: Number(f.dataset.paso) * paso() });
       });
     }
-    pista.addEventListener('scroll', revisar, { passive: true });
-    addEventListener('resize', revisar, { passive: true });
+    // ── La vuelta ──────────────────────────────────────────────────────
+    // Con el contenido en tres copias, la posición X y la posición X + un
+    // tercio muestran exactamente lo mismo. Se arranca sobre la copia del
+    // medio y se salta al acercarse a una punta, dejando siempre una copia
+    // entera de colchón para seguir en cualquiera de los dos sentidos.
+    const daVueltas = carrusel.hasAttribute('data-vueltas');
+    let acomodando = false;
+
+    const copia = () => pista.scrollWidth / 3;
+    const centrar = () => {
+      if (!daVueltas) return;
+      acomodando = true;
+      pista.scrollLeft = copia();
+      acomodando = false;
+    };
+
+    const envolver = () => {
+      if (!daVueltas || acomodando) return;
+      const c = copia();
+      if (c < 10) return;
+      const x = pista.scrollLeft;
+      if (x > c * 1.75 || x < c * 0.25) {
+        acomodando = true;
+        // Sin `behavior`, que si no el salto se anima y se ve.
+        pista.scrollLeft = x > c * 1.75 ? x - c : x + c;
+        acomodando = false;
+      }
+    };
+
+    pista.addEventListener(
+      'scroll',
+      () => {
+        envolver();
+        revisar();
+      },
+      { passive: true },
+    );
+    addEventListener('resize', () => {
+      centrar();
+      revisar();
+    }, { passive: true });
+    // El ancho real recién se sabe con las imágenes y las fuentes cargadas.
+    addEventListener('load', centrar);
+    centrar();
     revisar();
   }
 </script>

@@ -181,12 +181,6 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
       <rect x={EJE_X - 7} y="0" width="14" height={CODO_Y + 22} fill="url(#acero-v)" />
       {/* Tramo horizontal, desde el codo hasta la pared de la planta */}
       <rect x={EJE_X - 7} y={CODO_Y + 8} width={ENTRADA_X - EJE_X + 7} height="14" fill="url(#acero-h)" />
-      {/* El redondeo exterior del codo, que es lo que lo hace parecer un codo
-          y no dos caños cruzados. */}
-      <path
-        d={`M${EJE_X - 7} ${CODO_Y + 8} A 15 15 0 0 1 ${EJE_X + 8} ${CODO_Y + 23} L${EJE_X - 7} ${CODO_Y + 23} Z`}
-        fill="#0f1110"
-      />
 
       {/* Bridas del tramo horizontal */}
       {[0, 1, 2].map((i) => (
@@ -309,17 +303,21 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
      que le toca —unos bajando, otros ya entrando—, así que la escena se ve
      compuesta y no todo amontonado en el arranque. */
   @media (prefers-reduced-motion: reduce) {
-    .estrellas circle,
-    .luces rect,
-    .humo ellipse,
-    .viajeros > g {
+    /* Cada regla de acá va colgada de `html:not([data-mov='on'])`: si el
+       visitante prendió el movimiento a mano con el botón de la barra, su
+       decisión gana sobre la del sistema y nada de esto se aplica. */
+
+    :global(html:not([data-mov='on'])) .estrellas circle,
+    :global(html:not([data-mov='on'])) .luces rect,
+    :global(html:not([data-mov='on'])) .humo ellipse,
+    :global(html:not([data-mov='on'])) .viajeros > g {
       animation: none;
     }
-    .humo ellipse {
+    :global(html:not([data-mov='on'])) .humo ellipse {
       transform: translateY(calc(var(--i) * -17px)) scale(calc(0.6 + var(--i) * 0.2));
       opacity: calc(0.9 - var(--i) * 0.08);
     }
-    .viajeros > g {
+    :global(html:not([data-mov='on'])) .viajeros > g {
       transform: translate(var(--rx), var(--ry));
     }
   }

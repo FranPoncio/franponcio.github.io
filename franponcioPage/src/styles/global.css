@@ -106,6 +106,27 @@ body {
   background-image: none;
 }
 
+/* ── EL FONDO ─────────────────────────────────────────────────────────────
+   Estaba liso. Los lunares de antes competían con el humo y por eso salieron,
+   pero dejar el fondo pelado tampoco: una grilla de plano técnico, muy tenue
+   y grande, le da profundidad sin pelearse con nada.
+   Va en un pseudo-elemento fijo detrás de todo —incluso del canvas del humo—
+   y se desvanece hacia abajo, así que donde hay contenido denso no molesta.
+   `pointer-events: none` porque no tiene que interceptar un solo click. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(223, 220, 212, 0.028) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(223, 220, 212, 0.028) 1px, transparent 1px);
+  background-size: 104px 104px;
+  -webkit-mask-image: radial-gradient(ellipse 120% 80% at 50% 0%, #000 15%, transparent 70%);
+  mask-image: radial-gradient(ellipse 120% 80% at 50% 0%, #000 15%, transparent 70%);
+}
+
 /* Prosa de los casos. El Markdown sale sin clases: se estila acá una vez. */
 .prosa { line-height: 1.75; }
 .prosa > * + * { margin-top: 1.15rem; }
