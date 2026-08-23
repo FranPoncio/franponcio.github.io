@@ -1,0 +1,189 @@
+---
+/**
+ * El fondo vivo: humo de gas y datos cayendo, detrás de todo.
+ *
+ * Dos capas sobre un solo canvas:
+ *   · PLUMAS — manchas suaves que suben y se deshacen, como una fuga de gas.
+ *   · DATOS  — columnas de unos y ceros que bajan, como la lectura del caño.
+ *
+ * Las dos reaccionan al scroll: la velocidad con la que scrolleás empuja el
+ * humo hacia arriba y acelera la caída de los dígitos. Quieto, el fondo sigue
+ * respirando despacio; en movimiento, se agita.
+ *
+ * Va en un canvas y no en SVG porque son cientos de elementos redibujados por
+ * frame: en el DOM eso es inviable, en canvas es un solo elemento.
+ *
+ * Es DECORATIVO: aria-hidden, sin eventos de puntero, y con
+ * prefers-reduced-motion no se dibuja nada.
+ */
+---
+
+<canvas id="fondo" aria-hidden="true"></canvas>
+
+<style>
+  #fondo {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    pointer-events: none;
+    /* Muy por debajo del umbral de lectura: tiene que sentirse, no leerse. */
+    opacity: 0.5;
+  }
+</style>
+
+<script>
+  const lienzo = document.querySelector<HTMLCanvasElement>('#fondo');
+  const ctx = lienzo?.getContext('2d', { alpha: true });
+  const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (lienzo && ctx && !quieto) {
+    const raiz = getComputedStyle(document.documentElement);
+    // Se resuelven los tokens a componentes RGB UNA vez. Antes se armaba un
+    // color-mix() por dígito y por pluma —cientos de strings CSS por frame que
+    // el navegador tiene que parsear— y ademas color-mix dentro de canvas no
+    // está en todos los navegadores. Con rgba() es más rápido y anda en todos.
+    const aRgb = (css: string, respaldo: [number, number, number]): [number, number, number] => {
+      const h = css.trim();
+      const m = /^#?([0-9a-f]{6})$/i.exec(h);
+      if (!m) return respaldo;
+      const n = parseInt(m[1], 16);
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    };
+    const acento = aRgb(raiz.getPropertyValue('--color-acento'), [12, 122, 69]);
+    const tinta = aRgb(raiz.getPropertyValue('--color-texto'), [13, 26, 19]);
+    const rgba = ([r, g, b]: [number, number, number], a: number) => `rgba(${r},${g},${b},${a})`;
+
+    let an = 0;
+    let al = 0;
+    let dpr = 1;
+
+    interface Pluma { x: number; y: number; r: number; vy: number; vida: number; }
+    interface Columna { x: number; y: number; v: number; bits: string[]; paso: number; }
+
+    let plumas: Pluma[] = [];
+    let columnas: Columna[] = [];
+
+    const azar = (a: number, b: number) => a + Math.random() * (b - a);
+
+    const armar = () => {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      an = lienzo.clientWidth;
+      al = lienzo.clientHeight;
+      lienzo.width = Math.round(an * dpr);
+      lienzo.height = Math.round(al * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // La densidad sale del área: en un celular no van 40 plumas.
+      const area = (an * al) / (1440 * 900);
+      const cuantasPlumas = Math.round(26 * Math.min(Math.max(area, 0.35), 1.4));
+      const cuantasCols = Math.round(18 * Math.min(Math.max(area, 0.35), 1.4));
+
+      plumas = Array.from({ length: cuantasPlumas }, () => ({
+        x: azar(0, an),
+        y: azar(0, al),
+        r: azar(60, 190),
+        vy: azar(0.05, 0.22),
+        vida: azar(0, 1),
+      }));
+
+      columnas = Array.from({ length: cuantasCols }, () => ({
+        x: azar(0, an),
+        y: azar(-al, al),
+        v: azar(0.25, 0.75),
+        paso: azar(15, 22),
+        bits: Array.from({ length: Math.round(azar(6, 16)) }, () =>
+          Math.random() < 0.5 ? '0' : '1',
+        ),
+      }));
+    };
+
+    // Cuánto se scrolleó desde el último frame: es lo que agita el fondo.
+    let ultimoY = window.scrollY;
+    let empuje = 0;
+    addEventListener(
+      'scroll',
+      () => {
+        const d = window.scrollY - ultimoY;
+        ultimoY = window.scrollY;
+        // Se acumula y se acota: un scroll violento no tiene que reventarlo.
+        empuje = Math.min(Math.max(empuje + d * 0.045, -14), 14);
+      },
+      { passive: true },
+    );
+
+    let corriendo = true;
+    document.addEventListener('visibilitychange', () => {
+      corriendo = !document.hidden;
+      if (corriendo) {
+        ultimoY = window.scrollY;
+        requestAnimationFrame(pintar);
+      }
+    });
+
+    function pintar() {
+      if (!corriendo) return;
+      ctx.clearRect(0, 0, an, al);
+
+      // El empuje se disipa solo: el fondo vuelve a su ritmo si dejás de scrollear.
+      empuje *= 0.93;
+
+      // ── Humo ────────────────────────────────────────────────────────────
+      for (const p of plumas) {
+        p.vida += 0.0025;
+        if (p.vida > 1) {
+          p.vida = 0;
+          p.x = azar(0, an);
+          p.y = azar(al * 0.55, al * 1.15);
+          p.r = azar(60, 190);
+        }
+        p.y -= p.vy + empuje * 0.22;
+        p.x += Math.sin((p.y + p.r) * 0.004) * 0.35;
+        if (p.y < -p.r) p.y = al + p.r;
+
+        // Se desvanece en las dos puntas de su vida: nunca aparece de golpe.
+        const alfa = Math.sin(p.vida * Math.PI) * 0.05;
+        if (alfa <= 0.001) continue;
+
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+        g.addColorStop(0, rgba(acento, alfa));
+        g.addColorStop(1, rgba(acento, 0));
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // ── Unos y ceros ────────────────────────────────────────────────────
+      ctx.font = "500 11px 'Martian Mono', ui-monospace, monospace";
+      ctx.textAlign = 'center';
+      for (const c of columnas) {
+        c.y += c.v + empuje * 0.85;
+        const largo = c.bits.length * c.paso;
+        if (c.y - largo > al) {
+          c.y = -azar(0, al * 0.4);
+          c.x = azar(0, an);
+        } else if (c.y + largo < 0) {
+          c.y = al + azar(0, al * 0.4);
+        }
+        // Cada tanto un bit cambia: la columna no es una cadena fija.
+        if (Math.random() < 0.03) {
+          c.bits[Math.floor(Math.random() * c.bits.length)] = Math.random() < 0.5 ? '0' : '1';
+        }
+        for (let i = 0; i < c.bits.length; i++) {
+          // La cabeza de la columna es la más marcada y se apaga hacia atrás.
+          const alfa = (1 - i / c.bits.length) * 0.16;
+          ctx.fillStyle = rgba(i === 0 ? acento : tinta, alfa);
+          ctx.fillText(c.bits[i], c.x, c.y - i * c.paso);
+        }
+      }
+
+      requestAnimationFrame(pintar);
+    }
+
+    armar();
+    addEventListener('resize', armar, { passive: true });
+    requestAnimationFrame(pintar);
+  }
+</script>
