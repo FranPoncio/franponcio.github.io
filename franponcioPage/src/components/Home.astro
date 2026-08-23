@@ -97,39 +97,52 @@ const titulo =
     <span class="arranque" aria-hidden="true"></span>
   </header>
 
-  <Banda
-    id="experiencia"
-    indice="01"
-    titulo={t('tramo.laboral')}
-    anios={anios(laboral)}
-    bajada={t('tramo.laboral.bajada')}
-  />
-  <Traza id="traza-laboral" proyectos={laboral} lang={lang} />
+  {/*
+    EL TRONCO — el caño corre de punta a punta, sin cortarse.
+    Antes el caño existía sólo adentro de las dos trazas y entre sección y
+    sección quedaban muñones que se desvanecían: en el Stack y en la Formación
+    directamente no había nada. Ahora hay UN caño, absoluto sobre todo este
+    bloque, y las trazas le pintan encima el tramo recorrido.
+  */}
+  <div class="tronco">
+    <span class="troncal" aria-hidden="true"></span>
 
   <Banda
-    id="propias"
-    indice="02"
-    titulo={t('tramo.proyecto')}
-    anios={anios(propias)}
-    bajada={t('tramo.proyecto.bajada')}
-  />
-  <Traza id="traza-propias" proyectos={propias} lang={lang} />
+      id="experiencia"
+      indice="01"
+      titulo={t('tramo.laboral')}
+      anios={anios(laboral)}
+      bajada={t('tramo.laboral.bajada')}
+    />
+    <Traza id="traza-laboral" proyectos={laboral} lang={lang} />
 
-  <Banda
-    id="herramientas"
-    indice="03"
-    titulo={t('herramientas.titulo')}
-    bajada={t('banda.stack.bajada')}
-  />
-  <Herramientas lang={lang} />
+    <Banda
+      id="propias"
+      indice="02"
+      titulo={t('tramo.proyecto')}
+      anios={anios(propias)}
+      bajada={t('tramo.proyecto.bajada')}
+    />
+    <Traza id="traza-propias" proyectos={propias} lang={lang} />
 
-  <Banda
-    id="formacion"
-    indice="04"
-    titulo={t('formacion.titulo')}
-    bajada={t('banda.formacion.bajada')}
-  />
-  <Formacion cursos={cursos} lang={lang} />
+    <Banda
+      id="herramientas"
+      indice="03"
+      titulo={t('herramientas.titulo')}
+      bajada={t('banda.stack.bajada')}
+    />
+    <Herramientas lang={lang} />
+
+    <Banda
+      id="formacion"
+      indice="04"
+      titulo={t('formacion.titulo')}
+      bajada={t('banda.formacion.bajada')}
+    />
+    <Formacion cursos={cursos} lang={lang} />
+
+
+  </div>
 
   {/* El remate: la postal de industria, gas y datos, toda junta. */}
   <Planta />
@@ -208,6 +221,23 @@ const titulo =
     }
 
     /* El nacimiento del eje: de acá para abajo la línea no se corta más. */
+    .tronco {
+      position: relative;
+    }
+    /* El caño de fondo: uno solo, del principio al final. Va apagado porque
+       el tramo que ya recorriste lo pinta la traza por encima, en acero
+       pleno; si los dos fueran iguales no se notaría el avance. */
+    .troncal {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 14px;
+      margin-left: -7px;
+      z-index: 0;
+      background: var(--acero-apagado);
+    }
+
     /* De acá nace el caño: aparece de la nada y ya viene tendido. */
     .arranque {
       width: 14px;
