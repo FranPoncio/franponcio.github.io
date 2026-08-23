@@ -2,7 +2,6 @@
 import type { CollectionEntry } from 'astro:content';
 import { Image, getImage } from 'astro:assets';
 import Carrusel from './Carrusel.astro';
-import Proximos from './Proximos.astro';
 import { usarTraduccion, type Idioma } from '../i18n/ui';
 
 /**
@@ -10,9 +9,17 @@ import { usarTraduccion, type Idioma } from '../i18n/ui';
  *
  * Antes eran tres columnas por estado (cursando / completado / planificado) y
  * las columnas flacas dejaban huecos. Ahora es una sola fila de imágenes: lo
- * hecho y lo que está en curso van juntos, en orden, y lo planificado queda
- * abajo en su propia cinta (ver `Proximos.astro`) — todavía no es una
- * credencial y no debería ocupar el mismo lugar visual que una.
+ * Va TODO en la misma fila: lo hecho, lo que está en curso y lo planificado.
+ * Antes lo planificado iba aparte, abajo, con el argumento de que todavía no
+ * es una credencial y no debería ocupar el mismo lugar visual que una. El
+ * argumento sigue en pie, pero se resuelve mejor con una chapa de estado en
+ * cada tarjeta que sacando las cosas de la fila: así se ve todo el recorrido
+ * de una y igual se distingue de un vistazo qué está hecho y qué no.
+ *
+ * El orden pone adelante lo que ya tiene respaldo —completado y cursando— y
+ * deja lo planificado al final. Ordenado sólo por `orden`, los dos cursos
+ * planificados quedaban PRIMEROS, encabezando la formación con dos cosas que
+ * todavía no existen.
  *
  * Los cursos sin certificado en el repo muestran una insignia generada, que
  * dice en la propia imagen que no es un certificado.
@@ -26,13 +33,11 @@ interface Props {
 const { cursos, lang } = Astro.props;
 const t = usarTraduccion(lang);
 
-const enFila = cursos
-  .filter((c) => c.data.estado !== 'planificado')
-  .sort((a, b) => a.data.orden - b.data.orden);
-
-const proximos = cursos
-  .filter((c) => c.data.estado === 'planificado')
-  .sort((a, b) => a.data.orden - b.data.orden);
+const peso = { cursando: 0, completado: 0, planificado: 1 } as const;
+const enFila = [...cursos].sort(
+  (a, b) =>
+    peso[a.data.estado] - peso[b.data.estado] || a.data.orden - b.data.orden,
+);
 
 // `getImage` corre en el build: la URL del certificado en grande ya viene
 // optimizada y con hash, nunca se sirve el original.
@@ -63,9 +68,14 @@ const nota = (c: CollectionEntry<'formacion'>) =>
                 {imagen && (
                   <a
                     href={plenos.get(c.id)}
-                    class="block overflow-hidden border-b-[3px] border-borde bg-panel-alto"
+                    class="relative block overflow-hidden border-b border-borde bg-panel-alto"
                     aria-label={`${t('formacion.certificado')}: ${c.data.titulo}`}
                   >
+                    {c.data.estado !== 'completado' && (
+                      <span class:list={['estado', c.data.estado]}>
+                        {t(`formacion.${c.data.estado}`)}
+                      </span>
+                    )}
                     <Image
                       src={imagen}
                       alt={
@@ -75,24 +85,24 @@ const nota = (c: CollectionEntry<'formacion'>) =>
                       }
                       widths={[340, 680]}
                       sizes="340px"
-                      class="h-32 w-full object-cover object-top"
+                      class="h-24 w-full object-cover object-top"
                       loading="lazy"
                     />
                   </a>
                 )}
 
-                <div class="flex flex-1 flex-col p-3.5">
-                  <p class="text-sm font-medium leading-snug">{c.data.titulo}</p>
-                  <p class="mt-1 font-mono text-[0.66rem] text-tenue">
+                <div class="flex flex-1 flex-col p-2.5">
+                  <p class="text-[0.78rem] font-medium leading-snug">{c.data.titulo}</p>
+                  <p class="mt-0.5 font-mono text-[0.58rem] text-tenue">
                     {c.data.entidad} · {c.data.periodo}
                   </p>
-                  {nota(c) && <p class="mt-2 text-xs leading-snug text-tenue">{nota(c)}</p>}
+                  {nota(c) && <p class="mt-1.5 text-[0.68rem] leading-snug text-tenue">{nota(c)}</p>}
 
-                  <div class="mt-auto flex flex-wrap gap-2 pt-4">
+                  <div class="mt-auto flex flex-wrap gap-1.5 pt-2.5">
                     {c.data.certificado && (
                       <a
                         href={plenos.get(c.id)}
-                        class="rounded border border-borde px-2 py-1 font-mono text-[0.62rem] text-tenue transition-colors hover:border-acento hover:text-acento"
+                        class="rounded border border-borde px-1.5 py-0.5 font-mono text-[0.56rem] text-tenue transition-colors hover:border-acento hover:text-acento"
                       >
                         {t('formacion.verCertificado')}
                       </a>
@@ -100,7 +110,7 @@ const nota = (c: CollectionEntry<'formacion'>) =>
                     {c.data.certificadoPdf && (
                       <a
                         href={c.data.certificadoPdf}
-                        class="rounded border border-borde px-2 py-1 font-mono text-[0.62rem] text-tenue transition-colors hover:border-acento hover:text-acento"
+                        class="rounded border border-borde px-1.5 py-0.5 font-mono text-[0.56rem] text-tenue transition-colors hover:border-acento hover:text-acento"
                       >
                         PDF ↗
                       </a>
@@ -108,7 +118,7 @@ const nota = (c: CollectionEntry<'formacion'>) =>
                     {c.data.credencial && (
                       <a
                         href={c.data.credencial}
-                        class="rounded border border-borde px-2 py-1 font-mono text-[0.62rem] text-tenue transition-colors hover:border-acento hover:text-acento"
+                        class="rounded border border-borde px-1.5 py-0.5 font-mono text-[0.56rem] text-tenue transition-colors hover:border-acento hover:text-acento"
                       >
                         {t('formacion.credencial')}
                       </a>
@@ -122,23 +132,38 @@ const nota = (c: CollectionEntry<'formacion'>) =>
       </Carrusel>
     </div>
 
-    <Proximos cursos={proximos} titulo={t('formacion.proximo')} />
-
   </div>
 </section>
 
 <style>
+  /* La chapa de estado: lo que reemplaza a sacar las cosas de la fila.
+     Sin esto, un curso planificado se ve igual que uno con certificado. */
+  .estado {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.4rem;
+    z-index: 2;
+    border-radius: 999px;
+    padding: 0.1rem 0.45rem;
+    font-size: 0.52rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-fondo);
+  }
+  .estado.cursando { background: var(--color-datos); }
+  .estado.planificado { background: var(--color-tenue); }
+
   .ficha-curso {
-    border: 2px solid var(--color-borde-vivo);
-    border-radius: 14px;
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
     background: var(--color-panel);
-    box-shadow: var(--sombra);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   @media (hover: hover) {
     .ficha-curso:hover {
-      transform: translate(-3px, -3px);
-      box-shadow: var(--sombra-alta);
+      transform: translateY(-3px);
+      border-color: var(--color-borde-vivo);
     }
   }
 </style>
