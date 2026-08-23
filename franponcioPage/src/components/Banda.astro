@@ -50,16 +50,26 @@ const { indice, titulo, bajada, anios, id } = Astro.props;
   }
 
   /* El tramo de eje que entra y el que sale: la línea no se corta nunca. */
+  /* El tramo de caño que entra y el que sale: no se corta entre secciones.
+     Mismo cilindro que en la traza, apagándose en la punta. */
   .eje {
-    width: 2px;
+    width: 14px;
     height: 4rem;
-    background: linear-gradient(to bottom, transparent, var(--color-borde));
+    border-radius: 3px;
     margin-bottom: 1.6rem;
+    background: linear-gradient(
+      to right,
+      #241a11 0%, #4f3a22 16%, #966c42 38%, #c79a68 50%,
+      #8a6238 62%, #46331e 84%, #1e150d 100%
+    );
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 85%);
+    mask-image: linear-gradient(to bottom, transparent, #000 85%);
   }
   .eje.abajo {
-    height: 2.4rem;
+    height: 2.6rem;
     margin: 1.8rem 0 0;
-    background: linear-gradient(to bottom, var(--color-borde), transparent);
+    -webkit-mask-image: linear-gradient(to bottom, #000 15%, transparent);
+    mask-image: linear-gradient(to bottom, #000 15%, transparent);
   }
 
   .num {
@@ -105,6 +115,7 @@ const { indice, titulo, bajada, anios, id } = Astro.props;
   @media (max-width: 700px) {
     .banda { padding-top: 3rem; }
     .eje { height: 2.6rem; margin-bottom: 1.2rem; }
+    .eje.abajo { height: 1.8rem; }
     .num { width: 2.6rem; height: 2.6rem; font-size: 1rem; }
     h2 { margin-top: 1.1rem; }
   }
