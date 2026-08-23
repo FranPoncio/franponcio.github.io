@@ -669,11 +669,28 @@ const estaciones = proyectos.map((p) => ({
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ficha, .nodo, .chevron, .mas, .mas-dentro > * { transition: none; }
-    /* Nada se arma a la vista: las bridas ya están todas puestas. */
-    :global(.js-on) .parada .nodo { opacity: 1; transform: none; transition: none; }
+    .ficha, .chevron, .mas, .mas-dentro > * { transition: none; }
     :global(.js-on) .parada > *:not(.nodo) { opacity: 1; translate: none; transition: none; }
     :global(.js-on) .parada .anio-fondo { translate: -50% 0; }
+
+    /* LA BRIDA SÍ APARECE, aunque no se mueva.
+       Antes acá las bridas quedaban todas puestas desde el arranque, y eso
+       era pasarse de conservador: con la preferencia prendida el armado no se
+       veía nunca, que es justamente lo que hace a la traza.
+       Un FUNDIDO no es movimiento. La preferencia pide que nada se desplace
+       —nada de parallax, nada que se escale, nada que gire—, no que la página
+       esté congelada. Así que se mantiene el mismo momento de siempre (cuando
+       la válvula llega) pero la brida se enciende nomás: cambia la opacidad y
+       no se corre ni un píxel. Sin `scaleX`, que sí sería movimiento. */
+    :global(.js-on) .parada .nodo {
+      opacity: 0;
+      transform: none;
+      transition: opacity 0.5s ease;
+    }
+    :global(.js-on) .parada.bridada .nodo {
+      opacity: 1;
+      transform: none;
+    }
   }
 </style>
 
