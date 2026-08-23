@@ -64,9 +64,38 @@
       const n = parseInt(m[1], 16);
       return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
     };
-    const acento = aRgb(raiz.getPropertyValue('--color-acento'), [255, 45, 120]);
-    const tinta = aRgb(raiz.getPropertyValue('--color-texto'), [20, 18, 16]);
+    const acento = aRgb(raiz.getPropertyValue('--color-acento'), [255, 138, 43]);
+    const datos = aRgb(raiz.getPropertyValue('--color-datos'), [58, 224, 207]);
+    const tinta = aRgb(raiz.getPropertyValue('--color-texto'), [236, 231, 218]);
     const rgba = ([r, g, b]: [number, number, number], a: number) => `rgba(${r},${g},${b},${a})`;
+
+    /**
+     * LA VOLUTA, PINTADA UNA SOLA VEZ.
+     *
+     * Antes cada partícula armaba su propio createRadialGradient() y su
+     * propio arc()+fill() en cada frame. Con ~560 volutas vivas eso es armar
+     * 560 objetos de gradiente por frame, y medido en esta máquina daba 23
+     * fps: el humo se arrastraba.
+     *
+     * Acá el degradado se pinta una vez en un canvas aparte de 128 px y
+     * después cada partícula es un drawImage() escalado, que es una copia de
+     * píxeles y nada más. El color se resuelve con globalAlpha, así que una
+     * sola voluta sirve para todas.
+     */
+    const VOLUTA = 64;
+    const voluta = document.createElement('canvas');
+    voluta.width = voluta.height = VOLUTA * 2;
+    {
+      const vx = voluta.getContext('2d')!;
+      const g = vx.createRadialGradient(VOLUTA, VOLUTA, 0, VOLUTA, VOLUTA, VOLUTA);
+      // Claro sobre tinta: es como se ve el humo de verdad, por dispersión de
+      // luz sobre un fondo oscuro. Va con un toque de azul, como la noche.
+      g.addColorStop(0, 'rgba(214, 214, 236, 1)');
+      g.addColorStop(0.5, 'rgba(180, 186, 214, 0.45)');
+      g.addColorStop(1, 'rgba(180, 186, 214, 0)');
+      vx.fillStyle = g;
+      vx.fillRect(0, 0, VOLUTA * 2, VOLUTA * 2);
+    }
 
     let an = 0;
     let al = 0;
@@ -230,7 +259,7 @@
     // binarios flotando entre las volutas. Cada partícula guarda su posición
     // en coordenada de recorrido (0 a 1 de la traza entera) y no en píxeles:
     // así queda anclada a su tramo y acompaña al scroll.
-    const MAX_HUMO = 420;
+    const MAX_HUMO = 340;
 
     /**
      * Lo que flota en el humo son NÚMEROS DE VERDAD, no unos y ceros: los que
@@ -243,13 +272,30 @@
     ];
     const sueltos = '0123456789';
 
-    function nacerHumo(marco: HTMLElement, s: number, esBit: boolean) {
+    /**
+     * `flanco` es la media anchura de la ficha: los NÚMEROS nacen más afuera
+     * que eso. Las fichas van centradas sobre el mismo eje por el que sube el
+     * humo, así que un número que nace pegado al eje sube justo por detrás de
+     * la ficha y no se lee nunca — que es exactamente lo que pasaba.
+     * El humo sí nace pegado al eje: por detrás de la ficha queda como un
+     * resplandor, y para eso la ficha es semitransparente.
+     */
+    function nacerHumo(marco: HTMLElement, s: number, esBit: boolean, flanco: number) {
       if (humo.length >= MAX_HUMO) humo.shift();
       humo.push({
         marco,
         s,
-        desvio: azar(-11, 11),
-        deriva: azar(-0.4, 0.4),
+        // Nace pegado al eje y se ABRE mientras sube: es la forma de una
+        // pluma de verdad. Con la deriva vieja (±0.4) el humo subia en una
+        // columna finita y quedaba todo detras de las fichas, que estan
+        // centradas sobre el mismo eje. Con ±1.7 a los ~200 frames ya esta
+        // a ±340 px, o sea afuera de la ficha, en los costados libres.
+        desvio: esBit
+          ? (Math.random() < 0.5 ? -1 : 1) * azar(flanco, flanco * 1.9)
+          : azar(-14, 14),
+        // El humo se ABRE mientras sube: es la forma de una pluma de verdad.
+        // Los números ya nacen afuera, así que apenas van a la deriva.
+        deriva: esBit ? azar(-0.25, 0.25) : azar(-1.7, 1.7),
         subida: esBit ? azar(0.35, 0.75) : azar(0, 6),
         r: esBit ? 0 : azar(18, 40),
         crece: azar(0.5, 1.1),
@@ -263,7 +309,7 @@
             ? CIFRAS[Math.floor(Math.random() * CIFRAS.length)]
             : sueltos[Math.floor(Math.random() * 10)]
           : null,
-        fuerte: esBit && Math.random() < 0.62,
+        fuerte: esBit && Math.random() < 0.42,
       });
     }
 
@@ -284,14 +330,41 @@
       // frames en humo que nadie ve.
       const aLaVista = caja.bottom > -200 && caja.top < al + 200;
       const avance = parseFloat(via.style.getPropertyValue('--avance') || '0');
-      const vertical = !matchMedia('(min-width: 901px)').matches;
+
+      // El eje NO se asume en el medio: se mide. La traza esta centrada en la
+      // pagina, pero si algun dia deja de estarlo el humo la sigue igual.
+      const vcaja = via.getBoundingClientRect();
+      const eje = vcaja.left + vcaja.width / 2;
+
+      // Media anchura de la ficha + un respiro. En una pantalla angosta la
+      // ficha ocupa casi todo el ancho y no hay costados libres: ahí el
+      // flanco se acota para que los números caigan en los huecos que quedan
+      // ENTRE ficha y ficha, que en vertical sí los hay.
+      const fcaja = marco.querySelector('.ficha')?.getBoundingClientRect();
+      const media = fcaja ? fcaja.width / 2 : 310;
+      const flanco = Math.min(media + 30, Math.max(an * 0.5 - 40, 60));
 
       if (aLaVista && avance > 0.004) {
-        for (let i = 0; i < 8; i++) nacerHumo(marco, avance - Math.random() * 0.02, false);
-        for (let i = 0; i < 3; i++) nacerHumo(marco, Math.random() * avance, false);
-        // Los números salen seguido: son lo que tiene que verse.
-        for (let i = 0; i < 2; i++) nacerHumo(marco, avance - Math.random() * 0.03, true);
-        if (Math.random() < 0.8) nacerHumo(marco, Math.random() * avance, true);
+        // EL HUMO sale del frente —la cabeza encendida que va bajando— y un
+        // resto de todo el tramo ya recorrido, que en pantalla queda ARRIBA
+        // del frente. Como el humo sube, el rastro y la pluma van al mismo
+        // lado: el gas se escapa hacia el tramo que ya hiciste.
+        for (let i = 0; i < 8; i++) nacerHumo(marco, avance - Math.random() * 0.012, false, flanco);
+        for (let i = 0; i < 3; i++) nacerHumo(marco, Math.random() * avance, false, flanco);
+
+        // LOS NÚMEROS, en cambio, se reparten por TODO el tramo que se ve.
+        // Antes nacían todos junto al frente, que cae siempre a la misma
+        // altura de pantalla, y como suben apenas 150 px terminaban apilados
+        // en una franja horizontal: dejaban de leerse como números sueltos
+        // flotando y pasaban a ser una mancha.
+        // `sArriba` es el punto del recorrido que hoy está tocando el borde
+        // de arriba de la pantalla; entre ése y el frente hay una pantalla
+        // entera de rastro para repartirlos.
+        const sArriba = Math.max(-caja.top / caja.height, 0);
+        const tramo = Math.max(avance - sArriba, 0.001);
+        if (Math.random() < 0.4) {
+          nacerHumo(marco, sArriba + Math.random() * tramo, true, flanco);
+        }
       }
 
       cx.textAlign = 'center';
@@ -307,54 +380,50 @@
         if (!aLaVista) continue;
 
         q.desvio += q.deriva;
-        // Las brasas suben más rápido y no se frenan: son livianas.
-        // Los números suben más rápido que el humo: se despegan y se leen.
+        // Los numeros suben mas rapido que el humo: se despegan y se leen.
         q.subida += (q.bit ? 1.15 : 0.72) * Math.max(1 - q.subida / 150, 0.1);
-        q.r += q.crece;
+        // El radio SE TOPEA. Sin tope, con `crece` ~1 y 240 frames de vida
+        // una voluta terminaba con 300 px de radio: son 600x600 px de mezcla
+        // por partícula y por frame, y con cientos vivas el fondo se comía la
+        // placa (23 fps medidos). A 105 px sigue leyéndose como humo y el
+        // dibujado baja como el cuadrado del radio.
+        q.r = Math.min(q.r + q.crece, 105);
 
         const p = q.vida / q.dura;
-        // Entra rápido y se va lento: es como se disipa el humo.
+        // Entra rapido y se va lento: es como se disipa el humo.
         const alfa = Math.sin(Math.pow(p, 0.65) * Math.PI);
-        // EN HORIZONTAL LA LÍNEA ESTÁ EN EL MEDIO DE LA PANTALLA, no en el
-        // medio del bloque. El bloque mide varias pantallas de alto y adentro
-        // hay un panel `sticky`: la línea vive a media pantalla, siempre.
-        // Estaba usando el centro del bloque —caja.top + caja.height / 2— que
-        // con un bloque de 5.000 px cae en cualquier lado. Por eso el humo
-        // salía a 300 px de la traza, flotando solo: nunca estuvo sobre la
-        // línea, y por eso no se leía como gas saliendo del recorrido.
-        const x = vertical ? 23 + q.desvio + q.subida : q.s * an;
-        const y = vertical ? caja.top + q.s * caja.height : al / 2 + q.desvio - q.subida;
-        if (y < -120 || y > al + 120 || x < -120 || x > an + 120) continue;
+
+        // LA TRAZA ES VERTICAL Y CENTRADA. Cada particula guarda su posicion
+        // en coordenada de recorrido (`s`, de 0 a 1 del bloque entero) y no
+        // en pixeles: asi queda anclada a su tramo y acompaña al scroll.
+        // `s` -> altura de pagina; `subida` sube; `desvio` abre la pluma.
+        const x = eje + q.desvio;
+        const y = caja.top + q.s * caja.height - q.subida;
+        if (y < -120 || y > al + 120 || x < -140 || x > an + 140) continue;
 
         if (q.bit) {
-          // Las cifras completas van grandes y en llama; los dígitos sueltos,
-          // chicos y en agua. Así el humo tiene jerarquía en vez de ruido.
+          // Las cifras completas van grandes y en llama; los digitos sueltos,
+          // chicos y en pantalla. Asi el humo tiene jerarquia en vez de ruido.
           if (q.fuerte) {
+            // El resplandor NO va con shadowBlur: es de lo más caro que
+            // tiene canvas y acá se dibujaban decenas por frame. Se hace a
+            // mano con una pasada previa más grande y translúcida, que sale
+            // casi gratis y se ve igual.
             cx.font = "700 26px 'Martian Mono', ui-monospace, monospace";
-            cx.fillStyle = `rgba(255, 158, 92, ${alfa.toFixed(3)})`;
-            cx.shadowColor = `rgba(255, 138, 61, ${(alfa * 0.55).toFixed(3)})`;
-            cx.shadowBlur = 16;
+            cx.fillStyle = rgba(acento, alfa * 0.16);
+            cx.fillText(q.bit, x, y);
+            cx.fillStyle = rgba(acento, alfa);
           } else {
             cx.font = "700 14px 'Martian Mono', ui-monospace, monospace";
-            cx.fillStyle = `rgba(79, 196, 176, ${(alfa * 0.85).toFixed(3)})`;
-            cx.shadowBlur = 0;
+            cx.fillStyle = rgba(datos, alfa * 0.85);
           }
           cx.fillText(q.bit, x, y);
-          cx.shadowBlur = 0;
         } else {
-          const g = cx.createRadialGradient(x, y, 0, x, y, q.r);
-          // Claro sobre tinta: es como se ve el humo de verdad, por dispersión
-          // de luz sobre un fondo oscuro. Y acá sí puede ir fuerte sin taparle
-          // nada al texto, porque el texto también es claro y está por encima.
-          // Hueso tibio, no gris: el humo de una llama de gas arrastra el
-          // color de la llama.
-          g.addColorStop(0, `rgba(214, 206, 186, ${(alfa * 0.42).toFixed(3)})`);
-          g.addColorStop(0.5, `rgba(190, 186, 168, ${(alfa * 0.2).toFixed(3)})`);
-          g.addColorStop(1, 'rgba(190, 186, 168, 0)');
-          cx.fillStyle = g;
-          cx.beginPath();
-          cx.arc(x, y, q.r, 0, Math.PI * 2);
-          cx.fill();
+          // Puede ir fuerte sin taparle nada al texto, porque el texto tambien
+          // es claro y esta por encima.
+          cx.globalAlpha = alfa * 0.4;
+          cx.drawImage(voluta, x - q.r, y - q.r, q.r * 2, q.r * 2);
+          cx.globalAlpha = 1;
         }
       }
     }

@@ -5,20 +5,29 @@ import { usarTraduccion, type Idioma } from '../i18n/ui';
 import type { Proyecto } from '../lib/proyectos';
 
 /**
- * LA TRAZA — el recorrido de 2013 a hoy sobre un caño horizontal.
+ * LA TRAZA — el recorrido, ahora VERTICAL Y CENTRADO.
  *
- * La traza muestra SÓLO los pines: año, título corto y la cifra. El detalle
- * completo vive en un popup que sale al pasar el mouse o al tocar el pin. Antes
- * cada estación arrastraba una ficha de 300 px siempre abierta y la traza era
- * una pila de cajas; ahora es una línea que se lee de un vistazo y que se abre
- * donde te interesa.
+ * Antes esto era un panel `sticky` que traducía el scroll vertical en
+ * desplazamiento horizontal: la traza corría de izquierda a derecha y las
+ * estaciones alternaban arriba y abajo de un caño. Andaba, pero peleaba con
+ * el gesto natural de la página, obligaba a un bloque de varias pantallas de
+ * alto que no se podía linkear por dentro, y en el teléfono era otro diseño
+ * distinto mantenido aparte.
  *
- * Cómo se mueve: NO se secuestra la rueda. El bloque mide varias pantallas y
- * adentro hay un panel `sticky`; el scroll vertical normal se traduce a
- * desplazamiento horizontal. Anda con rueda, trackpad, teclado y barra.
+ * Ahora el eje BAJA por el medio exacto de la página y todo se apoya encima,
+ * centrado y simétrico: el año gigante de fondo, el nodo sobre la línea, y la
+ * ficha. Un solo diseño para todos los anchos — en el celular es lo mismo,
+ * más angosto.
  *
- * El pin es un <button> de verdad, así que se llega con Tab y el popup se abre
- * con Enter. En celular todo cae en columna y el popup se abre al tocar.
+ * El eje se llena a medida que scrolleás (`--avance`, de 0 a 1) y de ese
+ * frente sale el humo con los números flotando (lo dibuja Fondo.astro, que
+ * lee justamente ese `--avance`).
+ *
+ * La ficha arranca compacta —año, rubro, título y la cifra— y se abre en el
+ * lugar al clickearla. Se abre EN EL LUGAR y no en un globo flotante porque
+ * en una columna centrada un globo tapa la estación siguiente; y se abre por
+ * click y no por hover porque expandir bajo el cursor haría saltar la página
+ * justo donde estás mirando.
  */
 
 interface Props {
@@ -32,444 +41,477 @@ const { proyectos, lang, id } = Astro.props;
 const t = usarTraduccion(lang);
 const base = lang === 'es' ? 'proyectos' : 'en/projects';
 
-/** El título largo no entra en un pin: se corta en el primer corte natural. */
+/** El título largo no entra: se corta en el primer corte natural. */
 const corto = (titulo: string) => {
   const limpio = titulo.split(/\s+[—–]\s+/)[0];
-  return limpio.length > 34 ? limpio.slice(0, 32).trimEnd() + '…' : limpio;
+  return limpio.length > 42 ? limpio.slice(0, 40).trimEnd() + '…' : limpio;
 };
 
-const estaciones = proyectos.map((p, i) => ({
+/** El año gigante del fondo es UNO solo: el primero del período. */
+const anioDe = (periodo: string) => periodo.match(/\d{4}/)?.[0] ?? '';
+
+/**
+ * El rótulo traducido ya termina en flecha ("ver el caso →"). En el link eso
+ * está bien; en la seña de "esto se despliega" no, porque ahí no se va a
+ * ningún lado: la seña lleva un chevrón que gira. Se le saca la flecha.
+ */
+const sinFlecha = (s: string) => s.replace(/\s*[→>]+\s*$/, '');
+
+const estaciones = proyectos.map((p) => ({
   p,
-  arriba: i % 2 === 0,
-  marcas: logosDelStack(p.data.stack, 3),
+  anio: anioDe(p.data.periodo),
+  marcas: logosDelStack(p.data.stack, 4),
 }));
 ---
 
-<section class="marco" id={id} style={`--paradas:${estaciones.length}`}>
-  <div class="pega">
-    <div class="via" aria-hidden="true"></div>
+<section class="marco" id={id}>
+  <div class="via" aria-hidden="true"><span class="frente"></span></div>
 
-    <ol class="pista">
-      {
-        estaciones.map(({ p, arriba, marcas }) => (
-          <li
-            class:list={['parada', arriba ? 'arriba' : 'abajo']}
-            style={`--c: var(--color-${p.data.categoria})`}
-          >
-            <span class="nodo" aria-hidden="true" />
+  <ol class="pista">
+    {
+      estaciones.map(({ p, anio, marcas }) => (
+        <li class="parada" style={`--c: var(--color-${p.data.categoria})`}>
+          {/* El año gigante, en hueco, detrás de la ficha: la ficha se apoya
+              adentro del número y se lee el año por arriba y por abajo. */}
+          <span class="anio-fondo" aria-hidden="true">{anio}</span>
 
-            {/* El pin: lo único que se ve siempre. */}
-            <button type="button" class="pin" aria-expanded="false">
-              <span class="pin-anio">{p.data.periodo}</span>
-              <span class="pin-titulo">{corto(p.data.titulo)}</span>
+          <span class="nodo" aria-hidden="true" />
+          <span class="tallo" aria-hidden="true" />
+
+          <article class="ficha">
+            <button type="button" class="tapa" aria-expanded="false">
+              <span class="cab">
+                <span class="rubro">{p.data.categoria}</span>
+                <span class="periodo">{p.data.periodo}</span>
+              </span>
+
+              <span class="titulo">{corto(p.data.titulo)}</span>
+
               {p.data.kpis[0] && (
-                <span class="pin-dato">
+                <span class="cifra">
                   <b class="tabular-nums" data-cifra={p.data.kpis[0].valor}>
                     {p.data.kpis[0].valor}
                   </b>
                   <i>{p.data.kpis[0].label}</i>
                 </span>
               )}
+
+              <span class="senia" aria-hidden="true">
+                <span class="senia-txt">{sinFlecha(t('proyecto.ver'))}</span>
+                <svg viewBox="0 0 24 24" class="chevron"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
             </button>
 
-            {/* El detalle, sólo cuando lo pedís. */}
-            <span class="popup" role="group">
-              <span class="popup-rubro">{p.data.categoria}</span>
-              <span class="popup-titulo">{p.data.titulo}</span>
-              <span class="popup-texto">{p.data.resumen}</span>
+            {/* El detalle. Se anima con grid-template-rows 0fr → 1fr, que es
+                la única forma de transicionar a "alto automático" sin medir
+                nada con JavaScript. */}
+            <div class="mas">
+              <div class="mas-dentro">
+                <p class="resumen">{p.data.resumen}</p>
 
-              <span class="popup-datos">
-                {p.data.kpis.slice(0, 2).map((k) => (
-                  <span>
-                    <b class="tabular-nums">{k.valor}</b>
-                    <i>{k.label}</i>
+                {p.data.kpis.length > 1 && (
+                  <div class="datos">
+                    {p.data.kpis.slice(1, 4).map((k) => (
+                      <span>
+                        <b class="tabular-nums">{k.valor}</b>
+                        <i>{k.label}</i>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div class="pie">
+                  <span class="marcas" aria-hidden="true">
+                    {marcas.map((m) => (
+                      <svg viewBox="0 0 24 24" role="presentation">
+                        <path d={m.path} fill="currentColor" />
+                      </svg>
+                    ))}
                   </span>
-                ))}
-              </span>
-
-              <span class="popup-pie">
-                <span class="marcas" aria-hidden="true">
-                  {marcas.map((m) => (
-                    <svg viewBox="0 0 24 24" role="presentation">
-                      <path d={m.path} fill="currentColor" />
-                    </svg>
-                  ))}
-                </span>
-                <a href={conBase(`${base}/${p.id}/`)} class="ir">
-                  {t('proyecto.ver')}
-                </a>
-              </span>
-            </span>
-          </li>
-        ))
-      }
-    </ol>
-  </div>
+                  <a href={conBase(`${base}/${p.id}/`)} class="ir">
+                    {t('proyecto.ver')}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </article>
+        </li>
+      ))
+    }
+  </ol>
 </section>
 
 <style>
-  .marco { height: calc(var(--paradas) * 44vh + 100vh); }
-  .pega {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow: hidden;
+  /* ── El bloque ────────────────────────────────────────────────────────
+     Bloque normal, sin `sticky` y sin alto calculado: la traza mide lo que
+     miden sus estaciones. */
+  .marco {
+    position: relative;
+    z-index: 1;
+    padding: 4rem 1.2rem 3rem;
+    scroll-margin-top: 4.5rem;
   }
 
-  /* ── El recorrido ─────────────────────────────────────────────────────
-     Ya no hay tubo. Queda una guía de un pelo —para que se entienda que hay
-     un camino— y todo lo demás lo dibuja el canvas: humo gris que sale por
-     donde ya pasaste, con los binarios flotando adentro. */
+  /* ── El eje ───────────────────────────────────────────────────────────
+     Por el medio EXACTO de la página. La línea de base es apenas visible; el
+     tramo recorrido se pinta encima con `.frente`, que escala en Y según
+     `--avance`. Escalar un pseudo-elemento es composición pura: no hay
+     layout ni pintado por frame. */
   .via {
     position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: 1px;
-    margin-top: -0.5px;
-    height: 3px;
-    margin-top: -1.5px;
-    background: var(--color-borde-vivo);
-    opacity: 1;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    margin-left: -1px;
+    background: var(--color-borde);
+    --avance: 0;
   }
-
-
-  .pista {
+  .frente {
     position: absolute;
     inset: 0;
-    display: flex;
-    align-items: stretch;
-    padding-left: 5vw;
-    margin: 0;
-    list-style: none;
-    will-change: transform;
+    transform: scaleY(var(--avance));
+    transform-origin: top;
+    background: linear-gradient(
+      to bottom,
+      var(--color-datos) 0%,
+      var(--color-acento) 100%
+    );
+    box-shadow: 0 0 14px 1px color-mix(in srgb, var(--color-acento) 55%, transparent);
+  }
+  /* La cabeza del recorrido: el punto encendido que va bajando. */
+  .frente::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 11px;
+    height: 11px;
+    margin-left: -5.5px;
+    margin-bottom: -5.5px;
+    border-radius: 50%;
+    background: var(--color-acento);
+    box-shadow: 0 0 18px 4px color-mix(in srgb, var(--color-acento) 70%, transparent);
+    /* El punto no se estira aunque el padre esté escalado en Y. */
+    transform: scaleY(calc(1 / max(var(--avance), 0.001)));
+    transform-origin: bottom;
   }
 
-  /* ── La estación ──────────────────────────────────────────────────────── */
+  .pista {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* ── La estación ──────────────────────────────────────────────────────
+     Centrada, simétrica, sin alternar lados. */
   .parada {
     position: relative;
-    --sangria: 0px;
-    /* Mucho más angosta que antes: ahora entran seis en pantalla y la traza
-       se lee como una línea, no como una fila de cajas. */
-    flex: 0 0 calc(clamp(200px, 16vw, 245px) + var(--sangria));
+    width: min(620px, 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 3.4rem;
+  }
+
+  /* El año gigante en hueco. Es el gesto de la sección: la ficha se apoya
+     adentro del número. */
+  .anio-fondo {
+    position: absolute;
+    top: -1.6rem;
+    left: 50%;
+    translate: -50% 0;
+    z-index: 0;
+    font-family: var(--font-titulo);
+    font-weight: 800;
+    font-size: clamp(6.5rem, 17vw, 11.5rem);
+    line-height: 0.8;
+    letter-spacing: -0.045em;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--color-borde);
+    user-select: none;
+    white-space: nowrap;
   }
 
   .nodo {
-    position: absolute;
-    left: var(--sangria);
-    top: 50%;
-    z-index: 4;
-    width: 22px;
-    height: 22px;
-    margin-top: -11px;
-    margin-left: -11px;
+    position: relative;
+    z-index: 3;
+    width: 17px;
+    height: 17px;
     border-radius: 50%;
-    border: 2px solid var(--color-texto);
     background: var(--c);
-    box-shadow: 0 0 0 5px var(--color-fondo), 3px 3px 0 var(--color-acento);
-    transition:
-      transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-      box-shadow 0.3s ease;
+    box-shadow:
+      0 0 0 5px var(--color-fondo),
+      0 0 0 7px color-mix(in srgb, var(--c) 45%, transparent),
+      0 0 20px 2px color-mix(in srgb, var(--c) 60%, transparent);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  /* El tramito que baja del nodo a la ficha. */
+  .tallo {
+    position: relative;
+    z-index: 1;
+    width: 2px;
+    height: 1.5rem;
+    background: linear-gradient(to bottom, var(--c), transparent);
   }
 
-  /* El pin: año, título corto y la cifra. Nada más. */
-  .pin {
-    position: absolute;
-    left: calc(var(--sangria) + 18px);
+  /* ── La ficha ─────────────────────────────────────────────────────────
+     Semitransparente a propósito: el humo y los números que suben por el eje
+     se ven ghosteados por atrás en vez de quedar tapados. */
+  .ficha {
+    position: relative;
     z-index: 2;
+    width: 100%;
+    border: 1px solid var(--color-borde);
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--color-panel) 84%, transparent);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+    overflow: hidden;
+    transition:
+      border-color 0.25s ease,
+      transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.35s ease;
+  }
+  .ficha:hover,
+  .parada.abierta .ficha {
+    border-color: var(--c);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 40%, transparent),
+      0 18px 45px -20px color-mix(in srgb, var(--c) 70%, transparent);
+  }
+  @media (hover: hover) {
+    .ficha:hover { transform: translateY(-3px); }
+  }
+
+  /* La tapa es un botón de verdad: se llega con Tab y abre con Enter. */
+  .tapa {
     display: flex;
     flex-direction: column;
-    gap: 0.28rem;
-    width: clamp(160px, 13vw, 195px);
-    padding: 0.35rem 0.4rem;
-    margin: 0;
+    align-items: center;
+    gap: 0.55rem;
+    width: 100%;
+    padding: 1.5rem 1.6rem 1.35rem;
     border: 0;
-    border-radius: 7px;
     background: none;
-    text-align: left;
-    cursor: pointer;
-    font: inherit;
     color: inherit;
-    transition: background-color 0.2s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
   }
-  .arriba .pin { bottom: calc(50% + 20px); }
-  .abajo .pin { top: calc(50% + 20px); }
+  .tapa:focus-visible {
+    outline: 2px solid var(--color-acento);
+    outline-offset: -4px;
+    border-radius: 18px;
+  }
 
-  .pin-anio {
+  .cab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+  }
+  .rubro {
+    font-family: var(--font-mono);
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-fondo);
+    background: var(--c);
+    border-radius: 999px;
+    padding: 0.2rem 0.6rem;
+  }
+  .periodo {
     font-family: var(--font-mono);
     font-size: 0.58rem;
-    font-weight: 500;
     letter-spacing: -0.03em;
     color: var(--color-tenue);
   }
-  .pin-titulo {
+
+  .titulo {
     font-family: var(--font-titulo);
-    font-weight: 400;
-    font-size: 1.18rem;
-    line-height: 0.98;
-    letter-spacing: -0.005em;
-    text-transform: uppercase;
+    font-weight: 750;
+    font-size: clamp(1.4rem, 3.4vw, 1.95rem);
+    line-height: 1.02;
+    letter-spacing: -0.028em;
+    max-width: 20ch;
+    text-wrap: balance;
   }
-  .pin-dato {
+
+  .cifra {
     display: flex;
-    align-items: baseline;
-    gap: 0.35rem;
-    margin-top: 0.1rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    margin-top: 0.35rem;
   }
-  .pin-dato b {
+  .cifra b {
     font-family: var(--font-titulo);
-    font-size: 1.9rem;
+    /* En 800 el cero de Syne se cierra y queda una elipse maciza: la cifra
+       "0 accidentes" se leia como una pastilla y no como un numero. */
+    font-weight: 700;
+    font-size: clamp(2.4rem, 7vw, 3.4rem);
     line-height: 1;
-    letter-spacing: -0.01em;
-    color: #14120f;
-    background: var(--c);
-    border: 2px solid var(--color-texto);
-    border-radius: 8px;
-    padding: 0.05rem 0.4rem;
-    box-shadow: 3px 3px 0 var(--color-acento);
+    letter-spacing: -0.045em;
+    color: var(--c);
   }
-  .pin-dato i {
+  .cifra i {
     font-family: var(--font-mono);
     font-style: normal;
     font-size: 0.5rem;
-    letter-spacing: 0.11em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--color-tenue);
   }
 
-  /* ── El popup ─────────────────────────────────────────────────────────── */
-  .popup {
-    position: absolute;
-    left: calc(var(--sangria) + 4px);
-    z-index: 6;
+  /* La seña de que la ficha se abre. */
+  .senia {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 285px;
-    padding: 1rem 1.15rem;
-    border: 2px solid var(--color-borde-vivo);
-    border-radius: 14px;
-    background: var(--color-panel);
-    box-shadow: var(--sombra-alta);
-    opacity: 0;
-    visibility: hidden;
-    translate: 0 8px;
-    scale: 0.97;
-    transition:
-      opacity 0.22s ease,
-      translate 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-      scale 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-      visibility 0s linear 0.22s;
-  }
-  /* El popup sale del lado OPUESTO al pin: nunca lo tapa. */
-  .arriba .popup { top: calc(50% + 22px); }
-  .abajo .popup { bottom: calc(50% + 22px); }
-
-  .parada.abierta .popup,
-  .parada:hover .popup,
-  .parada:focus-within .popup {
-    opacity: 1;
-    visibility: visible;
-    translate: 0 0;
-    scale: 1;
-    transition-delay: 0s;
-  }
-
-  .popup-rubro {
-    align-self: flex-start;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.5rem;
     font-family: var(--font-mono);
-    font-size: 0.52rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
+    font-size: 0.53rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #14120f;
-    background: var(--c);
-    border: 2px solid var(--color-texto);
-    border-radius: 999px;
-    padding: 0.15rem 0.55rem;
+    color: var(--color-tenue);
+    transition: color 0.2s ease;
   }
-  .popup-titulo {
-    font-family: var(--font-titulo);
-    font-weight: 400;
-    font-size: 1.25rem;
-    line-height: 1;
-    text-transform: uppercase;
+  .ficha:hover .senia { color: var(--c); }
+  .chevron {
+    width: 0.85rem;
+    height: 0.85rem;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .popup-texto {
-    font-size: 0.78rem;
-    line-height: 1.55;
+  .parada.abierta .chevron { transform: rotate(180deg); }
+
+  /* ── El detalle ───────────────────────────────────────────────────────
+     0fr → 1fr: la única manera de transicionar hasta "alto automático". */
+  .mas {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .parada.abierta .mas { grid-template-rows: 1fr; }
+  .mas-dentro {
+    overflow: hidden;
+    min-height: 0;
+  }
+  .mas-dentro > * {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .parada.abierta .mas-dentro > * {
+    opacity: 1;
+    transition-delay: 0.12s;
+  }
+
+  .resumen {
+    margin: 0;
+    padding: 0 1.6rem;
+    max-width: 52ch;
+    margin-inline: auto;
+    font-size: 0.86rem;
+    line-height: 1.65;
     color: var(--color-tenue);
   }
-  .popup-datos {
+
+  .datos {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem 1.4rem;
-    margin-top: 0.15rem;
+    justify-content: center;
+    gap: 0.6rem 2.2rem;
+    margin-top: 1.1rem;
+    padding: 0 1.6rem;
   }
-  .popup-datos > span {
+  .datos > span {
     display: flex;
     flex-direction: column;
+    align-items: center;
   }
-  .popup-datos b {
+  .datos b {
     font-family: var(--font-titulo);
+    font-weight: 750;
     font-size: 1.5rem;
     line-height: 1;
+    letter-spacing: -0.03em;
   }
-  .popup-datos i {
+  .datos i {
     font-family: var(--font-mono);
     font-style: normal;
-    font-size: 0.5rem;
-    letter-spacing: 0.11em;
+    font-size: 0.48rem;
+    letter-spacing: 0.13em;
     text-transform: uppercase;
     color: var(--color-tenue);
   }
-  .popup-pie {
-    border-top-width: 2px;
+
+  .pie {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
-    margin-top: 0.35rem;
-    padding-top: 0.7rem;
+    gap: 1rem;
+    margin-top: 1.35rem;
+    padding: 0.85rem 1.6rem;
     border-top: 1px solid var(--color-borde);
+    background: color-mix(in srgb, var(--color-panel-alto) 55%, transparent);
   }
-  .marcas { display: flex; gap: 0.45rem; color: var(--color-texto); }
-  .marcas svg { width: 1rem; height: 1rem; opacity: 0.4; }
+  .marcas { display: flex; gap: 0.5rem; color: var(--color-texto); }
+  .marcas svg { width: 1.05rem; height: 1.05rem; opacity: 0.42; }
   .ir {
     font-family: var(--font-mono);
-    font-size: 0.58rem;
-    letter-spacing: -0.03em;
+    font-size: 0.6rem;
+    letter-spacing: -0.02em;
     color: var(--c);
     text-decoration: none;
+    white-space: nowrap;
   }
   .ir:hover { text-decoration: underline; text-underline-offset: 3px; }
-
-  /* ── Reacción al pasar por encima ─────────────────────────────────────── */
-  @media (hover: hover) {
-    .parada:hover .pin { transform: translateY(-3px); }
-    .parada:hover .nodo,
-    .parada.abierta .nodo {
-      transform: scale(1.35) rotate(12deg);
-      box-shadow: 0 0 0 5px var(--color-fondo), 5px 5px 0 var(--color-acento);
-    }
-  }
-  .pin:focus-visible { outline: 3px solid var(--color-acento); outline-offset: 3px; }
   .ir:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; border-radius: 3px; }
 
-  /* ── Entrada: cada estación se enciende cuando el gas la alcanza ──────── */
-  :global(.js-on) .pin,
-  :global(.js-on) .anio {
+  /* ── Entrada: la estación se enciende cuando el frente la alcanza ────── */
+  :global(.js-on) .parada > * {
     opacity: 0;
-    translate: 0 14px;
-    transition: opacity 0.5s ease, translate 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    translate: 0 26px;
+    transition:
+      opacity 0.55s ease,
+      translate 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  :global(.js-on) .parada.activa .pin {
+  :global(.js-on) .parada.activa > * {
     opacity: 1;
     translate: 0 0;
   }
-  :global(.js-on) .nodo {
-    transform: scale(0.3);
-    opacity: 0;
-  }
-  :global(.js-on) .parada.activa .nodo {
-    transform: scale(1);
-    opacity: 1;
-  }
-  @media (hover: hover) {
-    :global(.js-on) .parada.activa:hover .nodo,
-    :global(.js-on) .parada.activa.abierta .nodo {
-      transform: scale(1.35) rotate(12deg);
-    }
-  }
+  /* El año de fondo entra apenas después y desde más abajo: da profundidad. */
+  :global(.js-on) .parada .anio-fondo { translate: -50% 40px; transition-delay: 0.1s; }
+  :global(.js-on) .parada.activa .anio-fondo { translate: -50% 0; }
+  :global(.js-on) .parada.activa .nodo { transition-delay: 0.05s; }
+  :global(.js-on) .parada.activa .ficha { transition-delay: 0.14s; }
 
-  /* ── Celular: el MISMO caño, parado ───────────────────────────────────
-     Esto antes era `display:none` sobre la vía y una columna de tarjetas: o
-     sea, en el teléfono no había caño, ni gas, ni paquetes, ni nada que se
-     moviera. Ahora la traza baja en vertical con el gas corriendo hacia abajo,
-     y el popup se abre al tocar el pin. */
-  @media (max-width: 900px) {
-    .marco { height: auto; }
-    .pega { position: relative; height: auto; overflow: visible; }
-
-    .via {
-      left: 1.45rem;
-      right: auto;
-      top: 0;
-      bottom: 0;
-      width: 1px;
-      height: auto;
-      margin-top: 0;
-      margin-left: -0.5px;
-      width: 3px;
-      margin-left: -1.5px;
-      background: var(--color-borde-vivo);
-    }
-
-    .pista {
-      position: static;
-      flex-direction: column;
-      gap: 0;
-      padding: 0 1.15rem 0 3.4rem;
-      transform: none !important;
-    }
-    .parada {
-      --sangria: 0px;
-      flex: none;
-      padding: 1.05rem 0;
-      border-left: 0;
-    }
-    .pin-titulo { font-size: 0.95rem; }
-    .pin-dato b { font-size: 1.3rem; }
-
-    .nodo {
-      left: -2.05rem;
-      top: 1.7rem;
-      margin-top: 0;
-      margin-left: 0;
-      z-index: 3;
-    }
-
-    .pin { position: static; width: 100%; padding: 0; }
-    .pin-dato { margin-top: 0.2rem; }
-
-    /* En columna el popup no flota: se despliega abajo del pin y empuja. */
-    .popup {
-      position: static;
-      width: 100%;
-      height: 0;
-      margin-top: 0;
-      padding: 0;
-      border-width: 0;
-      overflow: hidden;
-      translate: 0 0;
-      scale: 1;
-      box-shadow: none;
-      transition: none;
-    }
-    .parada:hover .popup,
-    .parada:focus-within .popup { opacity: 0; visibility: hidden; }
-    .parada.abierta .popup {
-      opacity: 1;
-      visibility: visible;
-      height: auto;
-      margin-top: 0.85rem;
-      padding: 1rem 1.1rem;
-      border-width: 1px;
-    }
-
-  }
-
-    to { background-position: 0 210px; }
+  @media (max-width: 700px) {
+    .marco { padding: 3.5rem 1rem 4.5rem; }
+    .pista { gap: 3rem; }
+    .parada { padding-top: 2.6rem; }
+    .anio-fondo { top: -1rem; }
+    .tapa { padding: 1.25rem 1.1rem 1.15rem; }
+    /* "12.000 km" a 2.4rem no entra en 390 px: en angosto manda el vw. */
+    .cifra b { font-size: clamp(1.9rem, 8.5vw, 2.6rem); }
+    .resumen, .datos, .pie { padding-inline: 1.1rem; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .pin, .nodo, .popup { transition: none; }
+    .ficha, .nodo, .chevron, .mas, .mas-dentro > * { transition: none; }
+    :global(.js-on) .parada > * { opacity: 1; translate: none; transition: none; }
+    :global(.js-on) .parada .anio-fondo { translate: -50% 0; }
   }
 </style>
 
 <script>
-  // Hay más de una traza en la página —experiencia y herramientas son dos
-  // secciones separadas—, así que todo esto corre por cada una.
+  // Hay más de una traza en la página —los trabajos y las herramientas son
+  // dos secciones separadas—, así que todo esto corre por cada una.
   const trazas = [...document.querySelectorAll<HTMLElement>('.marco')];
   const suave = !matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -491,91 +533,85 @@ const estaciones = proyectos.map((p, i) => ({
 
     const destino = parseInt(miles ? crudo.replace(/[.,]/g, '') : crudo, 10);
     if (!isFinite(destino) || destino === 0) return;
-    const separador = miles;
     const t0 = performance.now();
 
     const paso = (ahora: number) => {
       const p = Math.min((ahora - t0) / 900, 1);
       const v = Math.round(destino * (p === 1 ? 1 : 1 - Math.pow(2, -10 * p)));
-      el.textContent = antes + (separador ? v.toLocaleString('es-AR') : String(v)) + despues;
+      el.textContent = antes + (miles ? v.toLocaleString('es-AR') : String(v)) + despues;
       if (p < 1) requestAnimationFrame(paso);
     };
     requestAnimationFrame(paso);
   }
 
+  /**
+   * Dos umbrales distintos, y a propósito.
+   *
+   * FRENTE es dónde cae la cabeza encendida del recorrido: a media pantalla,
+   * que es donde se mira. ENTRADA es dónde se enciende una estación, y va
+   * mucho más abajo — casi en el borde inferior.
+   *
+   * Con un umbral solo, la estación siguiente recién aparecía cuando su nodo
+   * llegaba al frente, así que abajo del todo quedaba SIEMPRE media pantalla
+   * en blanco mientras scrolleabas. Separándolos, la ficha ya entró revelada
+   * y lo que la cabeza marca es por dónde va el gas.
+   */
+  const FRENTE = 0.58;
+  const ENTRADA = 0.94;
+
   for (const marco of trazas) {
-    const pista = marco.querySelector<HTMLElement>('.pista');
     const via = marco.querySelector<HTMLElement>('.via');
-    if (!pista || !via) continue;
+    if (!via) continue;
 
     const paradas = [...marco.querySelectorAll<HTMLElement>('.parada')].map((el) => ({
       el,
       nodo: el.querySelector<HTMLElement>('.nodo')!,
-      pin: el.querySelector<HTMLButtonElement>('.pin')!,
-      cifra: el.querySelector<HTMLElement>('.pin-dato b'),
+      tapa: el.querySelector<HTMLButtonElement>('.tapa')!,
+      cifra: el.querySelector<HTMLElement>('.cifra b'),
       activa: false,
     }));
 
-    // ── El popup: se abre al tocar el pin, y sólo uno a la vez ────────────
-    const cerrarTodos = (menos?: HTMLElement) => {
+    // ── Abrir y cerrar: una sola ficha abierta a la vez ──────────────────
+    const cerrarTodas = (menos?: HTMLElement) => {
       for (const p of paradas) {
         if (p.el === menos) continue;
         p.el.classList.remove('abierta');
-        p.pin.setAttribute('aria-expanded', 'false');
+        p.tapa.setAttribute('aria-expanded', 'false');
       }
     };
     for (const p of paradas) {
-      p.pin.addEventListener('click', (e) => {
-        e.stopPropagation();
+      p.tapa.addEventListener('click', () => {
         const abre = !p.el.classList.contains('abierta');
-        cerrarTodos(p.el);
+        cerrarTodas(p.el);
         p.el.classList.toggle('abierta', abre);
-        p.pin.setAttribute('aria-expanded', String(abre));
+        p.tapa.setAttribute('aria-expanded', String(abre));
       });
     }
-    document.addEventListener('click', () => cerrarTodos());
     addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') cerrarTodos();
+      if (e.key === 'Escape') cerrarTodas();
     });
 
-    // ── El recorrido ──────────────────────────────────────────────────────
-    const encender = (todo = false) => {
-      const umbral = window.innerWidth * 0.68;
-      for (const p of paradas) {
-        if (p.activa) continue;
-        if (!todo && p.nodo.getBoundingClientRect().left > umbral) continue;
-        p.activa = true;
-        p.el.classList.add('activa');
-        if (suave && p.cifra) contar(p.cifra);
-      }
-    };
-
-    const horizontal = matchMedia('(min-width: 901px)');
+    // ── El recorrido ─────────────────────────────────────────────────────
     let pendiente = false;
 
     const medir = () => {
       pendiente = false;
-      if (horizontal.matches) {
-        const caja = marco.getBoundingClientRect();
-        const recorrido = caja.height - window.innerHeight;
-        const avance = recorrido <= 0 ? 1 : Math.min(Math.max(-caja.top / recorrido, 0), 1);
-        const sobra = Math.max(pista.scrollWidth - window.innerWidth, 0);
-        pista.style.transform = `translate3d(${(-sobra * avance).toFixed(1)}px,0,0)`;
-        via.style.setProperty('--avance', avance.toFixed(4));
-        encender(avance > 0.995);
-        return;
-      }
-      pista.style.transform = '';
-      // El caño vertical se llena con lo recorrido del bloque, igual que el
-      // horizontal. Sin esto quedaba en el fallback (1) y no se movía nunca.
-      // Misma cuenta que en horizontal: 0 cuando el bloque llega arriba de
-      // todo, 1 cuando su final toca el borde inferior. La primera version
-      // arrancaba al 69 % con la traza recien asomando.
       const caja = marco.getBoundingClientRect();
-      const recorrido = caja.height - window.innerHeight;
-      const avance = recorrido <= 0 ? 1 : Math.min(Math.max(-caja.top / recorrido, 0), 1);
+      const frente = window.innerHeight * FRENTE;
+      // 0 cuando el frente toca el borde de arriba del bloque, 1 cuando pasó
+      // el de abajo. Es exactamente lo que escala `.frente` en Y.
+      const avance =
+        caja.height <= 0 ? 0 : Math.min(Math.max((frente - caja.top) / caja.height, 0), 1);
       via.style.setProperty('--avance', avance.toFixed(4));
-      encender();
+
+      const entrada = window.innerHeight * ENTRADA;
+      for (const p of paradas) {
+        if (p.activa) continue;
+        if (p.nodo.getBoundingClientRect().top > entrada) continue;
+        p.activa = true;
+        p.el.classList.add('activa');
+        if (suave && p.cifra) contar(p.cifra);
+      }
     };
 
     const alScroll = () => {
@@ -585,27 +621,6 @@ const estaciones = proyectos.map((p, i) => ({
     };
     addEventListener('scroll', alScroll, { passive: true });
     addEventListener('resize', alScroll, { passive: true });
-
-    // En columna el nodo no cruza nada horizontalmente: ahí manda el observador.
-    if (!horizontal.matches) {
-      const obs = new IntersectionObserver(
-        (entradas) => {
-          for (const e of entradas) {
-            if (!e.isIntersecting) continue;
-            const p = paradas.find((x) => x.el === e.target);
-            if (!p || p.activa) continue;
-            p.activa = true;
-            p.el.classList.add('activa');
-            if (suave && p.cifra) contar(p.cifra);
-            obs.unobserve(e.target);
-          }
-        },
-        { rootMargin: '0px 0px -15% 0px' },
-      );
-      for (const p of paradas) obs.observe(p.el);
-    }
-
     medir();
-
   }
 </script>

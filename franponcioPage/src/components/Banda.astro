@@ -3,9 +3,13 @@
  * La banda que abre una sección.
  *
  * Existe para que no haya duda de dónde termina una cosa y empieza otra: los
- * trabajos, las herramientas, los certificados y el stack son cuatro cosas
- * distintas y antes se encadenaban sin corte. La banda corta la página de lado
- * a lado y anuncia qué viene.
+ * trabajos, las herramientas propias, el stack y los certificados son cuatro
+ * cosas distintas y antes se encadenaban sin corte.
+ *
+ * Va CENTRADA y con un tramo de eje arriba y abajo, para que la línea que baja
+ * por el medio de la página no se corte entre sección y sección: la banda es
+ * una estación más del mismo recorrido, sólo que en vez de un proyecto anuncia
+ * un tramo entero.
  */
 
 interface Props {
@@ -22,81 +26,86 @@ const { indice, titulo, bajada, anios, id } = Astro.props;
 ---
 
 <div class="banda" id={id}>
-  <div class="dentro">
-    <span class="num">{indice}</span>
-    <div class="texto">
-      <h2>
-        {titulo}
-        {anios && <span class="anios">{anios}</span>}
-      </h2>
-      <p>{bajada}</p>
-    </div>
-  </div>
+  <span class="eje" aria-hidden="true"></span>
+
+  <span class="num">{indice}</span>
+
+  <h2>{titulo}</h2>
+  {anios && <span class="anios">{anios}</span>}
+  <p>{bajada}</p>
+
+  <span class="eje abajo" aria-hidden="true"></span>
 </div>
 
 <style>
   .banda {
     position: relative;
     z-index: 1;
-    scroll-margin-top: 4.5rem;
-    padding: 0 1.4rem;
-  }
-  .dentro {
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 1.3rem 1.6rem;
     display: flex;
-    align-items: baseline;
-    gap: 1.3rem;
-    border: 2px solid var(--color-borde-vivo);
-    border-radius: 16px;
-    background: var(--color-panel);
-    box-shadow: var(--sombra);
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 3rem 1.2rem 0;
+    scroll-margin-top: 4.5rem;
   }
+
+  /* El tramo de eje que entra y el que sale: la línea no se corta nunca. */
+  .eje {
+    width: 2px;
+    height: 4rem;
+    background: linear-gradient(to bottom, transparent, var(--color-borde));
+    margin-bottom: 1.6rem;
+  }
+  .eje.abajo {
+    height: 2.4rem;
+    margin: 1.8rem 0 0;
+    background: linear-gradient(to bottom, var(--color-borde), transparent);
+  }
+
   .num {
-    flex: none;
     display: grid;
     place-items: center;
-    width: 2.6rem;
-    height: 2.6rem;
-    border: 2px solid var(--color-borde-vivo);
+    width: 3.1rem;
+    height: 3.1rem;
     border-radius: 999px;
     background: var(--color-acento);
-    color: var(--color-panel);
+    color: var(--color-fondo);
     font-family: var(--font-titulo);
+    font-weight: 800;
     font-size: 1.15rem;
+    letter-spacing: -0.03em;
     line-height: 1;
-    align-self: center;
-    transform: rotate(-6deg);
+    box-shadow:
+      0 0 0 6px var(--color-fondo),
+      0 0 26px 3px color-mix(in srgb, var(--color-acento) 55%, transparent);
   }
-  .texto { min-width: 0; }
+
   h2 {
-    margin: 0;
-    font-size: 1.6rem;
+    margin: 1.5rem 0 0;
+    font-size: clamp(2rem, 6vw, 3.4rem);
+    letter-spacing: -0.035em;
+    text-wrap: balance;
   }
   .anios {
-    margin-left: 0.75rem;
+    margin-top: 0.7rem;
     font-family: var(--font-mono);
-    font-size: 0.62rem;
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    color: var(--color-tenue);
-    vertical-align: middle;
+    font-size: 0.6rem;
+    letter-spacing: 0.05em;
+    color: var(--color-acento);
   }
   p {
-    margin: 0.3rem 0 0;
-    max-width: 62ch;
-    font-size: 0.85rem;
-    line-height: 1.5;
+    margin: 0.9rem 0 0;
+    max-width: 46ch;
+    font-size: 0.9rem;
+    line-height: 1.6;
     color: var(--color-tenue);
+    text-wrap: pretty;
   }
 
   @media (max-width: 700px) {
-    .dentro {
-      padding: 1.25rem 1.25rem;
-      gap: 0.95rem;
-    }
-    .num { font-size: 1.2rem; }
-    h2 { font-size: 1rem; }
+    .banda { padding-top: 3rem; }
+    .eje { height: 2.6rem; margin-bottom: 1.2rem; }
+    .num { width: 2.6rem; height: 2.6rem; font-size: 1rem; }
+    h2 { margin-top: 1.1rem; }
   }
 </style>
