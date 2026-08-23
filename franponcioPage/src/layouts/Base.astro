@@ -20,6 +20,28 @@ const otro = lang === 'es' ? 'en' : 'es';
 <!doctype html>
 <html lang={lang}>
   <head>
+    <script is:inline>
+      /*
+       * EL INTERRUPTOR DE MOVIMIENTO.
+       *
+       * Por defecto manda la preferencia del sistema: si pediste reducir
+       * movimiento, el sitio no se mueve. Pero esa preferencia no tiene forma
+       * de saber que estás mirando tu propio portfolio y querés ver cómo
+       * quedó. Con el botón de la barra la prendés a mano, y esa decisión
+       * gana sobre la del sistema para vos y sólo para vos.
+       *
+       * Va INLINE y en el <head>, sin defer, por dos razones: se aplica antes
+       * del primer pintado —si no, la escena arranca quieta y pega un salto al
+       * prenderse— y los scripts de los componentes leen `data-mov` al cargar.
+       */
+      try {
+        if (localStorage.getItem('mov') === 'on') {
+          document.documentElement.dataset.mov = 'on';
+        }
+      } catch (e) {
+        /* modo privado: sin memoria, manda el sistema */
+      }
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{titulo}</title>

@@ -47,7 +47,10 @@
 <script>
   const lienzo = document.querySelector<HTMLCanvasElement>('#fondo');
   const ctx = lienzo?.getContext('2d', { alpha: true });
-  const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // El botón de la barra gana sobre la preferencia del sistema.
+  const quieto =
+    matchMedia('(prefers-reduced-motion: reduce)').matches &&
+    document.documentElement.dataset.mov !== 'on';
 
   if (lienzo && ctx) {
     const cx = ctx;

@@ -55,16 +55,23 @@ const nota = (c: CollectionEntry<'formacion'>) =>
   <div class="mx-auto max-w-5xl px-6 py-14">
     <div>
       <Carrusel
+        vueltas
         etiqueta={t('formacion.titulo')}
         anterior={t('carrusel.anterior')}
         siguiente={t('carrusel.siguiente')}
       >
         {
-          enFila.map((c) => {
+          /* Tres copias: es lo que le permite al carrusel dar la vuelta sin
+             que se note el salto. Las dos de más van `aria-hidden`, porque
+             para un lector de pantalla la lista de certificados es una sola. */
+          [0, 1, 2].flatMap((copia) => enFila.map((c) => {
             const imagen = c.data.certificado ?? c.data.insignia;
             const esInsignia = !c.data.certificado && !!c.data.insignia;
             return (
-              <article class="tarjeta ficha-curso flex flex-col overflow-hidden">
+              <article
+                class="tarjeta ficha-curso flex flex-col overflow-hidden"
+                aria-hidden={copia > 0 ? 'true' : undefined}
+              >
                 {imagen && (
                   <a
                     href={plenos.get(c.id)}
@@ -127,7 +134,7 @@ const nota = (c: CollectionEntry<'formacion'>) =>
                 </div>
               </article>
             );
-          })
+          }))
         }
       </Carrusel>
     </div>

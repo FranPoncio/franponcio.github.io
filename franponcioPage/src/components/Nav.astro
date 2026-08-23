@@ -72,6 +72,19 @@ const otro = lang === 'es' ? 'EN' : 'ES';
           GitHub ↗
         </a>
 
+        {/* Sólo aparece si el sistema pidió reducir movimiento: para todos los
+            demás no hay nada que prender, ya se está moviendo. */}
+        <button
+          type="button"
+          class="mov"
+          hidden
+          aria-pressed="false"
+          title={lang === 'es' ? 'Prender o apagar las animaciones' : 'Turn animation on or off'}
+        >
+          <span class="mov-icono" aria-hidden="true"></span>
+          <span class="mov-txt">{lang === 'es' ? 'movimiento' : 'motion'}</span>
+        </button>
+
         {
           secciones.length > 0 && (
             <details class="menu-movil md:hidden">
@@ -107,4 +120,66 @@ const otro = lang === 'es' ? 'EN' : 'ES';
   .menu-movil summary::-webkit-details-marker {
     display: none;
   }
+
+  .mov {
+    display: none;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--color-borde);
+    border-radius: 999px;
+    background: none;
+    color: var(--color-tenue);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  /* Se muestra sólo cuando hay algo que prender. */
+  @media (prefers-reduced-motion: reduce) {
+    .mov { display: inline-flex; }
+  }
+  .mov:hover { color: var(--color-texto); border-color: var(--color-borde-vivo); }
+  .mov-icono {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--color-borde-vivo);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .mov[aria-pressed='true'] { color: var(--color-texto); border-color: var(--color-acento); }
+  .mov[aria-pressed='true'] .mov-icono {
+    background: var(--color-acento);
+    box-shadow: 0 0 8px 1px color-mix(in srgb, var(--color-acento) 70%, transparent);
+  }
 </style>
+
+<script>
+  // El botón existe en el HTML pero arranca oculto: si el navegador no pidió
+  // reducir movimiento no hay nada que prender, y un control que no hace nada
+  // es peor que ningún control.
+  const boton = document.querySelector<HTMLButtonElement>('.mov');
+  if (boton && matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const puesto = () => document.documentElement.dataset.mov === 'on';
+    const pintar = () => boton.setAttribute('aria-pressed', String(puesto()));
+
+    boton.hidden = false;
+    pintar();
+
+    boton.addEventListener('click', () => {
+      const nuevo = !puesto();
+      if (nuevo) document.documentElement.dataset.mov = 'on';
+      else delete document.documentElement.dataset.mov;
+      try {
+        localStorage.setItem('mov', nuevo ? 'on' : 'off');
+      } catch (e) {
+        /* sin memoria: vale para esta visita nomás */
+      }
+      pintar();
+      // Los fondos de canvas deciden al arrancar si se animan o no, así que
+      // para que el cambio se vea entero hay que volver a cargar.
+      location.reload();
+    });
+  }
+</script>

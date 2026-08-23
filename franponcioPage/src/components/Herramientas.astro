@@ -157,15 +157,19 @@ const filas: { items: Ficha[]; sentido: string }[] = [
   /* Sin movimiento la cinta se queda quieta y se arrastra a mano. El salto
      de copia lo hace el script de abajo, así que sigue siendo infinita. */
   @media (prefers-reduced-motion: reduce) {
-    .cinta {
+    /* Cada regla de acá va colgada de `html:not([data-mov='on'])`: si el
+       visitante prendió el movimiento a mano con el botón de la barra, su
+       decisión gana sobre la del sistema y nada de esto se aplica. */
+
+    :global(html:not([data-mov='on'])) .cinta {
       animation: none;
     }
-    .carril {
+    :global(html:not([data-mov='on'])) .carril {
       overflow-x: auto;
       scrollbar-width: none;
       overscroll-behavior-x: contain;
     }
-    .carril::-webkit-scrollbar {
+    :global(html:not([data-mov='on'])) .carril::-webkit-scrollbar {
       display: none;
     }
   }
@@ -182,7 +186,9 @@ const filas: { items: Ficha[]; sentido: string }[] = [
    * y se salta cuando te acercás a cualquiera de las dos puntas, de manera
    * que siempre queda al menos una copia entera de colchón para seguir.
    */
-  const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const quieto =
+    matchMedia('(prefers-reduced-motion: reduce)').matches &&
+    document.documentElement.dataset.mov !== 'on';
 
   if (quieto) {
     for (const carril of document.querySelectorAll<HTMLElement>('.carril')) {
