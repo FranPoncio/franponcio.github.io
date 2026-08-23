@@ -55,7 +55,7 @@ const estaciones = proyectos.map((p, i) => {
 
 <section class="marco" id="traza" style={`--paradas:${estaciones.length}`}>
   <div class="pega">
-    <div class="via" aria-hidden="true"></div>
+    <div class="via" aria-hidden="true"><span class="paquetes"></span></div>
 
     <ol class="pista">
       {
@@ -82,7 +82,9 @@ const estaciones = proyectos.map((p, i) => {
 
               {p.data.kpis[0] && (
                 <span class="dato">
-                  <b class="tabular-nums">{p.data.kpis[0].valor}</b>
+                  <b class="tabular-nums" data-cifra={p.data.kpis[0].valor}>
+                    {p.data.kpis[0].valor}
+                  </b>
                   <i>{p.data.kpis[0].label}</i>
                 </span>
               )}
@@ -124,8 +126,8 @@ const estaciones = proyectos.map((p, i) => {
     left: 0;
     right: 0;
     top: 50%;
-    height: 9px;
-    margin-top: -4.5px;
+    height: 14px;
+    margin-top: -7px;
     border-radius: 5px;
     border-top: 1px solid var(--color-borde);
     border-bottom: 1px solid var(--color-borde);
@@ -135,6 +137,33 @@ const estaciones = proyectos.map((p, i) => {
       var(--color-borde) 96px 98px
     );
   }
+  /* Los paquetes: pulsos claros que CORREN por el tramo ya cargado. Es lo que
+     hace que el caño se lea como una cañería con algo adentro y no como una
+     barra de progreso pintada. Sólo se anima background-position. */
+  .paquetes {
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    border-radius: 4px;
+    transform: scaleX(var(--avance, 1));
+    transform-origin: left center;
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent 0 58px,
+      rgba(255, 255, 255, 0.9) 58px 96px,
+      transparent 96px 150px
+    );
+    background-size: 300px 100%;
+    animation: correr-gas 2.1s linear infinite;
+  }
+  @keyframes correr-gas {
+    from { background-position: 0 0; }
+    to   { background-position: 300px 0; }
+  }
+
   /* El gas: se llena a medida que avanzás por la traza. */
   .via::after {
     content: '';
@@ -250,6 +279,36 @@ const estaciones = proyectos.map((p, i) => {
   .arriba .anio { top: calc(50% + 13px); }
   .abajo .anio { top: calc(50% - 26px); }
 
+  /* Sin JavaScript todo se ve de una: la entrada sólo existe con `js-on`. */
+  :global(.js-on) .ficha {
+    opacity: 0;
+    translate: 0 34px;
+    scale: 0.94;
+  }
+  :global(.js-on) .parada.activa .ficha {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  :global(.js-on) .nodo {
+    transform: scale(0.35);
+    opacity: 0;
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+  }
+  :global(.js-on) .parada.activa .nodo {
+    transform: scale(1);
+    opacity: 1;
+  }
+  :global(.js-on) .anio,
+  :global(.js-on) .tramo {
+    opacity: 0;
+    transition: opacity 0.5s ease 0.15s;
+  }
+  :global(.js-on) .parada.activa .anio,
+  :global(.js-on) .parada.activa .tramo {
+    opacity: 1;
+  }
+
   .ficha {
     display: block;
     position: absolute;
@@ -263,6 +322,9 @@ const estaciones = proyectos.map((p, i) => {
       0 1px 2px rgba(14, 23, 20, 0.05),
       0 10px 30px -18px rgba(14, 23, 20, 0.35);
     transition:
+      opacity 0.55s ease,
+      translate 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+      scale 0.65s cubic-bezier(0.16, 1, 0.3, 1),
       transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
       border-color 0.25s ease,
       box-shadow 0.25s ease;
@@ -272,11 +334,25 @@ const estaciones = proyectos.map((p, i) => {
 
   @media (hover: hover) {
     .ficha:hover {
-      transform: translateY(-6px);
+      transform: translateY(-14px);
       border-color: var(--c);
       box-shadow:
-        0 2px 4px rgba(14, 23, 20, 0.06),
-        0 18px 40px -20px color-mix(in srgb, var(--c) 55%, transparent);
+        0 3px 6px rgba(14, 23, 20, 0.08),
+        0 34px 60px -22px color-mix(in srgb, var(--c) 70%, transparent),
+        0 0 0 4px color-mix(in srgb, var(--c) 12%, transparent);
+    }
+    /* La estación también reacciona: el nodo crece mientras mirás su ficha.
+       Va con `.js-on .parada.activa` porque la regla de entrada tiene esa
+       misma especificidad y si no le ganaba. */
+    :global(.js-on) .parada.activa:hover .nodo,
+    .parada:hover .nodo {
+      transform: scale(1.5);
+      box-shadow:
+        0 0 0 4px var(--color-fondo),
+        0 0 24px -2px var(--c);
+    }
+    .ficha:hover .dato b {
+      color: var(--c);
     }
   }
   .ficha:focus-visible { outline: 2px solid var(--c); outline-offset: 4px; }
@@ -313,6 +389,7 @@ const estaciones = proyectos.map((p, i) => {
     gap: 0.45rem;
   }
   .dato b {
+    transition: color 0.3s ease;
     font-family: var(--font-mono);
     font-size: 1.2rem;
     font-weight: 700;
@@ -387,20 +464,81 @@ const estaciones = proyectos.map((p, i) => {
   const marco = document.querySelector<HTMLElement>('#traza');
   const pista = marco?.querySelector<HTMLElement>('.pista');
   const via = marco?.querySelector<HTMLElement>('.via');
+  const suave = !matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  if (marco && pista && via && matchMedia('(min-width: 901px)').matches) {
+  /**
+   * Cuenta una cifra hacia arriba respetando su formato: "12.000 km" cuenta el
+   * número y devuelve el resto tal cual, y "< 5 %" o "SPI / CPI" —que no tienen
+   * número que contar— se dejan quietas.
+   */
+  function contar(el: HTMLElement) {
+    const texto = (el.dataset.cifra ?? el.textContent ?? '').trim();
+    const m = texto.match(/^(\D*?)([\d.,]+)(.*)$/s);
+    if (!m) return;
+    const [, antes, crudo, despues] = m;
+    const destino = parseInt(crudo.replace(/[.,]/g, ''), 10);
+    if (!isFinite(destino) || destino === 0) return;
+    const separador = crudo.includes('.') || crudo.includes(',');
+    const t0 = performance.now();
+
+    const paso = (ahora: number) => {
+      const p = Math.min((ahora - t0) / 900, 1);
+      // easeOutExpo: arranca rápido y frena, se siente mecánico
+      const v = Math.round(destino * (p === 1 ? 1 : 1 - Math.pow(2, -10 * p)));
+      el.textContent = antes + (separador ? v.toLocaleString('es-AR') : String(v)) + despues;
+      if (p < 1) requestAnimationFrame(paso);
+    };
+    requestAnimationFrame(paso);
+  }
+
+  if (marco && pista && via) {
+    const paradas = [...marco.querySelectorAll<HTMLElement>('.parada')].map((el) => ({
+      el,
+      nodo: el.querySelector<HTMLElement>('.nodo')!,
+      cifra: el.querySelector<HTMLElement>('.dato b'),
+      activa: false,
+    }));
+
+    // Una estación se enciende cuando el gas la alcanza: cuando su nodo cruza
+    // el 62 % del ancho de pantalla. Ahí entra la ficha y la cifra cuenta.
+    const encender = (todo = false) => {
+      const umbral = window.innerWidth * 0.62;
+      for (const p of paradas) {
+        if (todo && !p.activa) {
+          p.activa = true;
+          p.el.classList.add('activa');
+          if (suave && p.cifra) contar(p.cifra);
+          continue;
+        }
+        if (p.activa) continue;
+        if (p.nodo.getBoundingClientRect().left > umbral) continue;
+        p.activa = true;
+        p.el.classList.add('activa');
+        if (suave && p.cifra) contar(p.cifra);
+      }
+    };
+
+    const horizontal = matchMedia('(min-width: 901px)');
     let pendiente = false;
+
     const medir = () => {
       pendiente = false;
-      const caja = marco.getBoundingClientRect();
-      // Lo que sobra del bloque por encima de la pantalla es el recorrido útil.
-      const recorrido = caja.height - window.innerHeight;
-      const avance = recorrido <= 0 ? 1 : Math.min(Math.max(-caja.top / recorrido, 0), 1);
-      // Cuánto tiene que correrse la pista para que su última ficha entre.
-      const sobra = Math.max(pista.scrollWidth - window.innerWidth, 0);
-      pista.style.transform = `translate3d(${(-sobra * avance).toFixed(1)}px,0,0)`;
-      via.style.setProperty('--avance', avance.toFixed(4));
+      if (horizontal.matches) {
+        const caja = marco.getBoundingClientRect();
+        // Lo que sobra del bloque por encima de la pantalla es el recorrido útil.
+        const recorrido = caja.height - window.innerHeight;
+        const avance = recorrido <= 0 ? 1 : Math.min(Math.max(-caja.top / recorrido, 0), 1);
+        // Cuánto tiene que correrse la pista para que su última ficha entre.
+        const sobra = Math.max(pista.scrollWidth - window.innerWidth, 0);
+        pista.style.transform = `translate3d(${(-sobra * avance).toFixed(1)}px,0,0)`;
+        via.style.setProperty('--avance', avance.toFixed(4));
+        encender(avance > 0.995);
+        return;
+      }
+      pista.style.transform = '';
+      encender();
     };
+
     const alScroll = () => {
       if (pendiente) return;
       pendiente = true;
@@ -408,6 +546,26 @@ const estaciones = proyectos.map((p, i) => {
     };
     addEventListener('scroll', alScroll, { passive: true });
     addEventListener('resize', alScroll, { passive: true });
+
+    // En columna el nodo no cruza nada horizontalmente: ahí manda el observador.
+    if (!horizontal.matches) {
+      const obs = new IntersectionObserver(
+        (entradas) => {
+          for (const e of entradas) {
+            if (!e.isIntersecting) continue;
+            const p = paradas.find((x) => x.el === e.target);
+            if (!p || p.activa) continue;
+            p.activa = true;
+            p.el.classList.add('activa');
+            if (suave && p.cifra) contar(p.cifra);
+            obs.unobserve(e.target);
+          }
+        },
+        { rootMargin: '0px 0px -18% 0px' },
+      );
+      for (const p of paradas) obs.observe(p.el);
+    }
+
     medir();
   }
 </script>

@@ -28,8 +28,9 @@
     height: 100%;
     z-index: -2;
     pointer-events: none;
-    /* Muy por debajo del umbral de lectura: tiene que sentirse, no leerse. */
-    opacity: 0.5;
+    /* Antes iba a 0.5 con alfas de 0.05: 2.5% real, o sea invisible.
+       Ahora se ve. Sigue detrás del texto y sigue sin competir con él. */
+    opacity: 1;
   }
 </style>
 
@@ -77,22 +78,22 @@
 
       // La densidad sale del área: en un celular no van 40 plumas.
       const area = (an * al) / (1440 * 900);
-      const cuantasPlumas = Math.round(26 * Math.min(Math.max(area, 0.35), 1.4));
-      const cuantasCols = Math.round(18 * Math.min(Math.max(area, 0.35), 1.4));
+      const cuantasPlumas = Math.round(16 * Math.min(Math.max(area, 0.35), 1.4));
+      const cuantasCols = Math.round(26 * Math.min(Math.max(area, 0.35), 1.4));
 
       plumas = Array.from({ length: cuantasPlumas }, () => ({
         x: azar(0, an),
         y: azar(0, al),
-        r: azar(60, 190),
-        vy: azar(0.05, 0.22),
+        r: azar(160, 420),
+        vy: azar(0.18, 0.55),
         vida: azar(0, 1),
       }));
 
       columnas = Array.from({ length: cuantasCols }, () => ({
         x: azar(0, an),
         y: azar(-al, al),
-        v: azar(0.25, 0.75),
-        paso: azar(15, 22),
+        v: azar(0.5, 1.5),
+        paso: azar(19, 27),
         bits: Array.from({ length: Math.round(azar(6, 16)) }, () =>
           Math.random() < 0.5 ? '0' : '1',
         ),
@@ -131,19 +132,19 @@
 
       // ── Humo ────────────────────────────────────────────────────────────
       for (const p of plumas) {
-        p.vida += 0.0025;
+        p.vida += 0.0018;
         if (p.vida > 1) {
           p.vida = 0;
           p.x = azar(0, an);
           p.y = azar(al * 0.55, al * 1.15);
-          p.r = azar(60, 190);
+          p.r = azar(160, 420);
         }
         p.y -= p.vy + empuje * 0.22;
-        p.x += Math.sin((p.y + p.r) * 0.004) * 0.35;
+        p.x += Math.sin((p.y + p.r) * 0.004) * 0.9;
         if (p.y < -p.r) p.y = al + p.r;
 
         // Se desvanece en las dos puntas de su vida: nunca aparece de golpe.
-        const alfa = Math.sin(p.vida * Math.PI) * 0.05;
+        const alfa = Math.sin(p.vida * Math.PI) * 0.17;
         if (alfa <= 0.001) continue;
 
         const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
@@ -156,7 +157,7 @@
       }
 
       // ── Unos y ceros ────────────────────────────────────────────────────
-      ctx.font = "500 11px 'Martian Mono', ui-monospace, monospace";
+      ctx.font = "500 14px 'Martian Mono', ui-monospace, monospace";
       ctx.textAlign = 'center';
       for (const c of columnas) {
         c.y += c.v + empuje * 0.85;
@@ -168,12 +169,12 @@
           c.y = al + azar(0, al * 0.4);
         }
         // Cada tanto un bit cambia: la columna no es una cadena fija.
-        if (Math.random() < 0.03) {
+        if (Math.random() < 0.06) {
           c.bits[Math.floor(Math.random() * c.bits.length)] = Math.random() < 0.5 ? '0' : '1';
         }
         for (let i = 0; i < c.bits.length; i++) {
           // La cabeza de la columna es la más marcada y se apaga hacia atrás.
-          const alfa = (1 - i / c.bits.length) * 0.16;
+          const alfa = (1 - i / c.bits.length) * 0.42;
           ctx.fillStyle = rgba(i === 0 ? acento : tinta, alfa);
           ctx.fillText(c.bits[i], c.x, c.y - i * c.paso);
         }
