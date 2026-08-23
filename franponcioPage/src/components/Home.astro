@@ -204,11 +204,19 @@ const titulo =
     }
 
     /* El nacimiento del eje: de acá para abajo la línea no se corta más. */
+    /* De acá nace el caño: aparece de la nada y ya viene tendido. */
     .arranque {
-      width: 2px;
+      width: 14px;
       height: 7rem;
       margin-top: 3.2rem;
-      background: linear-gradient(to bottom, transparent, var(--color-borde));
+      border-radius: 3px;
+      background: linear-gradient(
+        to right,
+        #241a11 0%, #4f3a22 16%, #966c42 38%, #c79a68 50%,
+        #8a6238 62%, #46331e 84%, #1e150d 100%
+      );
+      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 80%);
+      mask-image: linear-gradient(to bottom, transparent, #000 80%);
     }
 
     @media (max-width: 700px) {

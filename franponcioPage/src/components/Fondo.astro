@@ -225,7 +225,7 @@
       }
 
       // ── Unos y ceros ────────────────────────────────────────────────────
-      cx.font = "500 14px 'Martian Mono', ui-monospace, monospace";
+      cx.font = "500 14px 'Roboto Variable', system-ui, sans-serif";
       cx.textAlign = 'center';
       const tenues = an < 900 ? 0.32 : 1;
       for (const c of ambiente ? columnas : []) {
@@ -408,12 +408,12 @@
             // tiene canvas y acá se dibujaban decenas por frame. Se hace a
             // mano con una pasada previa más grande y translúcida, que sale
             // casi gratis y se ve igual.
-            cx.font = "700 26px 'Martian Mono', ui-monospace, monospace";
+            cx.font = "700 26px 'Roboto Variable', system-ui, sans-serif";
             cx.fillStyle = rgba(acento, alfa * 0.16);
             cx.fillText(q.bit, x, y);
             cx.fillStyle = rgba(acento, alfa);
           } else {
-            cx.font = "700 14px 'Martian Mono', ui-monospace, monospace";
+            cx.font = "700 14px 'Roboto Variable', system-ui, sans-serif";
             cx.fillStyle = rgba(datos, alfa * 0.85);
           }
           cx.fillText(q.bit, x, y);
@@ -502,12 +502,12 @@
 
         if (q.bit) {
           if (q.fuerte) {
-            cx.font = "700 26px 'Martian Mono', ui-monospace, monospace";
+            cx.font = "700 26px 'Roboto Variable', system-ui, sans-serif";
             cx.fillStyle = rgba(acento, alfa * 0.16);
             cx.fillText(q.bit, x, y);
             cx.fillStyle = rgba(acento, alfa);
           } else {
-            cx.font = "700 14px 'Martian Mono', ui-monospace, monospace";
+            cx.font = "700 14px 'Roboto Variable', system-ui, sans-serif";
             cx.fillStyle = rgba(datos, alfa * 0.85);
           }
           cx.fillText(q.bit, x, y);

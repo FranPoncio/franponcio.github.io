@@ -5,10 +5,19 @@ import type { Idioma } from '../i18n/ui';
 /**
  * Cinta de herramientas: dos filas que corren en sentidos opuestos.
  *
- * Cada fila lleva su contenido DUPLICADO y se desplaza exactamente un 50 %:
- * cuando termina la primera copia, la segunda está justo donde arrancó la
- * primera, así que el ciclo se reinicia sin salto. Es la única forma de que
- * una cinta infinita no pegue un tirón al volver.
+ * Cada fila lleva su contenido TRIPLICADO y se desplaza exactamente un
+ * tercio: cuando termina la primera copia, la segunda está justo donde
+ * arrancó la primera, así que el ciclo se reinicia sin salto.
+ *
+ * ¿Por qué tres copias y no dos, si para la animación alcanzaba con dos?
+ * Por el modo sin movimiento. Con `prefers-reduced-motion` la cinta no puede
+ * correr sola, así que se arrastra con el dedo o con el trackpad — y ahí
+ * la cinta SE TERMINABA: llegabas al final de la segunda copia y se acababa.
+ * O sea que quien tiene esa preferencia prendida nunca tuvo scroll infinito.
+ * Con tres copias hay una entera de colchón a cada lado, y un script chico
+ * salta de una copia a la equivalente cuando te acercás a la punta. Como las
+ * copias son idénticas, el salto es invisible: la cinta no termina nunca,
+ * la muevas vos o la mueva la animación.
  *
  * Se frena sola al pasar el mouse: si algo te llamó la atención, tenés que
  * poder leerlo.
@@ -30,9 +39,11 @@ const filas: { items: Ficha[]; sentido: string }[] = [
   <div class="cinta-marco pt-12 pb-14" role="group" aria-label={lang === 'es' ? 'Herramientas y métodos' : 'Tools and methods'}>
     {
       filas.map((fila) => (
+        <div class="carril">
         <div class:list={['cinta', fila.sentido]}>
-          {/* Dos copias: la segunda es la que hace que el ciclo cierre. */}
-          {[0, 1].map((copia) => (
+          {/* Tres copias: la de al medio es la que se ve, las de los costados
+              son el colchón para que el salto nunca caiga en pantalla. */}
+          {[0, 1, 2].map((copia) => (
             <div class="tanda" aria-hidden={copia === 1 ? 'true' : undefined}>
               {fila.items.map((f, i) => (
                 <span class:list={['ficha', `tono-${i % 4}`]}>
@@ -49,6 +60,7 @@ const filas: { items: Ficha[]; sentido: string }[] = [
             </div>
           ))}
         </div>
+        </div>
       ))
     }
   </div>
@@ -57,22 +69,27 @@ const filas: { items: Ficha[]; sentido: string }[] = [
 <style>
   /* Las puntas se desvanecen: la cinta entra y sale, no empieza ni termina. */
   .cinta-marco {
-    overflow: hidden;
     -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
     mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
   }
 
+  /* Cada fila tiene SU carril. Antes las dos compartían el contenedor con
+     scroll, y como miden distinto no hay un solo punto de vuelta que sirva
+     para las dos. */
+  .carril {
+    overflow: hidden;
+  }
+  .carril + .carril {
+    margin-top: 0.9rem;
+  }
   .cinta {
     display: flex;
     width: max-content;
-    animation: correr 46s linear infinite;
-  }
-  .cinta + .cinta {
-    margin-top: 0.9rem;
+    animation: correr 69s linear infinite;
   }
   .derecha {
     animation-direction: reverse;
-    animation-duration: 58s;
+    animation-duration: 87s;
   }
   .cinta-marco:hover .cinta {
     animation-play-state: paused;
@@ -83,8 +100,8 @@ const filas: { items: Ficha[]; sentido: string }[] = [
       transform: translateX(0);
     }
     to {
-      /* Justo una copia: la segunda queda donde arrancó la primera. */
-      transform: translateX(-50%);
+      /* Justo una copia de tres: la segunda queda donde arrancó la primera. */
+      transform: translateX(-33.3333%);
     }
   }
 
@@ -137,13 +154,76 @@ const filas: { items: Ficha[]; sentido: string }[] = [
 
 
   /* Sin movimiento la cinta se queda quieta y se puede scrollear con el dedo. */
+  /* Sin movimiento la cinta se queda quieta y se arrastra a mano. El salto
+     de copia lo hace el script de abajo, así que sigue siendo infinita. */
   @media (prefers-reduced-motion: reduce) {
     .cinta {
       animation: none;
     }
-    .cinta-marco {
+    .carril {
       overflow-x: auto;
       scrollbar-width: none;
+      overscroll-behavior-x: contain;
+    }
+    .carril::-webkit-scrollbar {
+      display: none;
     }
   }
 </style>
+
+<script>
+  /**
+   * La vuelta de la cinta cuando NO se anima.
+   *
+   * Con `prefers-reduced-motion` la cinta está quieta y se mueve arrastrando.
+   * Cada carril tiene tres copias idénticas del mismo contenido, así que la
+   * posición X y la posición X + (un tercio) muestran exactamente lo mismo:
+   * saltar de una a la otra es invisible. Se arranca sobre la copia del medio
+   * y se salta cuando te acercás a cualquiera de las dos puntas, de manera
+   * que siempre queda al menos una copia entera de colchón para seguir.
+   */
+  const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (quieto) {
+    for (const carril of document.querySelectorAll<HTMLElement>('.carril')) {
+      const cinta = carril.querySelector<HTMLElement>('.cinta');
+      if (!cinta) continue;
+
+      const copia = () => cinta.scrollWidth / 3;
+      let acomodando = false;
+
+      const centrar = () => {
+        carril.scrollLeft = copia();
+      };
+
+      carril.addEventListener(
+        'scroll',
+        () => {
+          // El propio reacomodo dispara otro `scroll`: sin esta guarda se
+          // llama a sí mismo y la cinta se traba.
+          if (acomodando) return;
+          const c = copia();
+          if (c < 10) return;
+          const x = carril.scrollLeft;
+          // Se salta con un cuarto de copia de margen: nunca sobre la punta,
+          // donde el rebote del navegador lo haría visible.
+          if (x > c * 1.75) {
+            acomodando = true;
+            carril.scrollLeft = x - c;
+            acomodando = false;
+          } else if (x < c * 0.25) {
+            acomodando = true;
+            carril.scrollLeft = x + c;
+            acomodando = false;
+          }
+        },
+        { passive: true },
+      );
+
+      centrar();
+      // El ancho real recién se sabe con las fuentes cargadas.
+      addEventListener('load', centrar);
+      addEventListener('resize', centrar, { passive: true });
+    }
+  }
+</script>

@@ -1,11 +1,7 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/syne';
-@import '@fontsource-variable/instrument-sans';
-@import '@fontsource/martian-mono/latin-400.css';
-@import '@fontsource/martian-mono/latin-700.css';
-@import '@fontsource/martian-mono/latin-ext-400.css';
+@import '@fontsource-variable/roboto';
 
-/* Las tipografías viajan en el repo (paquetes de Fontsource), no se bajan de
+/* La tipografía viaja en el repo (paquete de Fontsource), no se baja de
    Google Fonts. Ventajas: no depende de un CDN externo, no hay salto de fuente
    al cargar, y no se le cuenta a Google quién entra al sitio.
    Cada subset trae su unicode-range: el navegador baja latin y sólo pide
@@ -17,51 +13,47 @@
  * La paleta acompaña a PMI-Toolbox para que todo se lea como la misma marca.
  */
 @theme {
-  /* NOCHE DE RUTA.
-     Industrial y naturaleza siguen estando, pero ya no de día ni en verde
-     bosque: es la noche de un viaje por ruta. El azul profundo del cielo sin
-     luna, el naranja sodio de las luminarias y de la llama piloto, el cian de
-     una pantalla encendida adentro del auto, el violeta de un fichín, y el
-     liquen que crece sobre el caño.
-     Viajar, los jueguitos, el gas y los datos, todo en la misma paleta.
-     Ningún gris neutro: los oscuros tienen azul adentro. */
-  --color-fondo: #0a0d18;
-  --color-panel: #131a2c;
-  --color-panel-alto: #1d2540;
-  --color-borde: #333e63;
-  --color-borde-vivo: #5f6d9e;
-  --color-texto: #ece7da;
-  --color-tenue: #8d97bd;
+  /* SOBRIA. Verdes, azules y marrones sobre casi negro.
+     Los colores no gritan: el naranja sodio y el azul noche eran lindos pero
+     se comían el contenido. Acá todo está bajado de saturación, como
+     material de verdad visto de noche: acero, bronce, musgo, agua quieta.
+     El fondo es casi negro con una gota de verde adentro — gris neutro no,
+     que apaga todo lo demás. */
+  --color-fondo: #0f1110;
+  --color-panel: #181b19;
+  --color-panel-alto: #212623;
+  --color-borde: #333a36;
+  --color-borde-vivo: #525c56;
+  --color-texto: #dfdcd4;
+  --color-tenue: #8e968f;
 
-  /* Sodio: la luminaria de la ruta y la llama del piloto son el mismo naranja. */
-  --color-acento: #ff8a2b;
-  --color-acento-tenue: #4a2a10;
+  /* Cobre quemado: el calor del caño, sin ser un naranja de alerta. */
+  --color-acento: #c08552;
+  --color-acento-tenue: #3d2a1a;
 
   /* Una categoría, un material:
-       datos        pantalla    el cian del monitor encendido
-       gestión      latón       el metal de las válvulas
-       herramienta  liquen      lo que crece sobre el caño
-       juego        fichín      el violeta del tubo de rayos catódicos
-       ruta         asfalto     el azul de la señalización */
-  --color-datos: #3ae0cf;
-  --color-gestion: #ffc44d;
-  --color-herramienta: #a6e262;
-  --color-juego: #c07bff;
-  --color-ruta: #6d8cff;
+       datos        agua quieta   verde azulado apagado
+       gestión      bronce        el metal de las válvulas
+       herramienta  musgo         lo que crece sobre el caño
+       ruta         acero         el azul de la señalización */
+  --color-datos: #6fa39c;
+  --color-gestion: #b8964f;
+  --color-herramienta: #7f9a63;
+  --color-ruta: #5d7f9c;
 
-  /* Sobre azul noche una sombra negra no existe: la sombra dura va en el sodio. */
-  --sombra: 4px 4px 0 color-mix(in srgb, var(--color-acento) 62%, transparent);
-  --sombra-alta: 7px 7px 0 color-mix(in srgb, var(--color-acento) 62%, transparent);
+  --sombra: 4px 4px 0 color-mix(in srgb, var(--color-acento) 55%, transparent);
+  --sombra-alta: 7px 7px 0 color-mix(in srgb, var(--color-acento) 55%, transparent);
 
-  /* Syne reemplaza a Anton. Anton es condensada, de un solo peso y sólo sirve
-     en mayúscula y en tamaño grande: por eso todos los títulos del sitio
-     estaban forzados a MAYÚSCULA y en caja baja se caían.
-     Syne es lo contrario —ancha, variable de 400 a 800— así que los títulos
-     pueden ir en caja mixta, con el peso justo en cada tamaño, y siguen
-     teniendo carácter. Es una tipografía de estudio de diseño, no de póster. */
-  --font-titulo: 'Syne Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'Martian Mono', ui-monospace, 'SF Mono', monospace;
+  /* UNA SOLA TIPOGRAFÍA EN TODO EL SITIO.
+     Antes había tres —Syne para los títulos, Instrument Sans para el texto y
+     Martian Mono para los rótulos— y se notaba: cada bloque parecía de otro
+     sitio. Roboto tiene el eje de peso completo (100 a 900), así que la
+     jerarquía se hace con PESO y TAMAÑO, que es como corresponde, y no
+     cambiando de familia. Los tres tokens apuntan a la misma fuente a
+     propósito: quedan para no tener que tocar cada componente. */
+  --font-titulo: 'Roboto Variable', system-ui, ui-sans-serif, sans-serif;
+  --font-display: 'Roboto Variable', system-ui, ui-sans-serif, sans-serif;
+  --font-mono: 'Roboto Variable', system-ui, ui-sans-serif, sans-serif;
 }
 
 html {
@@ -260,14 +252,18 @@ body {
    titulares — sin eso no entra nada. */
 h1, h2, h3, .titular {
   font-family: var(--font-titulo);
-  /* 750 es el peso donde Syne tiene más personalidad: las terminaciones se
-     achatan y la letra se vuelve casi una placa. En 800 se empasta. */
-  font-weight: 750;
-  letter-spacing: -0.025em;
-  line-height: 0.98;
+  /* Roboto llega a 900. En titulares grandes va bien arriba; el tracking
+     negativo es lo que la saca de "texto en negrita" y la vuelve titular. */
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
 }
-/* Los rótulos en mayúscula van al revés: abiertos, para que se lean como
-   etiquetas de instrumento y no como una palabra apretada. */
+/* Los rótulos en mayúscula chiquitos: abiertos, para que se lean como
+   etiquetas de instrumento y no como una palabra apretada. El -0.055em de
+   antes era para Martian Mono, que es larguísima; en una proporcional como
+   Roboto apretar así los vuelve ilegibles. */
 .font-mono {
-  letter-spacing: -0.055em;
+  letter-spacing: 0.06em;
 }
+/* Las cifras que cuentan o se comparan van de ancho fijo, si no bailan. */
+.tabular-nums, .contador { font-variant-numeric: tabular-nums; }

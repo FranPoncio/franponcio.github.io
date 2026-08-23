@@ -152,49 +152,95 @@ const estaciones = proyectos.map((p) => ({
     scroll-margin-top: 4.5rem;
   }
 
-  /* ── El eje ───────────────────────────────────────────────────────────
-     Por el medio EXACTO de la página. La línea de base es apenas visible; el
-     tramo recorrido se pinta encima con `.frente`, que escala en Y según
-     `--avance`. Escalar un pseudo-elemento es composición pura: no hay
-     layout ni pintado por frame. */
+  /* ── EL CAÑO ──────────────────────────────────────────────────────────
+     Por el medio EXACTO de la página. Ya no es una línea: es un caño que se
+     extiende. Donde todavía no llegó queda la traza marcada —el zanjeo, en
+     punteado— y detrás va quedando el caño tendido.
+
+     El caño crece con `height` y NO con `transform: scaleY()`. Escalar es más
+     barato, pero estira todo lo que tenga adentro: las juntas soldadas se
+     deformaban de redondas a ovaladas a medida que avanzaba, y el degradado
+     del cilindro se iba con ellas. Con `height` las juntas quedan siempre a
+     la misma distancia y del mismo grosor, que es lo que hace que se lea como
+     un caño y no como una barra de progreso. El costo es acotado: `.frente`
+     es `position: absolute`, así que cambiarle el alto no reacomoda nada. */
   .via {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 14px;
+    margin-left: -7px;
+    --avance: 0;
+  }
+  /* La traza marcada: por acá va a ir el caño. */
+  .via::before {
+    content: '';
     position: absolute;
     left: 50%;
     top: 0;
     bottom: 0;
     width: 2px;
     margin-left: -1px;
-    background: var(--color-borde);
-    --avance: 0;
+    /* Va en el borde VIVO: con --color-borde (#333a36) sobre un fondo casi
+       negro el punteado no se distinguía, y entonces el tramo que todavía no
+       tiene caño parecía vacío en vez de marcado. */
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--color-borde-vivo) 0 9px,
+      transparent 9px 18px
+    );
+    opacity: 0.75;
   }
+
   .frente {
     position: absolute;
-    inset: 0;
-    transform: scaleY(var(--avance));
-    transform-origin: top;
-    background: linear-gradient(
-      to bottom,
-      var(--color-datos) 0%,
-      var(--color-acento) 100%
-    );
-    box-shadow: 0 0 14px 1px color-mix(in srgb, var(--color-acento) 55%, transparent);
+    left: 0;
+    right: 0;
+    top: 0;
+    height: calc(var(--avance) * 100%);
+    border-radius: 3px;
+    will-change: height;
+    background:
+      /* Las juntas soldadas, cada 92 px. */
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0 88px,
+        rgba(0, 0, 0, 0.5) 88px 90px,
+        rgba(255, 255, 255, 0.07) 90px 92px
+      ),
+      /* El cilindro: la luz pega arriba a la izquierda y la sombra cae a la
+         derecha. Los siete cortes son lo que da el volumen — con dos el caño
+         se ve plano, como una cinta. Cobre quemado, que es el acento. */
+      linear-gradient(
+        to right,
+        #241a11 0%,
+        #4f3a22 16%,
+        #966c42 38%,
+        #c79a68 50%,
+        #8a6238 62%,
+        #46331e 84%,
+        #1e150d 100%
+      );
+    box-shadow: 0 0 18px -2px color-mix(in srgb, var(--color-acento) 30%, transparent);
   }
-  /* La cabeza del recorrido: el punto encendido que va bajando. */
+  /* La punta abierta del caño: la elipse que se ve de la boca, encendida. */
   .frente::after {
     content: '';
     position: absolute;
     left: 50%;
     bottom: 0;
-    width: 11px;
-    height: 11px;
-    margin-left: -5.5px;
-    margin-bottom: -5.5px;
+    width: 22px;
+    height: 10px;
+    margin-left: -11px;
+    margin-bottom: -5px;
     border-radius: 50%;
-    background: var(--color-acento);
-    box-shadow: 0 0 18px 4px color-mix(in srgb, var(--color-acento) 70%, transparent);
-    /* El punto no se estira aunque el padre esté escalado en Y. */
-    transform: scaleY(calc(1 / max(var(--avance), 0.001)));
-    transform-origin: bottom;
+    background: radial-gradient(
+      ellipse at center,
+      var(--color-acento) 0%,
+      color-mix(in srgb, var(--color-acento) 45%, transparent) 45%,
+      transparent 72%
+    );
   }
 
   .pista {
@@ -233,7 +279,8 @@ const estaciones = proyectos.map((p) => ({
     line-height: 0.8;
     letter-spacing: -0.045em;
     color: transparent;
-    -webkit-text-stroke: 1.5px var(--color-borde);
+    -webkit-text-stroke: 1.5px var(--color-borde-vivo);
+    opacity: 0.55;
     user-select: none;
     white-space: nowrap;
   }
@@ -241,8 +288,8 @@ const estaciones = proyectos.map((p) => ({
   .nodo {
     position: relative;
     z-index: 3;
-    width: 17px;
-    height: 17px;
+    width: 21px;
+    height: 21px;
     border-radius: 50%;
     background: var(--c);
     box-shadow:
@@ -328,8 +375,8 @@ const estaciones = proyectos.map((p) => ({
   }
   .periodo {
     font-family: var(--font-mono);
-    font-size: 0.58rem;
-    letter-spacing: -0.03em;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
     color: var(--color-tenue);
   }
 
@@ -464,8 +511,9 @@ const estaciones = proyectos.map((p) => ({
   .marcas svg { width: 1.05rem; height: 1.05rem; opacity: 0.42; }
   .ir {
     font-family: var(--font-mono);
-    font-size: 0.6rem;
-    letter-spacing: -0.02em;
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
     color: var(--c);
     text-decoration: none;
     white-space: nowrap;
