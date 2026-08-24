@@ -89,6 +89,20 @@ const primerRol = (rol: string) => {
  * va sin año: el que sigue arriba se entiende que sigue valiendo.
  */
 let anioPrevio = '';
+/**
+ * Para la fila de adelante van primero las cifras y después el resto.
+ *
+ * Algunos casos tienen KPIs que no son números —"Reducido", "Operación
+ * completa"— y puestos al lado de un 12.000 en cuerpo grande desbalancean la
+ * fila: una palabra larga se come el ancho de dos cifras. Ordenados así, la
+ * ficha muestra lo cuantitativo primero, que es lo que se lee de un vistazo,
+ * y lo cualitativo queda para el detalle.
+ * `sort` es estable, así que dentro de cada grupo se respeta el orden del caso.
+ */
+const conNumero = (v: string) => /\d/.test(v);
+const paraLaFicha = (kpis: Proyecto['data']['kpis']) =>
+  [...kpis].sort((a, b) => Number(conNumero(b.valor)) - Number(conNumero(a.valor)));
+
 const estaciones = proyectos.map((p) => {
   const propio = anioDe(p.data.periodo);
   const anio = propio === anioPrevio ? '' : propio;
@@ -97,6 +111,7 @@ const estaciones = proyectos.map((p) => {
   p,
   anio,
   marcas: logosDelStack(p.data.stack, 4),
+  kpis: paraLaFicha(p.data.kpis),
   };
 });
 ---
@@ -118,7 +133,7 @@ const estaciones = proyectos.map((p) => {
 
   <ol class="pista">
     {
-      estaciones.map(({ p, anio, marcas }) => (
+      estaciones.map(({ p, anio, marcas, kpis }) => (
         <li class="parada" style={`--c: var(--color-${p.data.categoria})`}>
           {/* El año gigante, en hueco, detrás de la ficha: la ficha se apoya
               adentro del número y se lee el año por arriba y por abajo. */}
@@ -137,12 +152,24 @@ const estaciones = proyectos.map((p) => {
 
               <span class="titulo">{corto(p.data.titulo)}</span>
 
-              {p.data.kpis[0] && (
-                <span class="cifra">
-                  <b class="tabular-nums" data-cifra={p.data.kpis[0].valor}>
-                    {p.data.kpis[0].valor}
-                  </b>
-                  <i>{p.data.kpis[0].label}</i>
+              {/* VARIOS datos, no uno. Con una sola cifra la ficha decía menos
+                  de lo que el caso tiene: dos o tres puestas juntas se leen
+                  como un tablero y dejan ver de qué tamaño fue la cosa.
+                  El tamaño baja cuando son más, para que la fila entre en los
+                  500 px de la ficha sin apretarse. */}
+              {kpis.length > 0 && (
+                <span class:list={['cifras', `de-${Math.min(kpis.length, 3)}`]}>
+                  {kpis.slice(0, 3).map((k) => (
+                    <span class="cifra">
+                      <b
+                        class:list={['tabular-nums', !/\d/.test(k.valor) && 'palabra']}
+                        data-cifra={k.valor}
+                      >
+                        {k.valor}
+                      </b>
+                      <i>{k.label}</i>
+                    </span>
+                  ))}
                 </span>
               )}
 
@@ -160,9 +187,9 @@ const estaciones = proyectos.map((p) => {
                 <p class="periodo">{p.data.periodo}</p>
                 <p class="resumen">{p.data.resumen}</p>
 
-                {p.data.kpis.length > 1 && (
+                {kpis.length > 3 && (
                   <div class="datos">
-                    {p.data.kpis.slice(1, 4).map((k) => (
+                    {kpis.slice(3).map((k) => (
                       <span>
                         <b class="tabular-nums">{k.valor}</b>
                         <i>{k.label}</i>
@@ -245,6 +272,27 @@ const estaciones = proyectos.map((p) => {
       ),
       var(--acero);
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  }
+  /* EL BORDE DE AVANCE.
+     Desde que el caño de la página es continuo, el tramo ya recorrido y el que
+     falta son los dos un caño: lo único que los separa es el brillo, y el
+     momento en que la punta pasa por una estación dejaba de ser un evento.
+     Esta banda encendida en la punta lo vuelve visible, y es lo que da pie a
+     que después se arme la brida. */
+  .frente::after {
+    content: '';
+    position: absolute;
+    left: -3px;
+    right: -3px;
+    bottom: 0;
+    height: 26px;
+    border-radius: 3px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      color-mix(in srgb, var(--color-acento) 42%, transparent)
+    );
+    box-shadow: 0 0 16px 2px color-mix(in srgb, var(--color-acento) 30%, transparent);
   }
   /* ── LA VÁLVULA DE LA PUNTA ───────────────────────────────────────────
      Baja con el frente porque `top` sale del mismo `--avance` que estira el
@@ -489,12 +537,19 @@ const estaciones = proyectos.map((p) => {
     text-wrap: balance;
   }
 
+  .cifras {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 0.4rem 1.5rem;
+    margin-top: 0.5rem;
+  }
   .cifra {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.1rem;
-    margin-top: 0.35rem;
   }
   .cifra b {
     font-family: var(--font-titulo);
@@ -505,6 +560,7 @@ const estaciones = proyectos.map((p) => {
     line-height: 1;
     letter-spacing: -0.045em;
     color: var(--c);
+    white-space: nowrap;
   }
   .cifra i {
     font-family: var(--font-mono);
@@ -514,6 +570,24 @@ const estaciones = proyectos.map((p) => {
     text-transform: uppercase;
     color: var(--color-tenue);
   }
+
+  /* Cuantas más cifras, más chicas: si no, tres de 2,8rem no entran en una
+     ficha de 500 px y se parten en tres renglones. */
+  .de-2 .cifra b { font-size: clamp(1.6rem, 4.4vw, 2.1rem); }
+  .de-3 .cifra b { font-size: clamp(1.25rem, 3.4vw, 1.65rem); }
+  /* Un valor que es una palabra y no un número va más chico y en el tono del
+     texto: si no, "Operación completa" pesa más que un 12.000 y desordena la
+     jerarquía de la ficha. */
+  .cifra b.palabra {
+    font-size: 0.95rem !important;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--color-texto);
+    align-self: center;
+  }
+  .de-3 { gap: 0.4rem 1.1rem; }
+  .de-2 .cifra i,
+  .de-3 .cifra i { font-size: 0.46rem; }
 
   /* La seña de que la ficha se abre. */
   .senia {
@@ -751,6 +825,8 @@ const estaciones = proyectos.map((p) => {
    */
   const FRENTE = 0.58;
   const ENTRADA = 0.94;
+  /** Cuánto tiene que pasarse la punta del nodo antes de que se arme la brida. */
+  const PASADO = 38;
 
   for (const marco of trazas) {
     const via = marco.querySelector<HTMLElement>('.via');
@@ -761,7 +837,7 @@ const estaciones = proyectos.map((p) => {
       nodo: el.querySelector<HTMLElement>('.nodo')!,
       bridada: false,
       tapa: el.querySelector<HTMLButtonElement>('.tapa')!,
-      cifra: el.querySelector<HTMLElement>('.cifra b'),
+      cifras: [...el.querySelectorAll<HTMLElement>('.cifra b')],
       activa: false,
     }));
 
@@ -815,11 +891,16 @@ const estaciones = proyectos.map((p) => {
         if (!p.activa && caja.top <= entrada) {
           p.activa = true;
           p.el.classList.add('activa');
-          if (suave && p.cifra) contar(p.cifra);
+          if (suave) for (const c of p.cifras) contar(c);
         }
 
-        // 2) La brida se arma cuando LLEGA LA VÁLVULA, que va en el frente.
-        if (!p.bridada && (alFinal || caja.top + caja.height / 2 <= frente)) {
+        // 2) La brida se arma cuando la punta del caño YA PASÓ, no mientras
+        //    la está cruzando. Antes disparaba con el centro del nodo sobre
+        //    el frente, o sea justo encima: la brida aparecía al mismo tiempo
+        //    que pasaba la válvula y no se leía como consecuencia.
+        //    `caja.bottom + PASADO <= frente` quiere decir que el frente dejó
+        //    atrás el nodo entero y siguió de largo un poco más.
+        if (!p.bridada && (alFinal || caja.bottom + PASADO <= frente)) {
           p.bridada = true;
           p.el.classList.add('bridada');
         }
