@@ -54,8 +54,8 @@ const cifras = [
 const secciones = [
   { id: 'experiencia', titulo: t('tramo.laboral') },
   { id: 'propias', titulo: t('tramo.proyecto') },
-  { id: 'herramientas', titulo: t('herramientas.titulo') },
   { id: 'formacion', titulo: t('formacion.titulo') },
+  { id: 'herramientas', titulo: t('herramientas.titulo') },
 ];
 
 const titulo =
@@ -135,20 +135,21 @@ const titulo =
     <Traza id="traza-propias" proyectos={propias} lang={lang} />
 
     <Banda
-      id="herramientas"
+      id="formacion"
       indice="03"
+      titulo={t('formacion.titulo')}
+      bajada={t('banda.formacion.bajada')}
+    />
+    <Formacion cursos={cursos} lang={lang} />
+
+    <Banda
+      id="herramientas"
+      indice="04"
       titulo={t('herramientas.titulo')}
       bajada={t('banda.stack.bajada')}
     />
     <Herramientas lang={lang} />
 
-    <Banda
-      id="formacion"
-      indice="04"
-      titulo={t('formacion.titulo')}
-      bajada={t('banda.formacion.bajada')}
-    />
-    <Formacion cursos={cursos} lang={lang} />
 
 
   </div>
