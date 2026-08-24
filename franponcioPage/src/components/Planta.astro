@@ -263,9 +263,9 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
       {/* Tramo vertical. Baja HASTA PASAR la esquina: el vertical y el
           horizontal se solapan en el cuadrado del codo, así queda macizo.
           El arco que tenía antes dejaba un escalón visible entre los dos. */}
-      <rect x={EJE_X - 7} y="0" width="14" height={CODO_Y + 22} fill="url(#acero-v)" />
+      <rect x={EJE_X - 8} y="0" width="16" height={CODO_Y + 22} fill="url(#acero-v)" />
       {/* Tramo horizontal, desde el codo hasta la pared de la planta */}
-      <rect x={EJE_X - 7} y={CODO_Y + 8} width={ENTRADA_X - EJE_X + 7} height="14" fill="url(#acero-h)" />
+      <rect x={EJE_X - 8} y={CODO_Y + 7} width={ENTRADA_X - EJE_X + 8} height="16" fill="url(#acero-h)" />
 
       {/* Bridas del tramo horizontal */}
       {[0, 1, 2].map((i) => (
@@ -329,9 +329,11 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
     width: 100%;
     height: clamp(250px, 31vw, 430px);
     overflow: hidden;
-    /* El caño de la página entra sin costura: arriba no hay borde. */
-    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 9%);
-    mask-image: linear-gradient(to bottom, transparent, #000 9%);
+    /* SIN MÁSCARA. Estaba puesta para que la escena no arrancara con un
+       borde duro, pero desvanecía TODO lo de arriba —el caño incluido— y
+       justo en la junta con el caño de la página quedaba un hueco.
+       El borde duro no existía igual: el primer tono del cielo del SVG es
+       #0f1110, el mismo `--color-fondo` que tiene la página atrás. */
   }
   .planta svg {
     display: block;
