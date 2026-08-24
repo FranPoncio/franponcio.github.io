@@ -261,7 +261,7 @@
     // binarios flotando entre las volutas. Cada partícula guarda su posición
     // en coordenada de recorrido (0 a 1 de la traza entera) y no en píxeles:
     // así queda anclada a su tramo y acompaña al scroll.
-    const MAX_HUMO = 360;
+    const MAX_HUMO = 240;
 
     /**
      * Lo que flota en el humo son NÚMEROS DE VERDAD, no unos y ceros: los que
@@ -332,10 +332,10 @@
 
       cx.beginPath();
       cx.arc(x, y, R, 0, Math.PI * 2);
-      cx.fillStyle = rgba(col, alfa * 0.11);
+      cx.fillStyle = rgba(col, alfa * 0.08);
       cx.fill();
       cx.lineWidth = grande ? 2 : 1.4;
-      cx.strokeStyle = rgba(col, alfa * 0.72);
+      cx.strokeStyle = rgba(col, alfa * 0.58);
       cx.stroke();
 
       // Los satélites. El ángulo sale de la vida de la partícula y de su
@@ -345,12 +345,12 @@
         const a = giro + k * Math.PI;
         cx.beginPath();
         cx.arc(x + Math.cos(a) * (R + 6), y + Math.sin(a) * (R + 6), grande ? 2.7 : 1.9, 0, Math.PI * 2);
-        cx.fillStyle = rgba(col, alfa * 0.6);
+        cx.fillStyle = rgba(col, alfa * 0.45);
         cx.fill();
       }
 
       cx.font = `700 ${grande ? 10 : 8}px 'Roboto Variable', system-ui, sans-serif`;
-      cx.fillStyle = rgba(col, alfa);
+      cx.fillStyle = rgba(col, alfa * 0.82);
       cx.fillText(q.bit!, x, y + (grande ? 4 : 3));
     }
 
@@ -389,16 +389,25 @@
       const sAbajo = Math.min((window.scrollY + al) / altoDoc, 1);
       const tramo = Math.max(sAbajo - sArriba, 0.001);
 
-      // UNA por frame, no dos. Con dos, en las secciones sin traza las 400
-      // partículas del cupo iban todas a esta columna y el fondo pasaba de
-      // vacío a saturado — y medido costaba 15 fps. Con una queda poblado sin
-      // taparle nada al contenido.
-      const s = sArriba + Math.random() * tramo;
-      // El tope de 0.78 deja siempre una quinta parte de gas: sin él, abajo
-      // de todo `s^1.9` da casi 1 y el fondo se vuelve una nube de números
-      // sin nada de humo — se pierde justamente la idea de que una cosa se
-      // transforma en la otra.
-      nacerHumo(document.body, s, Math.random() < Math.min(Math.pow(s, 1.9), 0.78), flanco);
+      // MENOS GLOBOS. Antes nacía una partícula por frame y hasta el 78 %
+      // eran moléculas: abajo de todo el fondo era una nube de números que le
+      // ganaba al contenido en vez de acompañarlo.
+      // Ahora nace una cada dos frames, y el tope de molécula baja a 0,42 —
+      // o sea que aun en el final la mayoría sigue siendo gas, que es mucho
+      // más callado que un círculo con un número adentro.
+      // Una cada tres frames. Con una cada dos bajaban las moléculas pero
+      // subía la proporción de humo, y una voluta cubre mucha más área que un
+      // círculo chico: medido, el fondo terminaba MÁS cargado que antes.
+      //
+      // OJO con el `if`: gatea SÓLO el nacimiento. La primera versión hacía
+      // `return` acá y se llevaba puesta también la llamada a `pintarTramo`
+      // de abajo, así que la columna se dibujaba en uno de cada tres frames.
+      // Medido, en Formación daba 0 píxeles pintados: el fondo directamente
+      // no aparecía.
+      if (Math.random() < 0.34) {
+        const s = sArriba + Math.random() * tramo;
+        nacerHumo(document.body, s, Math.random() < Math.min(Math.pow(s, 1.9), 0.42), flanco);
+      }
 
       pintarTramo(document.body, caja, eje, true);
     }
@@ -453,7 +462,7 @@
         } else {
           // Puede ir fuerte sin taparle nada al texto, porque el texto tambien
           // es claro y esta por encima.
-          cx.globalAlpha = alfa * 0.4;
+          cx.globalAlpha = alfa * 0.3;
           cx.drawImage(voluta, x - q.r, y - q.r, q.r * 2, q.r * 2);
           cx.globalAlpha = 1;
         }
@@ -570,7 +579,7 @@
       if (!sembrado.has(document.body)) {
         // Repartidas por toda la página, con la misma regla: arriba gas,
         // abajo dato.
-        const cuantas = Math.round(Math.min(Math.max(altoDoc / 34, 60), 240));
+        const cuantas = Math.round(Math.min(Math.max(altoDoc / 58, 40), 140));
         for (let i = 0; i < cuantas; i++) {
           const s = Math.random();
           humo.push({
@@ -584,7 +593,7 @@
             vida: azar(0.4, 1),
             dura: 1,
             bit:
-              Math.random() < Math.pow(s, 1.9)
+              Math.random() < Math.min(Math.pow(s, 1.9), 0.42)
                 ? Math.random() < 0.62
                   ? CIFRAS[Math.floor(Math.random() * CIFRAS.length)]
                   : sueltos[Math.floor(Math.random() * 10)]
