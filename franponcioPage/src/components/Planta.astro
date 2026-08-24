@@ -220,13 +220,9 @@ const volutas = Array.from({ length: 10 }, (_, i) => ({
     {/* ── EL CAÑO: baja por el medio, dobla a la IZQUIERDA y entra a la PRP ── */}
     <g class="canio">
       <rect x={EJE_X - 8} y="0" width="16" height={ENTRADA_Y + 16} fill="url(#acero-v)" />
-      <rect
-        x={PRP_X1 - 6}
-        y={ENTRADA_Y}
-        width={EJE_X - PRP_X1 + 14}
-        height="16"
-        fill="url(#acero-h)"
-      />
+      {/* El tramo de llegada entra HASTA ADENTRO del skid: si se cortaba en
+          la pared, el caño y los tanques parecían dos dibujos pegados. */}
+      <rect x="198" y={ENTRADA_Y} width={EJE_X - 198 + 8} height="16" fill="url(#acero-h)" />
       {/* La brida de entrada a la reductora */}
       <rect x={PRP_X1 - 4} y={ENTRADA_Y - 6} width="10" height="28" rx="1.5" fill="#98a3a5" />
       {/* Un caballete en el tramo de llegada */}
@@ -238,33 +234,65 @@ const volutas = Array.from({ length: 10 }, (_, i) => ({
       />
     </g>
 
-    {/* ── LA PRP ─────────────────────────────────────────────────────── */}
+    {/* ── LA PRP: un tren de regulación, no un edificio ──────────────
+        Los tanques son lo que hace reconocible a una reductora: filtros y
+        vasijas en línea, el venteo saliendo para arriba y la casilla de
+        control al costado. Un galpón con techo de dientes de sierra es una
+        fábrica, no una PRP — y encima la repetía igual a la industria. */}
     <g class="prp" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.6">
-      <rect x={PRP_X0} y="250" width={PRP_X1 - PRP_X0} height={SUELO - 250} />
-      {[0, 1].map((i) => (
-        <path
-          d={`M${PRP_X0 + 56 + i * 116} 250 L${PRP_X0 + 96 + i * 116} 202 L${PRP_X0 + 136 + i * 116} 250 Z`}
-        />
+      {/* La platea */}
+      <rect x={PRP_X0} y="390" width={PRP_X1 - PRP_X0} height="10" />
+
+      {/* La bajada del caño de llegada al colector */}
+      <rect x="202" y={ENTRADA_Y + 10} width="10" height="52" />
+
+      {/* El colector de arriba, que reparte a los filtros */}
+      <rect x="192" y="262" width="146" height="12" rx="2" />
+
+      {/* Los tanques del tren de regulación, en línea y de menor a mayor */}
+      <rect x="192" y="272" width="38" height="118" rx="19" stroke="#55625c" />
+      <rect x="248" y="286" width="34" height="104" rx="17" stroke="#55625c" />
+      <rect x="300" y="298" width="30" height="92" rx="15" stroke="#55625c" />
+
+      {/* El colector de salida: junta los tres y se va a la industria */}
+      <rect x="196" y={SALIDA_Y} width={PRP_X1 - 196 + 8} height="16" rx="2" />
+
+      {/* El venteo */}
+      <rect x="352" y="198" width="12" height="192" />
+      <rect x="346" y="192" width="24" height="8" rx="2" />
+
+      {/* La casilla de control */}
+      <rect x="378" y="344" width="46" height="46" />
+      <rect
+        class="luz-prp"
+        x={388}
+        y="354"
+        width="14"
+        height="12"
+        fill="#c08552"
+        stroke="none"
+        opacity="0.85"
+      />
+
+      {/* El cerco perimetral */}
+      {Array.from({ length: 9 }, (_, i) => (
+        <path d={`M${PRP_X0 + 8 + i * 32} 390 L${PRP_X0 + 8 + i * 32} 360`} stroke-width="1.2" opacity="0.42" />
       ))}
-      {/* El cartel: en una reductora de verdad está, y acá además dice qué es. */}
-      <rect x={PRP_X0 + 24} y="296" width="58" height="22" rx="2" />
-      <text class="rotulo" x={PRP_X0 + 53} y="311">PRP</text>
-      {/* Las ventanas */}
-      <g class="luces">
-        {Array.from({ length: 4 }, (_, i) => (
-          <rect
-            x={PRP_X0 + 108 + i * 40}
-            y="332"
-            width="12"
-            height="14"
-            rx="1"
-            fill="#c08552"
-            stroke="none"
-            opacity="0.8"
-            style={`--i:${i}`}
-          />
-        ))}
-      </g>
+      <path d={`M${PRP_X0 + 6} 368 L${PRP_X1 - 6} 368`} stroke-width="1.1" opacity="0.34" />
+
+      {/* El cartel */}
+      <rect x={PRP_X0 + 2} y="330" width="52" height="20" rx="2" />
+      <text class="rotulo" x={PRP_X0 + 28} y="344">PRP</text>
+    </g>
+
+    {/* Los volantes del tren: se agarran y se giran */}
+    <g class="volantes" fill="none" stroke="#98a3a5" stroke-width="2.2">
+      {[211, 265, 315].map((x) => (
+        <g>
+          <path d={`M${x} 262 L${x} 250`} />
+          <circle cx={x} cy="245" r="5.5" />
+        </g>
+      ))}
     </g>
 
     {/* ── LA CAÑERÍA SALIENTE: de la PRP a la industria ──────────────── */}
@@ -276,6 +304,8 @@ const volutas = Array.from({ length: 10 }, (_, i) => ({
         height="16"
         fill="url(#acero-h)"
       />
+      {/* La brida donde el colector de salida se hace cañería de distribución */}
+      <rect x={PRP_X1 - 4} y={SALIDA_Y - 6} width="10" height="28" rx="1.5" fill="#98a3a5" />
       {/* Bridas de salida y de llegada */}
       {[PRP_X1 - 2, IND_X0 - 4].map((x) => (
         <rect x={x} y={SALIDA_Y - 6} width="10" height="28" rx="1.5" fill="#98a3a5" />
