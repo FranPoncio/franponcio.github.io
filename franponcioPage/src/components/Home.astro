@@ -107,6 +107,15 @@ const titulo =
   <div class="tronco">
     <span class="troncal" aria-hidden="true"></span>
 
+    {/* LA BRIDA DE EMPALME.
+        Acá se junta el caño de la página con el de la escena del pie, y no
+        tienen el mismo diámetro: el de la escena está adentro de un SVG que
+        escala con el ancho, así que en un celular queda bastante más fino.
+        Emprolijarlo con matemática de escalas es pelear contra el
+        `preserveAspectRatio`; una brida es como se resuelve de verdad cuando
+        dos tramos no coinciden, y además es lo que ya hay en cada estación. */}
+    <span class="empalme" aria-hidden="true"></span>
+
   <Banda
       id="experiencia"
       indice="01"
@@ -236,6 +245,31 @@ const titulo =
       margin-left: -7px;
       z-index: 0;
       background: var(--acero-apagado);
+    }
+
+    .empalme {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      z-index: 1;
+      width: 34px;
+      height: 20px;
+      margin-left: -17px;
+      /* Straddle: la mitad de la brida queda de cada lado de la junta. */
+      transform: translateY(50%);
+      border-radius: 2px;
+      background:
+        radial-gradient(circle at 7px 3.5px, #c8d1d3 1.5px, transparent 1.5px),
+        radial-gradient(circle at 27px 3.5px, #c8d1d3 1.5px, transparent 1.5px),
+        radial-gradient(circle at 7px 16.5px, #c8d1d3 1.5px, transparent 1.5px),
+        radial-gradient(circle at 27px 16.5px, #c8d1d3 1.5px, transparent 1.5px),
+        linear-gradient(
+          to bottom,
+          var(--acero-claro) 0 7px,
+          transparent 7px 13px,
+          var(--acero-claro) 13px 20px
+        );
+      box-shadow: 0 3px 10px -3px rgba(0, 0, 0, 0.85);
     }
 
     /* De acá nace el caño: aparece de la nada y ya viene tendido. */
