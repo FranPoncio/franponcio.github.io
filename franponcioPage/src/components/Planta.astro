@@ -48,13 +48,13 @@ const CODO_Y = 330;
    funciona de verdad: el gasoducto no entra directo a una fábrica, primero
    pasa por una reductora que le baja la presión de transporte a la de uso.
    El dato hace el mismo camino: baja, se regula, y recién ahí se consume. */
-const PRP_X0 = 828;
-const PRP_X1 = 990;
+const PRP_X0 = 820;
+const PRP_X1 = 952;
 
 /* La industria. Termina en 1300 y no más a la derecha por una razón medida:
    el SVG usa `slice`, así que en un celular se recorta por los costados, y
    pasado ese punto la fábrica quedaba entera fuera de pantalla. */
-const IND_X0 = 1046;
+const IND_X0 = 1060;
 const IND_X1 = 1268;
 const ENTRADA_X = IND_X0;
 
@@ -65,7 +65,11 @@ const VIAJE = ENTRADA_X - EJE_X + 18;
 /** Qué fracción del viaje se va bajando; el resto es el tramo horizontal. */
 const CORTE = 0.4;
 
-const CIFRAS = ['12.000', '413', '+35', '150', '500', '135', '46', '6.900'];
+/* CINCO y no ocho. Con ocho, y a este tamaño, sobre el tramo horizontal
+   quedaba una molécula cada 55 unidades para un diámetro de 42: casi
+   pegadas, y entre todas tapaban la reductora justo cuando el punto era
+   mostrarla. */
+const CIFRAS = ['12.000', '413', '150', '500', '46'];
 const viajeros = CIFRAS.map((bit, i) => {
   // Posición de reposo: la misma cuenta que hace la animación, pero congelada
   // en el punto que le toca a cada uno. Es lo que usa el modo sin movimiento.
@@ -93,7 +97,7 @@ const aves = [
 ];
 
 const volutas = Array.from({ length: 12 }, (_, i) => ({
-  x: 1268 - 61 + azar(i + 201, -11, 11),
+  x: 1268 - 58 + azar(i + 201, -11, 11),
   i,
 }));
 ---
@@ -284,14 +288,14 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
       {[0, 1, 2, 3].map((i) => (
         <g>
           <path
-            d={`M${IND_X0 + i * ((1268 - 1046) / 4)} 288 L${IND_X0 + i * ((1268 - 1046) / 4)} 252 L${IND_X0 + (i + 1) * ((1268 - 1046) / 4)} 288 Z`}
+            d={`M${IND_X0 + i * ((1268 - 1060) / 4)} 288 L${IND_X0 + i * ((1268 - 1060) / 4)} 252 L${IND_X0 + (i + 1) * ((1268 - 1060) / 4)} 288 Z`}
             fill="#0b0e0d"
             stroke="#3f4a45"
             stroke-width="1.5"
           />
           {/* La cara vidriada del diente, que es por donde entra la luz. */}
           <path
-            d={`M${IND_X0 + 4 + i * ((1268 - 1046) / 4)} 285 L${IND_X0 + 4 + i * ((1268 - 1046) / 4)} 258`}
+            d={`M${IND_X0 + 4 + i * ((1268 - 1060) / 4)} 285 L${IND_X0 + 4 + i * ((1268 - 1060) / 4)} 258`}
             stroke="#6fa39c"
             stroke-width="3"
             opacity="0.5"
@@ -324,7 +328,7 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
 
       {/* Las ventanas encendidas */}
       <g class="luces">
-        {Array.from({ length: 7 }, (_, i) => [IND_X0 + 18 + i * 31, 324]).map(([x, y], i) => (
+        {Array.from({ length: 6 }, (_, i) => [IND_X0 + 20 + i * 30, 324]).map(([x, y], i) => (
           <rect x={x} y={y} width="11" height="14" rx="1" fill="#c08552" opacity="0.8" style={`--i:${i}`} />
         ))}
       </g>
@@ -339,17 +343,22 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
       {/* Tramo horizontal, desde el codo hasta la pared de la planta */}
       <rect x={EJE_X - 8} y={CODO_Y + 7} width={ENTRADA_X - EJE_X + 8} height="16" fill="url(#acero-h)" />
 
-      {/* Bridas del tramo horizontal */}
-      {[0, 1, 2].map((i) => (
-        <rect x={EJE_X + 26 + i * 74} y={CODO_Y + 3} width="9" height="24" rx="1.5" fill="#98a3a5" />
+      {/* Las bridas de ENTRADA y SALIDA de la reductora. Son las que hacen
+          que el caño se lea como que entra a la PRP y sale de ella, y no como
+          uno solo que le pasa por arriba de largo — que era lo que parecía.
+          En el medio queda el tramo regulado; después, la distribución que va
+          a la industria. */}
+      {[PRP_X0, PRP_X1].map((x) => (
+        <rect x={x - 5} y={CODO_Y + 1} width="10" height="28" rx="1.5" fill="#98a3a5" />
       ))}
+      {/* Y una más en el tramo que sale hacia la industria. */}
+      <rect x={(PRP_X1 + IND_X0) / 2 - 4} y={CODO_Y + 3} width="9" height="24" rx="1.5" fill="#98a3a5" />
 
       {/* Los caballetes que lo sostienen */}
-      {[0].map((i) => {
-        const x = EJE_X + 24 + i * 60;
+      {[EJE_X + 12, (PRP_X1 + IND_X0) / 2].map((x, i) => {
         return (
           <path
-            d={`M${x - 16} 400 L${x} ${CODO_Y + 16} L${x + 16} 400`}
+            d={`M${x - 15} 400 L${x} ${CODO_Y + 18} L${x + 15} 400`}
             fill="none"
             stroke="#3f4a45"
             stroke-width="2.5"
@@ -366,9 +375,9 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
               partícula redonda que viene bajando por el fondo de toda la
               página: si acá fuera un rectángulo, el viaje se cortaría justo
               en el remate. */}
-          <circle cx={EJE_X} cy={CODO_Y + 8} r="21" fill="#0f1110" stroke="#6fa39c" stroke-width="1.6" />
-          <circle class="sat" cx={EJE_X + 27} cy={CODO_Y + 8} r="2.6" fill="#6fa39c" opacity="0.75" />
-          <circle class="sat sat-b" cx={EJE_X - 27} cy={CODO_Y + 8} r="2.6" fill="#6fa39c" opacity="0.75" />
+          <circle cx={EJE_X} cy={CODO_Y + 8} r="17" fill="#0f1110" stroke="#6fa39c" stroke-width="1.5" />
+          <circle class="sat" cx={EJE_X + 23} cy={CODO_Y + 8} r="2.3" fill="#6fa39c" opacity="0.75" />
+          <circle class="sat sat-b" cx={EJE_X - 23} cy={CODO_Y + 8} r="2.3" fill="#6fa39c" opacity="0.75" />
           <text x={EJE_X} y={CODO_Y + 12}>{v.bit}</text>
         </g>
       ))}
@@ -418,7 +427,7 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
 
   .viajeros text {
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
     text-anchor: middle;
     fill: var(--color-datos);
@@ -427,7 +436,7 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
   /* ── Lo que se mueve ───────────────────────────────────────────────
      Todo sobre `transform` y `opacity`: lo resuelve el compositor. */
   .estrellas circle {
-    animation: titilar 4.5s ease-in-out infinite;
+    animation: titilar 7s ease-in-out infinite;
     animation-delay: calc(var(--i) * -0.29s);
   }
   @keyframes titilar {
@@ -436,7 +445,7 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
   }
 
   .luces rect {
-    animation: parpadeo 3.6s ease-in-out infinite;
+    animation: parpadeo 5.4s ease-in-out infinite;
     animation-delay: calc(var(--i) * -0.44s);
   }
   @keyframes parpadeo {
@@ -454,8 +463,8 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
        elemento, y ahí `center` significa lo que uno espera. */
     transform-box: fill-box;
     transform-origin: center;
-    animation: subir 8.5s linear infinite;
-    animation-delay: calc(var(--i) * -0.71s);
+    animation: subir 13s linear infinite;
+    animation-delay: calc(var(--i) * -1.08s);
   }
   @keyframes subir {
     from { transform: translateY(0) scale(0.4); opacity: 0; }
@@ -466,8 +475,8 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
   /* El viaje: primero baja por el caño, después dobla y entra a la planta.
      Dos tramos en una sola animación — el quiebre del 40 % es el codo. */
   .viajeros > g {
-    animation: viajar 9s linear infinite;
-    animation-delay: calc(var(--i) * -1.125s);
+    animation: viajar 16s linear infinite;
+    animation-delay: calc(var(--i) * -3.2s);
   }
   @keyframes viajar {
     0% { transform: translate(0, -340px); opacity: 0; }
@@ -494,17 +503,17 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
      es el satélite y giraría sobre sí mismo. */
   .sat {
     transform-origin: 800px 308px;
-    animation: orbitar 3.2s linear infinite;
+    animation: orbitar 5.4s linear infinite;
   }
-  .sat-b { animation-delay: -1.6s; }
+  .sat-b { animation-delay: -2.7s; }
   @keyframes orbitar {
     from { rotate: 0deg; }
     to { rotate: 360deg; }
   }
 
   .nubes > g {
-    animation: cruzar 90s linear infinite;
-    animation-delay: calc(var(--i) * -30s);
+    animation: cruzar 145s linear infinite;
+    animation-delay: calc(var(--i) * -48s);
     transform: scale(var(--e));
   }
   @keyframes cruzar {
@@ -513,7 +522,7 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
   }
 
   .aves path {
-    animation: volar 26s linear infinite, aletear 0.9s ease-in-out infinite;
+    animation: volar 42s linear infinite, aletear 1.3s ease-in-out infinite;
     animation-delay: calc(var(--i) * -0.5s), calc(var(--i) * -0.22s);
   }
   @keyframes volar {
@@ -529,7 +538,7 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
   .fugaz {
     transform: translate(180px, 40px);
     opacity: 0;
-    animation: fugarse 17s linear infinite;
+    animation: fugarse 26s linear infinite;
   }
   @keyframes fugarse {
     0%, 88% { transform: translate(180px, 40px); opacity: 0; }
@@ -538,7 +547,7 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
   }
 
   .llama {
-    animation: arder 1.4s ease-in-out infinite;
+    animation: arder 2.3s ease-in-out infinite;
   }
   @keyframes arder {
     0%, 100% { transform: scaleY(1) scaleX(1); }
@@ -546,7 +555,7 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
     68% { transform: scaleY(0.86) scaleX(1.1); }
   }
   .halo-llama {
-    animation: latir-halo 1.4s ease-in-out infinite;
+    animation: latir-halo 2.3s ease-in-out infinite;
   }
   @keyframes latir-halo {
     0%, 100% { opacity: 0.75; transform: scale(1); }
@@ -554,7 +563,7 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
   }
 
   .baliza {
-    animation: balizar 2.6s ease-in-out infinite;
+    animation: balizar 3.6s ease-in-out infinite;
   }
   @keyframes balizar {
     0%, 62%, 100% { opacity: 0.18; transform: scale(0.85); }
@@ -562,9 +571,10 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
   }
 
   /* El destello de ingreso late al mismo ritmo con el que llegan los datos:
-     un ciclo de 9 s dividido por los 8 que viajan. */
+     un ciclo de 16 s dividido por los 5 que viajan. Si los dos números se
+     despegan, la planta acusa recibo cuando no llegó nadie. */
   .ingreso {
-    animation: acusar 1.125s ease-out infinite;
+    animation: acusar 3.2s ease-out infinite;
   }
   @keyframes acusar {
     0% { opacity: 0.55; transform: scale(0.35); }
