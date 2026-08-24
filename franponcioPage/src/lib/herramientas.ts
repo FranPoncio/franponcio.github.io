@@ -10,6 +10,10 @@ import * as si from 'simple-icons';
  *
  * Hay dos tipos de ficha y la diferencia NO es estética:
  *   · `logo`   — la marca existe en el paquete simple-icons y se dibuja.
+ * Los nombres largos van abreviados —Actions, Postgres, scikit, Looker— porque
+ * en una cinta sin recuadro un nombre de catorce letras se come el lugar de
+ * tres herramientas, y con el logo al lado se entiende igual.
+ *
  *   · `nombre` — no existe y se escribe. Power BI, Tableau, Excel, Looker
  *                Studio y Salesforce están afuera porque Microsoft, Google y
  *                Salesforce pidieron que los saquen; ISO, Scrum, Lean, WCM,
@@ -47,12 +51,12 @@ export const grupos: Grupo[] = [
     items: [
       n('Power BI'),
       n('Tableau'),
-      n('Looker Studio'),
+      n('Looker'),
       n('DAX'),
       n('Power Query'),
       n('Excel'),
       n('SQL'),
-      conLogo('postgresql'),
+      conLogo('postgresql', 'Postgres'),
       conLogo('mysql'),
       conLogo('googlebigquery', 'BigQuery'),
       n('ETL'),
@@ -66,7 +70,7 @@ export const grupos: Grupo[] = [
       conLogo('pandas'),
       conLogo('numpy', 'NumPy'),
       conLogo('scipy', 'SciPy'),
-      conLogo('scikitlearn', 'scikit-learn'),
+      conLogo('scikitlearn', 'scikit'),
       n('Matplotlib'),
       n('Seaborn'),
       conLogo('plotly'),
@@ -122,7 +126,7 @@ export const grupos: Grupo[] = [
       conLogo('css', 'CSS'),
       conLogo('git'),
       conLogo('github'),
-      conLogo('githubactions', 'GitHub Actions'),
+      conLogo('githubactions', 'Actions'),
       conLogo('netlify'),
       conLogo('cplusplus', 'C++'),
     ],
