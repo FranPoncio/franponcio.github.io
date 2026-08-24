@@ -42,11 +42,26 @@ const estrellas = Array.from({ length: 38 }, (_, i) => ({
    izquierda. Estos tres números mandan sobre el dibujo Y sobre la animación:
    si se mueve el codo, los números lo siguen solos. */
 const EJE_X = 800;
-const CODO_Y = 300;
-const ENTRADA_X = 1168;
+const CODO_Y = 330;
+
+/* La PRP —planta reductora de presión— entre el caño y la industria. Es como
+   funciona de verdad: el gasoducto no entra directo a una fábrica, primero
+   pasa por una reductora que le baja la presión de transporte a la de uso.
+   El dato hace el mismo camino: baja, se regula, y recién ahí se consume. */
+const PRP_X0 = 828;
+const PRP_X1 = 990;
+
+/* La industria. Termina en 1300 y no más a la derecha por una razón medida:
+   el SVG usa `slice`, así que en un celular se recorta por los costados, y
+   pasado ese punto la fábrica quedaba entera fuera de pantalla. */
+const IND_X0 = 1046;
+const IND_X1 = 1268;
+const ENTRADA_X = IND_X0;
 
 const BAJADA = CODO_Y + 40; // de cuánto más arriba de la pantalla vienen
 const TRAMO = ENTRADA_X - EJE_X - 24;
+/* El viaje horizontal completo, para que la animación no lleve el número a mano. */
+const VIAJE = ENTRADA_X - EJE_X + 18;
 /** Qué fracción del viaje se va bajando; el resto es el tramo horizontal. */
 const CORTE = 0.4;
 
@@ -78,18 +93,26 @@ const aves = [
 ];
 
 const volutas = Array.from({ length: 12 }, (_, i) => ({
-  x: 1412 + azar(i + 201, -11, 11),
+  x: 1268 - 61 + azar(i + 201, -11, 11),
   i,
 }));
 ---
 
-<section class="planta" aria-hidden="true">
+<section class="planta" aria-hidden="true" style={`--viaje:${VIAJE}px`}>
   <svg viewBox="0 0 1600 460" preserveAspectRatio="xMidYMax slice" role="presentation">
     <defs>
+      {/* EL CIELO NO ES OPACO.
+          Antes esto era un rectángulo macizo que tapaba todo lo que la página
+          tiene atrás: la grilla del fondo y las moléculas del canvas. Por eso
+          la escena se leía como una imagen pegada al final y no como parte
+          del sitio.
+          Ahora arranca en transparente puro y sólo se va tiñendo hacia el
+          suelo, que es lo que hace la bruma de verdad. El gas y los datos que
+          vienen bajando por toda la página siguen viéndose acá adentro. */}
       <linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#0f1110" />
-        <stop offset="0.6" stop-color="#151b19" />
-        <stop offset="1" stop-color="#1d2624" />
+        <stop offset="0" stop-color="#1d2624" stop-opacity="0" />
+        <stop offset="0.5" stop-color="#1b2422" stop-opacity="0.3" />
+        <stop offset="1" stop-color="#1d2624" stop-opacity="0.72" />
       </linearGradient>
       <radialGradient id="luna">
         <stop offset="0" stop-color="#dfdcd4" stop-opacity="0.28" />
@@ -202,21 +225,73 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
       fill="#141a19"
     />
 
+    {/* ── LA PRP: donde el gasoducto baja la presión ────────────────── */}
+    {/* El skid va DEBAJO de la línea a propósito. La primera versión lo tenía
+        a la altura del caño y las moléculas que viajan le pasaban justo por
+        encima: la reductora quedaba tapada y se leía como un amontonamiento.
+        Abajo, con dos bajadas que entran desde el caño y el venteo saliendo
+        para arriba, se entiende de una qué hace. */}
+    <g class="prp" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.4">
+      {/* La platea */}
+      <rect x={PRP_X0} y="390" width={PRP_X1 - PRP_X0} height="10" />
+
+      {/* Las dos bajadas: del caño al tren de regulación */}
+      <rect x={PRP_X0 + 26} y={CODO_Y + 12} width="8" height="44" />
+      <rect x={PRP_X0 + 74} y={CODO_Y + 12} width="8" height="44" />
+
+      {/* Los filtros, que es lo que hace reconocible a una reductora */}
+      <rect x={PRP_X0 + 18} y="356" width="24" height="36" rx="11" />
+      <rect x={PRP_X0 + 66} y="356" width="24" height="36" rx="11" />
+
+      {/* El venteo, que sale para arriba y cruza la línea */}
+      <rect x={PRP_X0 + 108} y="256" width="10" height="136" />
+      <rect x={PRP_X0 + 103} y="250" width="20" height="8" rx="2" />
+
+      {/* La casilla de control */}
+      <rect x={PRP_X0 + 130} y="360" width="30" height="32" />
+      <rect
+        class="luz-prp"
+        x={PRP_X0 + 137}
+        y="366"
+        width="10"
+        height="9"
+        fill="#c08552"
+        stroke="none"
+        opacity="0.85"
+      />
+
+      {/* El cerco perimetral, bajito */}
+      {Array.from({ length: 7 }, (_, i) => (
+        <path d={`M${PRP_X0 + 8 + i * 25} 390 L${PRP_X0 + 8 + i * 25} 368`} stroke-width="1.4" opacity="0.7" />
+      ))}
+      <path d={`M${PRP_X0 + 6} 374 L${PRP_X1 - 6} 374`} stroke-width="1.2" opacity="0.55" />
+    </g>
+
+    {/* Los dos volantes de la reductora, sobre el caño */}
+    <g class="volantes" fill="none" stroke="#98a3a5" stroke-width="2.2">
+      {[PRP_X0 + 30, PRP_X0 + 78].map((x) => (
+        <g>
+          <path d={`M${x} ${CODO_Y + 14} L${x} ${CODO_Y - 5}`} />
+          <circle cx={x} cy={CODO_Y - 10} r="5.5" />
+        </g>
+      ))}
+    </g>
+
     {/* ── LA PLANTA, una sola ────────────────────────────────────────── */}
     <g class="fabrica">
       {/* Nave con techo de diente de sierra */}
-      <rect x="1168" y="288" width="352" height="112" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.5" />
+      <rect x={IND_X0} y="288" width={IND_X1 - IND_X0} height="112" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.5" />
       {[0, 1, 2, 3].map((i) => (
         <g>
           <path
-            d={`M${1168 + i * 88} 288 L${1168 + i * 88} 250 L${1168 + (i + 1) * 88} 288 Z`}
+            d={`M${IND_X0 + i * ((1268 - 1046) / 4)} 288 L${IND_X0 + i * ((1268 - 1046) / 4)} 252 L${IND_X0 + (i + 1) * ((1268 - 1046) / 4)} 288 Z`}
             fill="#0b0e0d"
             stroke="#3f4a45"
             stroke-width="1.5"
           />
           {/* La cara vidriada del diente, que es por donde entra la luz. */}
           <path
-            d={`M${1172 + i * 88} 285 L${1172 + i * 88} 256`}
+            d={`M${IND_X0 + 4 + i * ((1268 - 1046) / 4)} 285 L${IND_X0 + 4 + i * ((1268 - 1046) / 4)} 258`}
             stroke="#6fa39c"
             stroke-width="3"
             opacity="0.5"
@@ -226,33 +301,30 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
 
       {/* El resplandor de la planta sobre el suelo: es lo que la apoya en el
           piso en vez de dejarla flotando recortada. */}
-      <ellipse cx="1344" cy="398" rx="330" ry="46" fill="url(#brillo-suelo)" />
+      <ellipse cx={(IND_X0 + IND_X1) / 2} cy="398" rx="250" ry="44" fill="url(#brillo-suelo)" />
 
       {/* La antorcha: el mechero que nunca se apaga. */}
-      <rect x="1196" y="196" width="13" height="94" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.4" />
-      <path d="M1190 196 L1215 196 L1211 186 L1194 186 Z" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.4" />
+      <rect x={IND_X0 + 22} y="196" width="13" height="94" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.4" />
+      <path d={`M${IND_X0 + 16} 196 L${IND_X0 + 41} 196 L${IND_X0 + 37} 186 L${IND_X0 + 20} 186 Z`} fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.4" />
 
       {/* La chimenea */}
-      <rect x="1394" y="150" width="36" height="140" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.5" />
-      <rect x="1388" y="144" width="48" height="10" rx="2" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.5" />
-      <path d="M1394 186 L1430 186 M1394 224 L1430 224" stroke="#3f4a45" stroke-width="1.2" opacity="0.6" />
+      <rect x={IND_X1 - 78} y="150" width="34" height="140" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.5" />
+      <rect x={IND_X1 - 84} y="144" width="46" height="10" rx="2" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.5" />
+      <path d={`M${IND_X1 - 78} 186 L${IND_X1 - 44} 186 M${IND_X1 - 78} 224 L${IND_X1 - 44} 224`} stroke="#3f4a45" stroke-width="1.2" opacity="0.6" />
 
       {/* La llama, y su halo sobre el cielo. */}
-      <circle class="halo-llama" cx="1202" cy="166" r="82" fill="url(#halo)" />
+      <circle class="halo-llama" cx={IND_X0 + 28} cy="166" r="82" fill="url(#halo)" />
       <g class="llama">
-        <path d="M1202 186 C1193 168 1209 158 1203 140 C1219 154 1223 172 1214 186 Z" fill="#c08552" opacity="0.92" />
-        <path d="M1203 184 C1199 172 1207 166 1204 154 C1212 165 1213 176 1209 184 Z" fill="#dfdcd4" opacity="0.5" />
+        <path d={`M${IND_X0 + 28} 186 C${IND_X0 + 19} 168 ${IND_X0 + 35} 158 ${IND_X0 + 29} 140 C${IND_X0 + 45} 154 ${IND_X0 + 49} 172 ${IND_X0 + 40} 186 Z`} fill="#c08552" opacity="0.92" />
+        <path d={`M${IND_X0 + 29} 184 C${IND_X0 + 25} 172 ${IND_X0 + 33} 166 ${IND_X0 + 30} 154 C${IND_X0 + 38} 165 ${IND_X0 + 39} 176 ${IND_X0 + 35} 184 Z`} fill="#dfdcd4" opacity="0.5" />
       </g>
 
       {/* La baliza de la chimenea: obligatoria en una torre, y le da pulso. */}
-      <circle class="baliza" cx="1412" cy="138" r="4.5" fill="#e8604a" />
+      <circle class="baliza" cx={IND_X1 - 61} cy="138" r="4.5" fill="#e8604a" />
 
       {/* Las ventanas encendidas */}
       <g class="luces">
-        {[
-          [1198, 324], [1238, 324], [1278, 324], [1318, 324],
-          [1358, 324], [1398, 324], [1438, 324], [1478, 324],
-        ].map(([x, y], i) => (
+        {Array.from({ length: 7 }, (_, i) => [IND_X0 + 18 + i * 31, 324]).map(([x, y], i) => (
           <rect x={x} y={y} width="11" height="14" rx="1" fill="#c08552" opacity="0.8" style={`--i:${i}`} />
         ))}
       </g>
@@ -269,12 +341,12 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
 
       {/* Bridas del tramo horizontal */}
       {[0, 1, 2].map((i) => (
-        <rect x={EJE_X + 78 + i * 100} y={CODO_Y - 4} width="9" height="24" rx="1.5" fill="#98a3a5" />
+        <rect x={EJE_X + 26 + i * 74} y={CODO_Y + 3} width="9" height="24" rx="1.5" fill="#98a3a5" />
       ))}
 
       {/* Los caballetes que lo sostienen */}
-      {[0, 1].map((i) => {
-        const x = EJE_X + 120 + i * 170;
+      {[0].map((i) => {
+        const x = EJE_X + 24 + i * 60;
         return (
           <path
             d={`M${x - 16} 400 L${x} ${CODO_Y + 16} L${x + 16} 400`}
@@ -327,7 +399,10 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
     position: relative;
     display: block;
     width: 100%;
-    height: clamp(250px, 31vw, 430px);
+    /* Más baja en pantalla angosta a propósito: con `slice` el recorte
+       lateral crece con la altura, y a 250 px la industria quedaba fuera de
+       cuadro en un celular. */
+    height: clamp(180px, 30vw, 430px);
     overflow: hidden;
     /* SIN MÁSCARA. Estaba puesta para que la escena no arrancara con un
        borde duro, pero desvanecía TODO lo de arriba —el caño incluido— y
@@ -399,7 +474,7 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
     8% { opacity: 1; }
     40% { transform: translate(0, 0); }
     94% { opacity: 1; }
-    100% { transform: translate(344px, 0); opacity: 0; }
+    100% { transform: translate(var(--viaje), 0); opacity: 0; }
   }
 
   /* Todo lo que escala o rota lleva `transform-box: fill-box`: en SVG el
