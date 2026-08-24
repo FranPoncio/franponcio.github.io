@@ -297,7 +297,7 @@
           : azar(-14, 14),
         // El humo se ABRE mientras sube: es la forma de una pluma de verdad.
         // Los números ya nacen afuera, así que apenas van a la deriva.
-        deriva: esBit ? azar(-0.25, 0.25) : azar(-1.7, 1.7),
+        deriva: esBit ? azar(-0.16, 0.16) : azar(-1.05, 1.05),
         subida: esBit ? azar(0.35, 0.75) : azar(0, 6),
         r: esBit ? 0 : azar(18, 40),
         crece: azar(0.5, 1.1),
@@ -426,7 +426,9 @@
 
         q.desvio += q.deriva;
         // Los numeros suben mas rapido que el humo: se despegan y se leen.
-        q.subida += (q.bit ? 1.15 : 0.72) * Math.max(1 - q.subida / 150, 0.1);
+        // Más lento a propósito: a 1.15/0.72 el fondo se leía apurado, y un
+        // fondo que corre le compite al contenido en vez de acompañarlo.
+        q.subida += (q.bit ? 0.7 : 0.44) * Math.max(1 - q.subida / 150, 0.1);
         // El radio SE TOPEA. Sin tope, con `crece` ~1 y 240 frames de vida
         // una voluta terminaba con 300 px de radio: son 600x600 px de mezcla
         // por partícula y por frame, y con cientos vivas el fondo se comía la
