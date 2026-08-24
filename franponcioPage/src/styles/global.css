@@ -66,6 +66,13 @@
    centrado es lo que hace que un tubo dibujado parezca falso.
    Se define una sola vez acá porque lo usan la traza, las bandas y el hero. */
 :root {
+  /* EL CALIBRE DEL CAÑO, uno solo para todo el sitio.
+     El caño de la escena del pie vive adentro de un SVG que escala con el
+     ancho: en desktop da 16 px y en un celular 4,5. Con el caño de la página
+     clavado en 14 px, el salto en la junta se veía feo. Escalando los dos con
+     el viewport, la diferencia se achica y la brida de empalme la termina de
+     tapar. */
+  --calibre: clamp(9px, 0.97vw, 14px);
   --acero: linear-gradient(
     to right,
     #1b1f20 0%,
