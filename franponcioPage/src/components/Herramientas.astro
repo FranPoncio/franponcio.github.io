@@ -1,26 +1,23 @@
 ---
-import { filaDatos, filaGestion, type Ficha } from '../lib/herramientas';
-import type { Idioma } from '../i18n/ui';
+import { grupos, type Ficha } from '../lib/herramientas';
+import { usarTraduccion, type Idioma } from '../i18n/ui';
 
 /**
- * Cinta de herramientas: dos filas que corren en sentidos opuestos.
+ * El stack: una cinta por área, cada una con su rótulo.
  *
- * Cada fila lleva su contenido TRIPLICADO y se desplaza exactamente un
- * tercio: cuando termina la primera copia, la segunda está justo donde
- * arrancó la primera, así que el ciclo se reinicia sin salto.
+ * Antes eran dos cintas sin título con 42 fichas corriendo. El problema no era
+ * que faltaran herramientas —SAP, pandas y scikit-learn ya estaban— sino que
+ * pasaban de largo entre otras cuarenta y nadie las veía. Con el rótulo
+ * adelante, cada fila contesta algo: con qué miro datos, con qué programo, con
+ * qué ordeno el trabajo.
  *
- * ¿Por qué tres copias y no dos, si para la animación alcanzaba con dos?
- * Por el modo sin movimiento. Con `prefers-reduced-motion` la cinta no puede
- * correr sola, así que se arrastra con el dedo o con el trackpad — y ahí
- * la cinta SE TERMINABA: llegabas al final de la segunda copia y se acababa.
- * O sea que quien tiene esa preferencia prendida nunca tuvo scroll infinito.
- * Con tres copias hay una entera de colchón a cada lado, y un script chico
- * salta de una copia a la equivalente cuando te acercás a la punta. Como las
- * copias son idénticas, el salto es invisible: la cinta no termina nunca,
- * la muevas vos o la mueva la animación.
+ * Las fichas ya NO van rellenas de color. Con cincuenta y pico, cincuenta
+ * bloques de color macizo eran un carnaval que le ganaba al contenido; ahora el
+ * color queda en el rótulo, el borde y el logo, que alcanza para agrupar.
  *
- * Se frena sola al pasar el mouse: si algo te llamó la atención, tenés que
- * poder leerlo.
+ * Cada fila lleva su contenido en tres copias y su propio carril con scroll:
+ * así es infinita la mueva la animación o la muevas vos con el dedo. Las filas
+ * alternan sentido para que no se lean como un bloque.
  */
 
 interface Props {
@@ -28,39 +25,51 @@ interface Props {
 }
 
 const { lang } = Astro.props;
+const t = usarTraduccion(lang);
 
-const filas: { items: Ficha[]; sentido: string }[] = [
-  { items: filaDatos, sentido: 'izquierda' },
-  { items: filaGestion, sentido: 'derecha' },
-];
+/**
+ * Cuántas veces repetir una fila antes de triplicarla.
+ *
+ * Si una copia mide menos que la pantalla, el salto de vuelta cae adentro del
+ * cuadro y se ve. Contar fichas no alcanza: nueve fichas de "ISO 45001" miden
+ * mucho más que nueve de "EVM" o "Lean" —medido, la fila de gestión quedaba en
+ * 1.388 px contra 1.440 de ventana— así que se estima el ancho de cada una por
+ * el largo del nombre y se repite hasta pasar el ancho de una pantalla grande.
+ */
+const anchoAprox = (f: Ficha) => 30 + f.nombre.length * 7.2 + (f.path ? 25 : 0);
+
+const repetida = (items: Ficha[]) => {
+  const uno = items.reduce((a, f) => a + anchoAprox(f) + 8, 0);
+  const veces = Math.max(1, Math.ceil(1900 / Math.max(uno, 1)));
+  return Array.from({ length: veces }, () => items).flat();
+};
 ---
 
-{/* Sin fondo propio: un panel opaco de lado a lado cortaba el caño. */}
 <section class="revelar relative">
-  <div class="cinta-marco pt-12 pb-14" role="group" aria-label={lang === 'es' ? 'Herramientas y métodos' : 'Tools and methods'}>
+  <div class="pila" role="group" aria-label={t('herramientas.titulo')}>
     {
-      filas.map((fila) => (
-        <div class="carril">
-        <div class:list={['cinta', fila.sentido]}>
-          {/* Tres copias: la de al medio es la que se ve, las de los costados
-              son el colchón para que el salto nunca caiga en pantalla. */}
-          {[0, 1, 2].map((copia) => (
-            <div class="tanda" aria-hidden={copia === 1 ? 'true' : undefined}>
-              {fila.items.map((f, i) => (
-                <span class:list={['ficha', `tono-${i % 4}`]}>
-                  {f.path ? (
-                    <svg viewBox="0 0 24 24" role="presentation" aria-hidden="true">
-                      <path d={f.path} fill="currentColor" />
-                    </svg>
-                  ) : (
-                    <span class="sigla">{f.nombre}</span>
-                  )}
-                  {f.path && <span class="pie">{f.nombre}</span>}
-                </span>
+      grupos.map((g, fila) => (
+        <div class="grupo" style={`--c: var(--color-${g.tono})`}>
+          <p class="rotulo">{t(g.clave as Parameters<typeof t>[0])}</p>
+
+          <div class="carril">
+            <div class:list={['cinta', fila % 2 === 1 && 'derecha']} style={`--dur:${58 + fila * 9}s`}>
+              {[0, 1, 2].map((copia) => (
+                <div class="tanda" aria-hidden={copia > 0 ? 'true' : undefined}>
+                  {repetida(g.items).map((f) => (
+                    <span class="ficha">
+                      {f.path && (
+                        <svg viewBox="0 0 24 24" role="presentation" aria-hidden="true">
+                          <path d={f.path} fill="currentColor" />
+                        </svg>
+                      )}
+                      <span class="nombre">{f.nombre}</span>
+                    </span>
+                  ))}
+                </div>
               ))}
             </div>
-          ))}
-        </div>
+          </div>
         </div>
       ))
     }
@@ -68,100 +77,86 @@ const filas: { items: Ficha[]; sentido: string }[] = [
 </section>
 
 <style>
-  /* Las puntas se desvanecen: la cinta entra y sale, no empieza ni termina. */
-  .cinta-marco {
-    -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-    mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  .pila {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 2.5rem 0 3rem;
   }
 
-  /* Cada fila tiene SU carril. Antes las dos compartían el contenedor con
-     scroll, y como miden distinto no hay un solo punto de vuelta que sirva
-     para las dos. */
+  .rotulo {
+    margin: 0 0 0.6rem;
+    padding: 0 1.4rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--c);
+    text-align: center;
+  }
+
   .carril {
     overflow: hidden;
-  }
-  .carril + .carril {
-    margin-top: 0.9rem;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
   }
   .cinta {
     display: flex;
     width: max-content;
-    animation: correr 69s linear infinite;
+    animation: correr var(--dur) linear infinite;
   }
   .derecha {
     animation-direction: reverse;
-    animation-duration: 87s;
   }
-  .cinta-marco:hover .cinta {
+  .carril:hover .cinta {
     animation-play-state: paused;
   }
-
   @keyframes correr {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      /* Justo una copia de tres: la segunda queda donde arrancó la primera. */
-      transform: translateX(-33.3333%);
-    }
+    from { transform: translateX(0); }
+    /* Justo una copia de tres. */
+    to { transform: translateX(-33.3333%); }
   }
 
   .tanda {
     display: flex;
-    gap: 0.55rem;
-    padding-right: 0.55rem;
+    gap: 0.5rem;
+    padding-right: 0.5rem;
   }
 
   .ficha {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.45rem;
     flex: none;
-    height: 3rem;
-    padding: 0 1rem;
-    border: 2px solid var(--color-borde-vivo);
-    border-radius: 10px;
-    background: var(--color-panel);
+    height: 2.5rem;
+    padding: 0 0.85rem;
+    border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--color-panel) 85%, transparent);
     color: var(--color-texto);
-    box-shadow: 3px 3px 0 color-mix(in srgb, var(--color-acento) 55%, transparent);
-    transition: transform 0.18s ease, background-color 0.18s ease;
   }
-  /* El tono va por ficha, no por posición en el DOM: ver la nota del código. */
-  .tono-0 { background: var(--color-datos); color: var(--color-fondo); }
-  .tono-1 { background: var(--color-gestion); color: var(--color-fondo); }
-  .tono-2 { background: var(--color-herramienta); color: var(--color-fondo); }
-  .tono-0 svg,
-  .tono-1 svg,
-  .tono-2 svg { color: var(--color-fondo); }
-  .ficha:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--color-acento); }
-
   .ficha svg {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.05rem;
+    height: 1.05rem;
     flex: none;
-    color: var(--color-texto);
+    color: var(--c);
   }
-
-  .pie,
-  .sigla {
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: -0.045em;
+  .nombre {
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
     white-space: nowrap;
   }
-  /* Las que no tienen logo se escriben más marcadas: la ficha no puede
-     quedar más flaca sólo porque la marca no exista. */
 
+  @media (max-width: 700px) {
+    .pila { gap: 1.2rem; }
+    .ficha { height: 2.2rem; padding: 0 0.7rem; }
+    .nombre { font-size: 0.68rem; }
+  }
 
-  /* Sin movimiento la cinta se queda quieta y se puede scrollear con el dedo. */
-  /* Sin movimiento la cinta se queda quieta y se arrastra a mano. El salto
-     de copia lo hace el script de abajo, así que sigue siendo infinita. */
   @media (prefers-reduced-motion: reduce) {
-    /* Cada regla de acá va colgada de `html:not([data-mov='on'])`: si el
-       visitante prendió el movimiento a mano con el botón de la barra, su
-       decisión gana sobre la del sistema y nada de esto se aplica. */
-
+    /* Colgado de `html:not([data-mov='on'])`: si el visitante prendió el
+       movimiento a mano, su decisión gana sobre la del sistema. */
     :global(html:not([data-mov='on'])) .cinta {
       animation: none;
     }
@@ -177,28 +172,19 @@ const filas: { items: Ficha[]; sentido: string }[] = [
 </style>
 
 <script>
-  /**
-   * La vuelta de la cinta cuando NO se anima.
-   *
-   * Con `prefers-reduced-motion` la cinta está quieta y se mueve arrastrando.
-   * Cada carril tiene tres copias idénticas del mismo contenido, así que la
-   * posición X y la posición X + (un tercio) muestran exactamente lo mismo:
-   * saltar de una a la otra es invisible. Se arranca sobre la copia del medio
-   * y se salta cuando te acercás a cualquiera de las dos puntas, de manera
-   * que siempre queda al menos una copia entera de colchón para seguir.
-   */
+  // La vuelta de la cinta cuando NO se anima: cada carril tiene tres copias
+  // idénticas, así que saltar de una a la equivalente es invisible. Se arranca
+  // sobre la del medio y se salta al acercarse a cualquiera de las puntas.
   const quieto =
     matchMedia('(prefers-reduced-motion: reduce)').matches &&
     document.documentElement.dataset.mov !== 'on';
 
   if (quieto) {
-    for (const carril of document.querySelectorAll<HTMLElement>('.carril')) {
+    for (const carril of document.querySelectorAll<HTMLElement>('.pila .carril')) {
       const cinta = carril.querySelector<HTMLElement>('.cinta');
       if (!cinta) continue;
-
       const copia = () => cinta.scrollWidth / 3;
       let acomodando = false;
-
       const centrar = () => {
         carril.scrollLeft = copia();
       };
@@ -206,21 +192,13 @@ const filas: { items: Ficha[]; sentido: string }[] = [
       carril.addEventListener(
         'scroll',
         () => {
-          // El propio reacomodo dispara otro `scroll`: sin esta guarda se
-          // llama a sí mismo y la cinta se traba.
-          if (acomodando) return;
+          if (acomodando) return; // el reacomodo dispara otro `scroll`
           const c = copia();
           if (c < 10) return;
           const x = carril.scrollLeft;
-          // Se salta con un cuarto de copia de margen: nunca sobre la punta,
-          // donde el rebote del navegador lo haría visible.
-          if (x > c * 1.75) {
+          if (x > c * 1.75 || x < c * 0.25) {
             acomodando = true;
-            carril.scrollLeft = x - c;
-            acomodando = false;
-          } else if (x < c * 0.25) {
-            acomodando = true;
-            carril.scrollLeft = x + c;
+            carril.scrollLeft = x > c * 1.75 ? x - c : x + c;
             acomodando = false;
           }
         },
@@ -228,7 +206,6 @@ const filas: { items: Ficha[]; sentido: string }[] = [
       );
 
       centrar();
-      // El ancho real recién se sabe con las fuentes cargadas.
       addEventListener('load', centrar);
       addEventListener('resize', centrar, { passive: true });
     }
