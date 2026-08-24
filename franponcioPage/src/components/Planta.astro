@@ -25,116 +25,96 @@
  */
 
 const azar = (semilla: number, a: number, b: number) => {
+  // Ruido determinista: el mismo dibujo en cada build, sin depender del reloj.
   const x = Math.sin(semilla * 12.9898) * 43758.5453;
   return a + (x - Math.floor(x)) * (b - a);
 };
 
-const estrellas = Array.from({ length: 38 }, (_, i) => ({
-  x: azar(i + 1, 0, 1600),
-  y: azar(i + 51, 10, 230),
-  r: azar(i + 101, 0.7, 1.9),
+/*
+ * EL ESQUEMA, tal cual el que corresponde:
+ *
+ *      PRP ◄─────────┐  (el caño baja por el medio y dobla a la izquierda)
+ *       └────────────────────────────► INDUSTRIA
+ *
+ * El gasoducto no entra directo a una fábrica: baja, dobla, entra a la
+ * reductora, y de la reductora sale otra cañería —más abajo, porque ya es
+ * otra presión— que recorre todo el ancho hasta la planta industrial.
+ *
+ * Antes la PRP estaba a la derecha, pegada a la industria, y el caño le
+ * pasaba de largo por arriba: el lado izquierdo quedaba vacío y el recorrido
+ * no se leía. Así usa el ancho entero y cuenta la secuencia sola.
+ */
+const EJE_X = 700; // el medio del viewBox: coincide con el caño de la página
+const ENTRADA_Y = 236; // la línea que llega a la PRP
+const SALIDA_Y = 320; // la que sale, más abajo
+const SUELO = 398;
+
+const PRP_X0 = 152;
+const PRP_X1 = 432;
+const IND_X0 = 980;
+const IND_X1 = 1292;
+
+/* Los dos tramos que recorren los datos. */
+const VIAJE_ENTRADA = EJE_X - PRP_X1;
+const VIAJE_SALIDA = IND_X0 - PRP_X1;
+
+const estrellas = Array.from({ length: 34 }, (_, i) => ({
+  x: azar(i + 1, 0, 1400),
+  y: azar(i + 51, 12, 200),
+  r: azar(i + 101, 0.7, 1.8),
   o: azar(i + 151, 0.25, 0.8),
   i,
 }));
 
-/* El recorrido del caño, en coordenadas del viewBox.
-   Baja por el centro (x = 800) hasta el codo y entra a la planta por la
-   izquierda. Estos tres números mandan sobre el dibujo Y sobre la animación:
-   si se mueve el codo, los números lo siguen solos. */
-const EJE_X = 800;
-const CODO_Y = 330;
-
-/* La PRP —planta reductora de presión— entre el caño y la industria. Es como
-   funciona de verdad: el gasoducto no entra directo a una fábrica, primero
-   pasa por una reductora que le baja la presión de transporte a la de uso.
-   El dato hace el mismo camino: baja, se regula, y recién ahí se consume. */
-const PRP_X0 = 820;
-const PRP_X1 = 952;
-
-/* La industria. Termina en 1300 y no más a la derecha por una razón medida:
-   el SVG usa `slice`, así que en un celular se recorta por los costados, y
-   pasado ese punto la fábrica quedaba entera fuera de pantalla. */
-const IND_X0 = 1060;
-const IND_X1 = 1268;
-const ENTRADA_X = IND_X0;
-
-const BAJADA = CODO_Y + 40; // de cuánto más arriba de la pantalla vienen
-const TRAMO = ENTRADA_X - EJE_X - 24;
-/* El viaje horizontal completo, para que la animación no lleve el número a mano. */
-const VIAJE = ENTRADA_X - EJE_X + 18;
-/** Qué fracción del viaje se va bajando; el resto es el tramo horizontal. */
-const CORTE = 0.4;
-
-/* CINCO y no ocho. Con ocho, y a este tamaño, sobre el tramo horizontal
-   quedaba una molécula cada 55 unidades para un diámetro de 42: casi
-   pegadas, y entre todas tapaban la reductora justo cuando el punto era
-   mostrarla. */
-const CIFRAS = ['12.000', '413', '150', '500', '46'];
-const viajeros = CIFRAS.map((bit, i) => {
-  // Posición de reposo: la misma cuenta que hace la animación, pero congelada
-  // en el punto que le toca a cada uno. Es lo que usa el modo sin movimiento.
-  const t = i / CIFRAS.length;
-  const rx = t < CORTE ? 0 : ((t - CORTE) / (1 - CORTE)) * TRAMO;
-  const ry = t < CORTE ? -BAJADA * (1 - t / CORTE) : 0;
-  return { bit, i, rx: rx.toFixed(0), ry: ry.toFixed(0) };
-});
-
-/* Doce volutas y no nueve: con el desenfoque puesto, menos de eso se ve como
-   manchitas sueltas en vez de una columna de gas. */
-/* Nubes altas, que cruzan lento. Anchos distintos para que no se lean como
-   tres copias de la misma. */
 const nubes = [
-  { y: 96, e: 1.0, i: 0 },
-  { y: 168, e: 0.68, i: 1 },
-  { y: 62, e: 1.35, i: 2 },
+  { y: 92, e: 1.0, i: 0 },
+  { y: 158, e: 0.68, i: 1 },
+  { y: 58, e: 1.3, i: 2 },
 ];
 
-/* Los pájaros: tres, en bandada floja. */
 const aves = [
   { dx: 0, dy: 0, e: 1, i: 0 },
   { dx: 26, dy: 14, e: 0.8, i: 1 },
   { dx: 48, dy: -8, e: 0.9, i: 2 },
 ];
 
-/**
- * LOS MOJONES DE LA TRAZA.
- *
- * El lado izquierdo estaba vacío y no tenía nada que contar. Esto lo llena
- * con lo que faltaba en la historia: por dónde viene la línea. Un gasoducto va
- * enterrado y su recorrido se marca en superficie con mojones — los carteles
- * de "ducto de gas" cada tantos metros. Puestos en perspectiva, achicándose
- * hacia el horizonte, dicen que el caño viene de lejos.
- *
- * `t` va de 0 (horizonte) a 1 (cerca), y de ahí salen el alto y el espaciado:
- * los de atrás quedan chicos y juntos, los de adelante grandes y separados.
- */
-const mojones = Array.from({ length: 7 }, (_, i) => {
-  const t = i / 6;
-  return {
-    x: 84 + Math.pow(t, 1.55) * 620,
-    alto: 7 + t * 13,
-    op: 0.3 + t * 0.42,
-    i,
-  };
-});
+const CIFRAS = ['12.000', '413', '150', '500', '46', '135'];
 
-const volutas = Array.from({ length: 12 }, (_, i) => ({
-  x: 1268 - 58 + azar(i + 201, -11, 11),
+/* Los que llegan a la PRP: bajan por el caño y doblan a la izquierda. */
+const entrantes = Array.from({ length: 3 }, (_, i) => ({
+  bit: CIFRAS[i],
+  i,
+  // Posición de reposo para el modo sin movimiento: repartidos por el
+  // recorrido, unos bajando y otros ya doblando.
+  rx: i === 0 ? 0 : -Math.round((i / 3) * VIAJE_ENTRADA),
+  ry: i === 0 ? -180 : 0,
+}));
+
+/* Los que salen de la PRP hacia la industria. */
+const salientes = Array.from({ length: 4 }, (_, i) => ({
+  bit: CIFRAS[(i + 3) % CIFRAS.length],
+  i,
+  rx: Math.round(((i + 0.5) / 4) * VIAJE_SALIDA),
+}));
+
+const volutas = Array.from({ length: 10 }, (_, i) => ({
+  x: IND_X1 - 62 + azar(i + 201, -10, 10),
   i,
 }));
 ---
 
-<section class="planta" aria-hidden="true" style={`--viaje:${VIAJE}px`}>
-  <svg viewBox="0 0 1600 460" preserveAspectRatio="xMidYMax slice" role="presentation">
+<section
+  class="planta"
+  aria-hidden="true"
+  style={`--entrada:${VIAJE_ENTRADA}px; --salida:${VIAJE_SALIDA}px`}
+>
+  {/* `meet` y no `slice`: con `slice` el SVG se recorta por los costados en
+      una pantalla angosta, y medido dejaba la industria ENTERA fuera de cuadro
+      en un celular. Con `meet` entra todo siempre; el alto lo da el
+      `aspect-ratio` del contenedor, y si sobra alto queda aire transparente
+      arriba, que se funde con la página porque el cielo también lo es. */}
+  <svg viewBox="0 0 1400 460" preserveAspectRatio="xMidYMax meet" role="presentation">
     <defs>
-      {/* EL CIELO NO ES OPACO.
-          Antes esto era un rectángulo macizo que tapaba todo lo que la página
-          tiene atrás: la grilla del fondo y las moléculas del canvas. Por eso
-          la escena se leía como una imagen pegada al final y no como parte
-          del sitio.
-          Ahora arranca en transparente puro y sólo se va tiñendo hacia el
-          suelo, que es lo que hace la bruma de verdad. El gas y los datos que
-          vienen bajando por toda la página siguen viéndose acá adentro. */}
       <linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stop-color="#1d2624" stop-opacity="0" />
         <stop offset="0.5" stop-color="#1b2422" stop-opacity="0.3" />
@@ -145,8 +125,6 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
         <stop offset="0.45" stop-color="#dfdcd4" stop-opacity="0.08" />
         <stop offset="1" stop-color="#dfdcd4" stop-opacity="0" />
       </radialGradient>
-      {/* El acero, en las dos orientaciones: el brillo cae al 38 %, no al
-          medio, que es donde pega la luz en un cilindro. */}
       <linearGradient id="acero-v" x1="0" y1="0" x2="1" y2="0">
         <stop offset="0" stop-color="#15191a" />
         <stop offset="0.2" stop-color="#39413f" />
@@ -161,18 +139,6 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
         <stop offset="0.62" stop-color="#525c56" />
         <stop offset="1" stop-color="#101314" />
       </linearGradient>
-      {/* LA VOLUTA, con degradado radial y SIN filtro.
-          Antes el desenfoque iba como `filter` sobre el grupo entero, y ahí
-          estaba el error: la región del filtro se calcula sobre el bounding
-          box SIN transformar, así que las volutas —que las mueve una
-          animación CSS— se rasterizaban corridas y el gas aparecía lejos de
-          la chimenea, flotando en cualquier lado del cielo.
-          Un radial ya trae el borde suave adentro: sale igual de difuso, se
-          mueve donde tiene que moverse y no cuesta un filtro por frame. */}
-      {/* Un relleno plano con opacidad NO es un resplandor: se ve como un
-          disco marrón pegado encima. Lo que lo vuelve luz es que se apague
-          hacia el borde, y eso lo hace un radial. Va para el halo de la
-          antorcha, el brillo del suelo y las nubes. */}
       <radialGradient id="halo">
         <stop offset="0" stop-color="#c08552" stop-opacity="0.4" />
         <stop offset="0.4" stop-color="#c08552" stop-opacity="0.13" />
@@ -195,12 +161,12 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
       </radialGradient>
     </defs>
 
-    <rect width="1600" height="460" fill="url(#cielo)" />
+    <rect width="1400" height="460" fill="url(#cielo)" />
 
-    <circle cx="286" cy="122" r="146" fill="url(#luna)" />
-    <circle cx="286" cy="122" r="40" fill="#dfdcd4" opacity="0.8" />
-    <circle cx="270" cy="110" r="6.5" fill="#0f1110" opacity="0.1" />
-    <circle cx="300" cy="136" r="4" fill="#0f1110" opacity="0.08" />
+    <circle cx="118" cy="104" r="130" fill="url(#luna)" />
+    <circle cx="118" cy="104" r="36" fill="#dfdcd4" opacity="0.8" />
+    <circle cx="104" cy="93" r="6" fill="#0f1110" opacity="0.1" />
+    <circle cx="131" cy="117" r="3.6" fill="#0f1110" opacity="0.08" />
 
     <g class="estrellas">
       {estrellas.map((e) => (
@@ -208,7 +174,6 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
       ))}
     </g>
 
-    {/* Nubes altas: le dan cielo al cielo. */}
     <g class="nubes">
       {nubes.map((n) => (
         <g style={`--i:${n.i}; --e:${n.e}`}>
@@ -219,14 +184,11 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
       ))}
     </g>
 
-    {/* La estrella fugaz: pasa cada tanto y nada más. Si pasara seguido
-        dejaría de ser un hallazgo y sería un tic. */}
     <g class="fugaz">
       <path d="M0 0 L58 26" stroke="#dfdcd4" stroke-width="2" stroke-linecap="round" opacity="0.85" />
       <circle cx="58" cy="26" r="2.4" fill="#dfdcd4" />
     </g>
 
-    {/* Los pájaros, en bandada floja. */}
     <g class="aves">
       {aves.map((a) => (
         <path
@@ -243,215 +205,174 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
 
     {/* Las sierras */}
     <path
-      d="M0 348 L150 300 L290 336 L440 292 L600 340 L760 300 L920 344 L1080 302 L1240 340 L1400 300 L1600 342 L1600 460 L0 460 Z"
+      d="M0 340 L150 300 L290 334 L440 296 L600 338 L760 300 L920 342 L1080 302 L1240 338 L1400 300 L1400 460 L0 460 Z"
       fill="#1a211f"
     />
     <path
-      d="M0 372 L180 344 L340 370 L520 340 L700 372 L880 344 L1060 374 L1260 342 L1440 372 L1600 350 L1600 460 L0 460 Z"
+      d="M0 366 L180 340 L340 366 L520 338 L700 368 L880 342 L1060 370 L1240 340 L1400 364 L1400 460 L0 460 Z"
       fill="#141a19"
     />
 
-    {/* ── DE DÓNDE VIENE LA LÍNEA ────────────────────────────────────── */}
-    <g class="traza-lejos">
-      {/* El resplandor de un pueblo en el horizonte. */}
-      <ellipse cx="196" cy="374" rx="150" ry="26" fill="url(#brillo-suelo)" opacity="0.5" />
-      {[128, 152, 178, 205, 232, 258].map((x, i) => (
-        <circle cx={x} cy={371 - (i % 2) * 2} r="1.3" fill="#c08552" opacity="0.55" />
-      ))}
+    {/* El resplandor del suelo bajo las dos plantas */}
+    <ellipse cx={(PRP_X0 + PRP_X1) / 2} cy={SUELO} rx="230" ry="40" fill="url(#brillo-suelo)" opacity="0.7" />
+    <ellipse cx={(IND_X0 + IND_X1) / 2} cy={SUELO} rx="250" ry="42" fill="url(#brillo-suelo)" />
 
-      {/* La válvula de bloqueo: cada tanto la línea tiene una, y a esta
-          distancia es apenas una silueta. */}
-      <g fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.1" opacity="0.75">
-        <rect x="420" y="374" width="46" height="22" />
-        <path d="M430 374 L430 364 M444 374 L444 360 M458 374 L458 366" stroke-width="1.4" />
-        <circle cx="444" cy="357" r="3.4" fill="none" stroke-width="1.4" />
-      </g>
-
-      {/* Los mojones que marcan la traza enterrada. */}
-      {mojones.map((m) => (
-        <g opacity={m.op}>
-          <rect x={m.x} y={396 - m.alto} width="2.4" height={m.alto} fill="#7d8789" />
-          <rect
-            x={m.x - 2.6}
-            y={396 - m.alto - 3.5}
-            width="7.6"
-            height="4"
-            rx="0.8"
-            fill="#b8964f"
-          />
-        </g>
-      ))}
-    </g>
-
-    {/* ── LA PRP: donde el gasoducto baja la presión ────────────────── */}
-    {/* El skid va DEBAJO de la línea a propósito. La primera versión lo tenía
-        a la altura del caño y las moléculas que viajan le pasaban justo por
-        encima: la reductora quedaba tapada y se leía como un amontonamiento.
-        Abajo, con dos bajadas que entran desde el caño y el venteo saliendo
-        para arriba, se entiende de una qué hace. */}
-    <g class="prp" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.4">
-      {/* La platea */}
-      <rect x={PRP_X0} y="390" width={PRP_X1 - PRP_X0} height="10" />
-
-      {/* Las dos bajadas: del caño al tren de regulación */}
-      <rect x={PRP_X0 + 26} y={CODO_Y + 12} width="8" height="44" />
-      <rect x={PRP_X0 + 74} y={CODO_Y + 12} width="8" height="44" />
-
-      {/* Los filtros, que es lo que hace reconocible a una reductora */}
-      <rect x={PRP_X0 + 18} y="356" width="24" height="36" rx="11" />
-      <rect x={PRP_X0 + 66} y="356" width="24" height="36" rx="11" />
-
-      {/* El venteo, que sale para arriba y cruza la línea */}
-      <rect x={PRP_X0 + 108} y="256" width="10" height="136" />
-      <rect x={PRP_X0 + 103} y="250" width="20" height="8" rx="2" />
-
-      {/* La casilla de control */}
-      <rect x={PRP_X0 + 130} y="360" width="30" height="32" />
+    {/* ── EL CAÑO: baja por el medio, dobla a la IZQUIERDA y entra a la PRP ── */}
+    <g class="canio">
+      <rect x={EJE_X - 8} y="0" width="16" height={ENTRADA_Y + 16} fill="url(#acero-v)" />
       <rect
-        class="luz-prp"
-        x={PRP_X0 + 137}
-        y="366"
-        width="10"
-        height="9"
-        fill="#c08552"
-        stroke="none"
-        opacity="0.85"
+        x={PRP_X1 - 6}
+        y={ENTRADA_Y}
+        width={EJE_X - PRP_X1 + 14}
+        height="16"
+        fill="url(#acero-h)"
       />
-
-      {/* El cerco perimetral, bajito */}
-      {Array.from({ length: 7 }, (_, i) => (
-        <path d={`M${PRP_X0 + 8 + i * 25} 390 L${PRP_X0 + 8 + i * 25} 368`} stroke-width="1.4" opacity="0.7" />
-      ))}
-      <path d={`M${PRP_X0 + 6} 374 L${PRP_X1 - 6} 374`} stroke-width="1.2" opacity="0.55" />
+      {/* La brida de entrada a la reductora */}
+      <rect x={PRP_X1 - 4} y={ENTRADA_Y - 6} width="10" height="28" rx="1.5" fill="#98a3a5" />
+      {/* Un caballete en el tramo de llegada */}
+      <path
+        d={`M${EJE_X - 95} ${SUELO} L${EJE_X - 80} ${ENTRADA_Y + 18} L${EJE_X - 65} ${SUELO}`}
+        fill="none"
+        stroke="#3f4a45"
+        stroke-width="2.4"
+      />
     </g>
 
-    {/* Los dos volantes de la reductora, sobre el caño */}
-    <g class="volantes" fill="none" stroke="#98a3a5" stroke-width="2.2">
-      {[PRP_X0 + 30, PRP_X0 + 78].map((x) => (
-        <g>
-          <path d={`M${x} ${CODO_Y + 14} L${x} ${CODO_Y - 5}`} />
-          <circle cx={x} cy={CODO_Y - 10} r="5.5" />
-        </g>
+    {/* ── LA PRP ─────────────────────────────────────────────────────── */}
+    <g class="prp" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.6">
+      <rect x={PRP_X0} y="250" width={PRP_X1 - PRP_X0} height={SUELO - 250} />
+      {[0, 1].map((i) => (
+        <path
+          d={`M${PRP_X0 + 56 + i * 116} 250 L${PRP_X0 + 96 + i * 116} 202 L${PRP_X0 + 136 + i * 116} 250 Z`}
+        />
       ))}
-    </g>
-
-    {/* ── LA PLANTA, una sola ────────────────────────────────────────── */}
-    <g class="fabrica">
-      {/* Nave con techo de diente de sierra */}
-      <rect x={IND_X0} y="288" width={IND_X1 - IND_X0} height="112" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.5" />
-      {[0, 1, 2, 3].map((i) => (
-        <g>
-          <path
-            d={`M${IND_X0 + i * ((1268 - 1060) / 4)} 288 L${IND_X0 + i * ((1268 - 1060) / 4)} 252 L${IND_X0 + (i + 1) * ((1268 - 1060) / 4)} 288 Z`}
-            fill="#0b0e0d"
-            stroke="#3f4a45"
-            stroke-width="1.5"
-          />
-          {/* La cara vidriada del diente, que es por donde entra la luz. */}
-          <path
-            d={`M${IND_X0 + 4 + i * ((1268 - 1060) / 4)} 285 L${IND_X0 + 4 + i * ((1268 - 1060) / 4)} 258`}
-            stroke="#6fa39c"
-            stroke-width="3"
-            opacity="0.5"
-          />
-        </g>
-      ))}
-
-      {/* El resplandor de la planta sobre el suelo: es lo que la apoya en el
-          piso en vez de dejarla flotando recortada. */}
-      <ellipse cx={(IND_X0 + IND_X1) / 2} cy="398" rx="250" ry="44" fill="url(#brillo-suelo)" />
-
-      {/* La antorcha: el mechero que nunca se apaga. */}
-      <rect x={IND_X0 + 22} y="196" width="13" height="94" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.4" />
-      <path d={`M${IND_X0 + 16} 196 L${IND_X0 + 41} 196 L${IND_X0 + 37} 186 L${IND_X0 + 20} 186 Z`} fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.4" />
-
-      {/* La chimenea */}
-      <rect x={IND_X1 - 78} y="150" width="34" height="140" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.5" />
-      <rect x={IND_X1 - 84} y="144" width="46" height="10" rx="2" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.5" />
-      <path d={`M${IND_X1 - 78} 186 L${IND_X1 - 44} 186 M${IND_X1 - 78} 224 L${IND_X1 - 44} 224`} stroke="#3f4a45" stroke-width="1.2" opacity="0.6" />
-
-      {/* La llama, y su halo sobre el cielo. */}
-      <circle class="halo-llama" cx={IND_X0 + 28} cy="166" r="82" fill="url(#halo)" />
-      <g class="llama">
-        <path d={`M${IND_X0 + 28} 186 C${IND_X0 + 19} 168 ${IND_X0 + 35} 158 ${IND_X0 + 29} 140 C${IND_X0 + 45} 154 ${IND_X0 + 49} 172 ${IND_X0 + 40} 186 Z`} fill="#c08552" opacity="0.92" />
-        <path d={`M${IND_X0 + 29} 184 C${IND_X0 + 25} 172 ${IND_X0 + 33} 166 ${IND_X0 + 30} 154 C${IND_X0 + 38} 165 ${IND_X0 + 39} 176 ${IND_X0 + 35} 184 Z`} fill="#dfdcd4" opacity="0.5" />
-      </g>
-
-      {/* La baliza de la chimenea: obligatoria en una torre, y le da pulso. */}
-      <circle class="baliza" cx={IND_X1 - 61} cy="138" r="4.5" fill="#e8604a" />
-
-      {/* Las ventanas encendidas */}
+      {/* El cartel: en una reductora de verdad está, y acá además dice qué es. */}
+      <rect x={PRP_X0 + 24} y="296" width="58" height="22" rx="2" />
+      <text class="rotulo" x={PRP_X0 + 53} y="311">PRP</text>
+      {/* Las ventanas */}
       <g class="luces">
-        {Array.from({ length: 6 }, (_, i) => [IND_X0 + 20 + i * 30, 324]).map(([x, y], i) => (
-          <rect x={x} y={y} width="11" height="14" rx="1" fill="#c08552" opacity="0.8" style={`--i:${i}`} />
+        {Array.from({ length: 4 }, (_, i) => (
+          <rect
+            x={PRP_X0 + 108 + i * 40}
+            y="332"
+            width="12"
+            height="14"
+            rx="1"
+            fill="#c08552"
+            stroke="none"
+            opacity="0.8"
+            style={`--i:${i}`}
+          />
         ))}
       </g>
     </g>
 
-    {/* ── EL CAÑO: baja, dobla y entra ───────────────────────────────── */}
+    {/* ── LA CAÑERÍA SALIENTE: de la PRP a la industria ──────────────── */}
     <g class="canio">
-      {/* Tramo vertical. Baja HASTA PASAR la esquina: el vertical y el
-          horizontal se solapan en el cuadrado del codo, así queda macizo.
-          El arco que tenía antes dejaba un escalón visible entre los dos. */}
-      <rect x={EJE_X - 8} y="0" width="16" height={CODO_Y + 22} fill="url(#acero-v)" />
-      {/* Tramo horizontal, desde el codo hasta la pared de la planta */}
-      <rect x={EJE_X - 8} y={CODO_Y + 7} width={ENTRADA_X - EJE_X + 8} height="16" fill="url(#acero-h)" />
-
-      {/* Las bridas de ENTRADA y SALIDA de la reductora. Son las que hacen
-          que el caño se lea como que entra a la PRP y sale de ella, y no como
-          uno solo que le pasa por arriba de largo — que era lo que parecía.
-          En el medio queda el tramo regulado; después, la distribución que va
-          a la industria. */}
-      {[PRP_X0, PRP_X1].map((x) => (
-        <rect x={x - 5} y={CODO_Y + 1} width="10" height="28" rx="1.5" fill="#98a3a5" />
+      <rect
+        x={PRP_X1 - 6}
+        y={SALIDA_Y}
+        width={IND_X0 - PRP_X1 + 12}
+        height="16"
+        fill="url(#acero-h)"
+      />
+      {/* Bridas de salida y de llegada */}
+      {[PRP_X1 - 2, IND_X0 - 4].map((x) => (
+        <rect x={x} y={SALIDA_Y - 6} width="10" height="28" rx="1.5" fill="#98a3a5" />
       ))}
-      {/* Y una más en el tramo que sale hacia la industria. */}
-      <rect x={(PRP_X1 + IND_X0) / 2 - 4} y={CODO_Y + 3} width="9" height="24" rx="1.5" fill="#98a3a5" />
-
-      {/* Los caballetes que lo sostienen */}
-      {[EJE_X + 12, (PRP_X1 + IND_X0) / 2].map((x, i) => {
+      {/* Los caballetes del tramo largo */}
+      {[0, 1, 2].map((i) => {
+        // Corridos para que no se enreden con el caballete del tramo que llega.
+        const x = PRP_X1 + 88 + i * 190;
         return (
           <path
-            d={`M${x - 15} 400 L${x} ${CODO_Y + 18} L${x + 15} 400`}
+            d={`M${x - 14} ${SUELO} L${x} ${SALIDA_Y + 18} L${x + 14} ${SUELO}`}
             fill="none"
             stroke="#3f4a45"
-            stroke-width="2.5"
+            stroke-width="2.2"
           />
         );
       })}
     </g>
 
-    {/* ── LOS NÚMEROS, viajando por el caño hasta la planta ──────────── */}
-    <g class="viajeros">
-      {viajeros.map((v) => (
+    {/* ── LA INDUSTRIA ───────────────────────────────────────────────── */}
+    <g class="fabrica" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.6">
+      <rect x={IND_X0} y="240" width={IND_X1 - IND_X0} height={SUELO - 240} />
+      {[0, 1, 2, 3].map((i) => (
+        <path
+          d={`M${IND_X0 + i * 78} 240 L${IND_X0 + i * 78} 196 L${IND_X0 + (i + 1) * 78} 240 Z`}
+        />
+      ))}
+      {/* La chimenea */}
+      <rect x={IND_X1 - 80} y="112" width="36" height="130" />
+      <rect x={IND_X1 - 86} y="106" width="48" height="10" rx="2" />
+      <g class="luces">
+        {Array.from({ length: 6 }, (_, i) => (
+          <rect
+            x={IND_X0 + 24 + i * 46}
+            y="316"
+            width="13"
+            height="16"
+            rx="1"
+            fill="#c08552"
+            stroke="none"
+            opacity="0.8"
+            style={`--i:${i}`}
+          />
+        ))}
+      </g>
+    </g>
+
+    {/* La antorcha de la industria, con su halo */}
+    <circle class="halo-llama" cx={IND_X0 + 34} cy="150" r="76" fill="url(#halo)" />
+    <g class="fabrica" fill="#0b0e0d" stroke="#3f4a45" stroke-width="1.4">
+      <rect x={IND_X0 + 28} y="176" width="13" height="66" />
+      <path d={`M${IND_X0 + 22} 176 L${IND_X0 + 47} 176 L${IND_X0 + 43} 166 L${IND_X0 + 26} 166 Z`} />
+    </g>
+    <g class="llama">
+      <path
+        d={`M${IND_X0 + 34} 166 C${IND_X0 + 25} 148 ${IND_X0 + 41} 138 ${IND_X0 + 35} 120 C${IND_X0 + 51} 134 ${IND_X0 + 55} 152 ${IND_X0 + 46} 166 Z`}
+        fill="#c08552"
+        opacity="0.92"
+      />
+    </g>
+    <circle class="baliza" cx={IND_X1 - 62} cy="100" r="4.5" fill="#e8604a" />
+
+    {/* ── LOS DATOS ──────────────────────────────────────────────────── */}
+    {/* Los que LLEGAN: bajan por el caño y doblan hacia la reductora. */}
+    <g class="entrantes">
+      {entrantes.map((v) => (
         <g style={`--i:${v.i}; --rx:${v.rx}px; --ry:${v.ry}px`}>
-          {/* MOLÉCULA, no cajita. El dato que llega por el caño es la misma
-              partícula redonda que viene bajando por el fondo de toda la
-              página: si acá fuera un rectángulo, el viaje se cortaría justo
-              en el remate. */}
-          <circle cx={EJE_X} cy={CODO_Y + 8} r="17" fill="#0f1110" stroke="#6fa39c" stroke-width="1.5" />
-          <circle class="sat" cx={EJE_X + 23} cy={CODO_Y + 8} r="2.3" fill="#6fa39c" opacity="0.75" />
-          <circle class="sat sat-b" cx={EJE_X - 23} cy={CODO_Y + 8} r="2.3" fill="#6fa39c" opacity="0.75" />
-          <text x={EJE_X} y={CODO_Y + 12}>{v.bit}</text>
+          <circle cx={EJE_X} cy={ENTRADA_Y + 8} r="17" fill="#0f1110" stroke="#6fa39c" stroke-width="1.5" />
+          <text x={EJE_X} y={ENTRADA_Y + 12}>{v.bit}</text>
         </g>
       ))}
     </g>
 
-    {/* El destello de la pared: cada vez que un dato entra, la planta lo
-        acusa. Es el remate de todo el recorrido — el número llega a algún
-        lado en vez de desvanecerse. */}
-    <circle class="ingreso" cx={ENTRADA_X} cy={CODO_Y + 8} r="15" fill="#6fa39c" />
-
-    {/* ── EL GAS, saliendo de la chimenea ────────────────────────────── */}
-    <g class="humo">
-      {volutas.map((v) => (
-        <ellipse cx={v.x} cy="142" rx="26" ry="30" fill="url(#voluta)" style={`--i:${v.i}`} />
+    {/* Los que SALEN: de la reductora a la industria. */}
+    <g class="salientes">
+      {salientes.map((v) => (
+        <g style={`--i:${v.i}; --rx:${v.rx}px`}>
+          <circle cx={PRP_X1} cy={SALIDA_Y + 8} r="17" fill="#0f1110" stroke="#6fa39c" stroke-width="1.5" />
+          <text x={PRP_X1} y={SALIDA_Y + 12}>{v.bit}</text>
+        </g>
       ))}
     </g>
-    {/* Primer plano: una loma oscura al ras. Sin esto la escena es un fondo
-        y una planta; con esto hay un adelante y un atrás. */}
+
+    {/* Los destellos: uno cuando entra a la PRP, otro cuando entra a la nave */}
+    <circle class="ingreso" cx={PRP_X1} cy={ENTRADA_Y + 8} r="15" fill="#6fa39c" />
+    <circle class="ingreso tarde" cx={IND_X0} cy={SALIDA_Y + 8} r="15" fill="#6fa39c" />
+
+    {/* ── EL GAS ─────────────────────────────────────────────────────── */}
+    <g class="humo">
+      {volutas.map((v) => (
+        <ellipse cx={v.x} cy="104" rx="26" ry="30" fill="url(#voluta)" style={`--i:${v.i}`} />
+      ))}
+    </g>
+
+    {/* Primer plano */}
     <path
-      d="M0 432 L140 418 L300 430 L470 414 L640 428 L820 412 L1000 428 L1180 414 L1360 430 L1520 416 L1600 426 L1600 460 L0 460 Z"
+      d="M0 428 L140 416 L300 428 L470 412 L640 426 L820 410 L1000 426 L1180 412 L1400 424 L1400 460 L0 460 Z"
       fill="#0a0d0c"
     />
   </svg>
@@ -462,16 +383,15 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
     position: relative;
     display: block;
     width: 100%;
-    /* Más baja en pantalla angosta a propósito: con `slice` el recorte
-       lateral crece con la altura, y a 250 px la industria quedaba fuera de
-       cuadro en un celular. */
-    height: clamp(180px, 30vw, 430px);
+    /* El alto sale del propio esquema. Antes era una altura fija y el SVG se
+       recortaba por los costados; ahora el contenedor tiene la proporción del
+       dibujo y entra todo. El mínimo es para que en una pantalla muy angosta
+       no quede una fajita: si sobra alto, queda aire transparente arriba, que
+       se funde con la página porque el cielo también es transparente. */
+    aspect-ratio: 1400 / 460;
+    min-height: 170px;
+    max-height: 460px;
     overflow: hidden;
-    /* SIN MÁSCARA. Estaba puesta para que la escena no arrancara con un
-       borde duro, pero desvanecía TODO lo de arriba —el caño incluido— y
-       justo en la junta con el caño de la página quedaba un hueco.
-       El borde duro no existía igual: el primer tono del cielo del SVG es
-       #0f1110, el mismo `--color-fondo` que tiene la página atrás. */
   }
   .planta svg {
     display: block;
@@ -479,16 +399,36 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
     height: 100%;
   }
 
-  .viajeros text {
+  .entrantes text,
+  .salientes text {
     font-family: var(--font-mono);
     font-size: 9px;
     font-weight: 700;
     text-anchor: middle;
     fill: var(--color-datos);
   }
+  .rotulo {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-anchor: middle;
+    fill: var(--color-tenue);
+    stroke: none;
+  }
 
-  /* ── Lo que se mueve ───────────────────────────────────────────────
-     Todo sobre `transform` y `opacity`: lo resuelve el compositor. */
+  /* Todo lo que escala lleva `transform-box: fill-box`: en SVG el origen por
+     defecto es el del lienzo y no el del elemento, así que sin esto la forma
+     no se agranda en el lugar — se dispara por el cuadro. */
+  .llama,
+  .halo-llama,
+  .baliza,
+  .ingreso,
+  .humo ellipse {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
   .estrellas circle {
     animation: titilar 7s ease-in-out infinite;
     animation-delay: calc(var(--i) * -0.29s);
@@ -503,66 +443,8 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
     animation-delay: calc(var(--i) * -0.44s);
   }
   @keyframes parpadeo {
-    0%, 100% { opacity: 0.85; }
-    50% { opacity: 0.4; }
-  }
-
-  .humo ellipse {
-    /* SIN ESTO EL GAS SE DISPARA POR TODO EL CIELO.
-       En SVG, `transform-origin` no arranca en el centro del elemento sino en
-       el origen del lienzo. Con eso, un `scale(2.9)` no agranda la voluta en
-       el lugar: le multiplica la coordenada — cx 1412 se iba a 4095— y el
-       humo terminaba en cualquier lado menos sobre la chimenea.
-       `transform-box: fill-box` hace que el origen sea la caja del propio
-       elemento, y ahí `center` significa lo que uno espera. */
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: subir 13s linear infinite;
-    animation-delay: calc(var(--i) * -1.08s);
-  }
-  @keyframes subir {
-    from { transform: translateY(0) scale(0.4); opacity: 0; }
-    14% { opacity: 1; }
-    to { transform: translateY(-185px) scale(2.9); opacity: 0; }
-  }
-
-  /* El viaje: primero baja por el caño, después dobla y entra a la planta.
-     Dos tramos en una sola animación — el quiebre del 40 % es el codo. */
-  .viajeros > g {
-    animation: viajar 16s linear infinite;
-    animation-delay: calc(var(--i) * -3.2s);
-  }
-  @keyframes viajar {
-    0% { transform: translate(0, -340px); opacity: 0; }
-    8% { opacity: 1; }
-    40% { transform: translate(0, 0); }
-    94% { opacity: 1; }
-    100% { transform: translate(var(--viaje), 0); opacity: 0; }
-  }
-
-  /* Todo lo que escala o rota lleva `transform-box: fill-box`: en SVG el
-     origen por defecto es el del lienzo, no el del elemento, y sin esto la
-     forma no se agranda en el lugar — se dispara por el cuadro. */
-  .llama,
-  .halo-llama,
-  .baliza,
-  .ingreso,
-  .humo ellipse {
-    transform-box: fill-box;
-    transform-origin: center;
-  }
-
-  /* Los satélites giran alrededor de su núcleo. El origen se pone a mano en
-     el centro del núcleo: `fill-box` acá no sirve, porque la caja del satélite
-     es el satélite y giraría sobre sí mismo. */
-  .sat {
-    transform-origin: 800px 308px;
-    animation: orbitar 5.4s linear infinite;
-  }
-  .sat-b { animation-delay: -2.7s; }
-  @keyframes orbitar {
-    from { rotate: 0deg; }
-    to { rotate: 360deg; }
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 0.35; }
   }
 
   .nubes > g {
@@ -571,8 +453,8 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
     transform: scale(var(--e));
   }
   @keyframes cruzar {
-    from { transform: translateX(-260px) scale(var(--e)); }
-    to { transform: translateX(1860px) scale(var(--e)); }
+    from { transform: translateX(-240px) scale(var(--e)); }
+    to { transform: translateX(1660px) scale(var(--e)); }
   }
 
   .aves path {
@@ -580,75 +462,100 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
     animation-delay: calc(var(--i) * -0.5s), calc(var(--i) * -0.22s);
   }
   @keyframes volar {
-    from { transform: translate(-90px, 210px) scale(var(--e)); }
-    to { transform: translate(1700px, 78px) scale(var(--e)); }
+    from { transform: translate(-90px, 200px) scale(var(--e)); }
+    to { transform: translate(1500px, 72px) scale(var(--e)); }
   }
-  /* El aleteo es un achatado vertical: con dos trazos alcanza. */
   @keyframes aletear {
     0%, 100% { scale: 1 1; }
     50% { scale: 1 0.55; }
   }
 
   .fugaz {
-    transform: translate(180px, 40px);
+    transform: translate(160px, 36px);
     opacity: 0;
     animation: fugarse 26s linear infinite;
   }
   @keyframes fugarse {
-    0%, 88% { transform: translate(180px, 40px); opacity: 0; }
+    0%, 88% { transform: translate(160px, 36px); opacity: 0; }
     89% { opacity: 0.9; }
-    97%, 100% { transform: translate(620px, 232px); opacity: 0; }
+    97%, 100% { transform: translate(560px, 214px); opacity: 0; }
   }
 
-  .llama {
-    animation: arder 2.3s ease-in-out infinite;
-  }
+  .llama { animation: arder 2.3s ease-in-out infinite; }
   @keyframes arder {
     0%, 100% { transform: scaleY(1) scaleX(1); }
     32% { transform: scaleY(1.24) scaleX(0.88); }
     68% { transform: scaleY(0.86) scaleX(1.1); }
   }
-  .halo-llama {
-    animation: latir-halo 2.3s ease-in-out infinite;
-  }
+  .halo-llama { animation: latir-halo 2.3s ease-in-out infinite; }
   @keyframes latir-halo {
     0%, 100% { opacity: 0.75; transform: scale(1); }
     32% { opacity: 1; transform: scale(1.1); }
   }
 
-  .baliza {
-    animation: balizar 3.6s ease-in-out infinite;
-  }
+  .baliza { animation: balizar 3.6s ease-in-out infinite; }
   @keyframes balizar {
     0%, 62%, 100% { opacity: 0.18; transform: scale(0.85); }
     72% { opacity: 1; transform: scale(1.25); }
   }
 
-  /* El destello de ingreso late al mismo ritmo con el que llegan los datos:
-     un ciclo de 16 s dividido por los 5 que viajan. Si los dos números se
-     despegan, la planta acusa recibo cuando no llegó nadie. */
-  .ingreso {
-    animation: acusar 3.2s ease-out infinite;
+  .humo ellipse {
+    animation: subir 13s linear infinite;
+    animation-delay: calc(var(--i) * -1.3s);
   }
+  @keyframes subir {
+    from { transform: translateY(0) scale(0.4); opacity: 0; }
+    14% { opacity: 1; }
+    to { transform: translateY(-185px) scale(2.9); opacity: 0; }
+  }
+
+  /* ── EL VIAJE DE LOS DATOS ─────────────────────────────────────────
+     Dos tramos, y dos grupos: no es el mismo dato el que baja y el que sale.
+     Uno entra a la reductora y ahí se termina su viaje; del otro lado sale
+     otro, ya regulado, hacia la industria. Con un solo elemento habría que
+     hacerlo desaparecer y reaparecer más abajo, que es justo lo que no pasa
+     en una cañería. */
+  .entrantes > g {
+    animation: llegar 15s linear infinite;
+    animation-delay: calc(var(--i) * -5s);
+  }
+  @keyframes llegar {
+    0% { transform: translate(0, -330px); opacity: 0; }
+    8% { opacity: 1; }
+    46% { transform: translate(0, 0); }
+    94% { opacity: 1; }
+    100% { transform: translate(calc(var(--entrada) * -1), 0); opacity: 0; }
+  }
+
+  .salientes > g {
+    animation: salir 15s linear infinite;
+    animation-delay: calc(var(--i) * -3.75s);
+  }
+  @keyframes salir {
+    0% { transform: translate(0, 0); opacity: 0; }
+    6% { opacity: 1; }
+    94% { opacity: 1; }
+    100% { transform: translate(var(--salida), 0); opacity: 0; }
+  }
+
+  /* Los destellos laten al ritmo con el que llegan los datos a cada pared. */
+  .ingreso { animation: acusar 5s ease-out infinite; }
+  .ingreso.tarde { animation-duration: 3.75s; }
   @keyframes acusar {
     0% { opacity: 0.55; transform: scale(0.35); }
     70%, 100% { opacity: 0; transform: scale(1.5); }
   }
 
-  /* ── Quieta ────────────────────────────────────────────────────────
-     No se apaga: se congela. Cada número queda en el punto del recorrido
-     que le toca —unos bajando, otros ya entrando—, así que la escena se ve
-     compuesta y no todo amontonado en el arranque. */
+  /* ── Quieta ───────────────────────────────────────────────────────── */
   @media (prefers-reduced-motion: reduce) {
-    /* Cada regla de acá va colgada de `html:not([data-mov='on'])`: si el
-       visitante prendió el movimiento a mano con el botón de la barra, su
-       decisión gana sobre la del sistema y nada de esto se aplica. */
-
+    /* Cada regla va colgada de `html:not([data-mov='on'])`: si el visitante
+       prendió el movimiento a mano con el botón de la barra, su decisión gana
+       sobre la del sistema y nada de esto se aplica. */
     :global(html:not([data-mov='on'])) .estrellas circle,
     :global(html:not([data-mov='on'])) .luces rect,
     :global(html:not([data-mov='on'])) .humo ellipse,
-    :global(html:not([data-mov='on'])) .viajeros > g,
-    :global(html:not([data-mov='on'])) .sat,
+    :global(html:not([data-mov='on'])) .entrantes > g,
+    :global(html:not([data-mov='on'])) .salientes > g,
     :global(html:not([data-mov='on'])) .nubes > g,
     :global(html:not([data-mov='on'])) .aves path,
     :global(html:not([data-mov='on'])) .fugaz,
@@ -662,16 +569,15 @@ const volutas = Array.from({ length: 12 }, (_, i) => ({
       transform: translateY(calc(var(--i) * -17px)) scale(calc(0.6 + var(--i) * 0.2));
       opacity: calc(0.9 - var(--i) * 0.08);
     }
-    :global(html:not([data-mov='on'])) .viajeros > g {
-      transform: translate(var(--rx), var(--ry));
+    :global(html:not([data-mov='on'])) .entrantes > g,
+    :global(html:not([data-mov='on'])) .salientes > g {
+      transform: translate(var(--rx), var(--ry, 0px));
     }
-    /* Cada cosa nueva, con su pose de reposo: la escena quieta tiene que
-       verse compuesta, no congelada en el cuadro cero. */
     :global(html:not([data-mov='on'])) .nubes > g {
-      transform: translateX(calc(240px + var(--i) * 520px)) scale(var(--e));
+      transform: translateX(calc(200px + var(--i) * 470px)) scale(var(--e));
     }
     :global(html:not([data-mov='on'])) .aves path {
-      transform: translate(calc(430px + var(--i) * 44px), calc(150px - var(--i) * 12px))
+      transform: translate(calc(380px + var(--i) * 44px), calc(140px - var(--i) * 12px))
         scale(var(--e));
     }
     :global(html:not([data-mov='on'])) .fugaz { opacity: 0; }
