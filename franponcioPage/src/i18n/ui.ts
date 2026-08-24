@@ -43,7 +43,7 @@ export const ui = {
     'banda.traza.bajada':
       'El recorrido completo, de 2013 a hoy: primero los trabajos, después las herramientas que escribí. Tocá cualquier parada para abrirla.',
     'banda.stack.bajada':
-      'Con qué trabajo. Arriba, datos y visualización; abajo, gestión y construcción. Pasá el mouse para frenar la cinta.',
+      'Con qué trabajo, agrupado por para qué sirve. Pasá el mouse por encima para frenar una fila.',
     'banda.formacion.bajada':
       'Los certificados, uno al lado del otro. Tocá cualquiera para verlo en grande.',
     'tramo.laboral': 'Experiencia laboral',
@@ -52,6 +52,11 @@ export const ui = {
     'tramo.proyecto.bajada': 'Software que escribí por mi cuenta, casi siempre para resolver algo que me faltaba en el trabajo.',
     'traza.pie': '↔ La traza se recorre de costado — 2013 → 2026',
     'herramientas.titulo': 'Stack',
+    'stack.datos': 'Datos y visualización',
+    'stack.python': 'Python y análisis',
+    'stack.gestion': 'Gestión y métodos',
+    'stack.sistemas': 'Sistemas y operación',
+    'stack.construyo': 'Con qué construyo',
     'herramientas.bajada':
       'Herramientas y métodos con los que trabajo: datos y visualización arriba, gestión y construcción abajo. Pasá el mouse para frenar la cinta.',
     'carrusel.anterior': 'Ver el anterior',
@@ -105,7 +110,7 @@ export const ui = {
     'banda.traza.bajada':
       'The whole run, 2013 to today: the jobs first, then the tools I wrote. Tap any stop to open it.',
     'banda.stack.bajada':
-      'What I work with. Data and visualisation on top; management and build below. Hover to stop the belt.',
+      'What I work with, grouped by what it is for. Hover over a row to pause it.',
     'banda.formacion.bajada':
       'The certificates, side by side. Tap any one to see it full size.',
     'tramo.laboral': 'Work experience',
@@ -114,6 +119,11 @@ export const ui = {
     'tramo.proyecto.bajada': 'Software I built on my own, almost always to solve something the job was missing.',
     'traza.pie': '↔ The route runs sideways — 2013 → 2026',
     'herramientas.titulo': 'Stack',
+    'stack.datos': 'Data and visualisation',
+    'stack.python': 'Python and analysis',
+    'stack.gestion': 'Management and methods',
+    'stack.sistemas': 'Systems and operations',
+    'stack.construyo': 'What I build with',
     'herramientas.bajada':
       'Tools and methods I work with: data and visualisation on top, management and build below. Hover to stop the belt.',
     'carrusel.anterior': 'Previous',
