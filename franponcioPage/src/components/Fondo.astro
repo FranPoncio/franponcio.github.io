@@ -394,7 +394,11 @@
       // vacío a saturado — y medido costaba 15 fps. Con una queda poblado sin
       // taparle nada al contenido.
       const s = sArriba + Math.random() * tramo;
-      nacerHumo(document.body, s, Math.random() < Math.pow(s, 1.9), flanco);
+      // El tope de 0.78 deja siempre una quinta parte de gas: sin él, abajo
+      // de todo `s^1.9` da casi 1 y el fondo se vuelve una nube de números
+      // sin nada de humo — se pierde justamente la idea de que una cosa se
+      // transforma en la otra.
+      nacerHumo(document.body, s, Math.random() < Math.min(Math.pow(s, 1.9), 0.78), flanco);
 
       pintarTramo(document.body, caja, eje, true);
     }
