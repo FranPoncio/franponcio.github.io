@@ -1,0 +1,706 @@
+---
+/**
+ * SGI TRINORMA — la demostración.
+ *
+ * Todo se calcula en tiempo de compilación. No hay fetch, no hay API, no hay
+ * clave de ningún modelo en el navegador: se evalúa el corpus contra la
+ * empresa de demostración y se imprime el resultado. El JavaScript del final
+ * sólo filtra lo que ya está en el HTML, así que la página funciona entera
+ * con el JS apagado.
+ *
+ * Que sea estático no es una limitación disimulada: el motor es una función
+ * pura, y una función pura sobre datos conocidos se puede resolver antes de
+ * servir la página. La parte que necesitaría un servidor —cargar TUS
+ * evidencias— es justamente la que no corresponde poner en un portfolio.
+ */
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import { conBase } from '../../lib/url';
+import { requisitos } from '../../lib/sgi/normas';
+import { evidenciasDemo, EMPRESA } from '../../lib/sgi/demo';
+import { evaluar, resumir, ordenarHallazgos, NORMAS, antiguedadMeses } from '../../lib/sgi/modelo';
+import type { Norma, Estado } from '../../lib/sgi/modelo';
+
+const hoy = new Date();
+const evidencias = evidenciasDemo(hoy);
+const coberturas = requisitos.map((r) => evaluar(r, evidencias, hoy));
+const hallazgos = ordenarHallazgos(coberturas);
+
+const claves = Object.keys(NORMAS) as Norma[];
+const resumenes = claves.map((n) => resumir(coberturas, n));
+
+const corte = hoy.toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' });
+
+const ETIQUETA: Record<Estado, string> = {
+  cubierto: 'Cubierto',
+  parcial: 'Parcial',
+  vencido: 'Vencido',
+  sin_cubrir: 'Sin cubrir',
+};
+
+const tronco = requisitos.filter((r) => r.tronco).length;
+const totalPreguntas = requisitos.reduce((a, r) => a + r.preguntas.length, 0);
+const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).length;
+---
+
+<Base
+  titulo="SGI Trinorma · Francisco Poncio"
+  descripcion="Demostración de un sistema que calcula la cobertura de ISO 9001, 14001 y 45001 sobre la evidencia real de una organización y arma el plan de auditoría interna."
+  lang="es"
+  alterna="/sgi/"
+>
+  <Nav lang="es" alterna="/sgi/" />
+
+  <main class="mx-auto max-w-5xl px-6 py-14">
+    <a href={conBase('/#proyectos')} class="volver">← Volver al portfolio</a>
+
+    <header class="cabecera">
+      <p class="rotulo">Demostración interactiva</p>
+      <h1>Sistema de gestión integrado<br /><span class="tri">ISO 9001 · 14001 · 45001</span></h1>
+      <p class="bajada">
+        Un auditor no audita tus documentos: audita si tenés evidencia de que el sistema
+        funciona, y si esa evidencia todavía prueba algo. Esto calcula exactamente eso —
+        requisito por requisito, con la cuenta a la vista — y arma el plan de auditoría interna
+        a partir del resultado.
+      </p>
+    </header>
+
+    {/*
+      El aviso va ARRIBA y no en letra chica al pie. Una pantalla que muestra
+      porcentajes de cumplimiento de una empresa tiene que decir de entrada
+      que la empresa no existe, o alguien la va a citar como si existiera.
+    */}
+    <aside class="aviso">
+      <h2>Antes de mirar los números</h2>
+      <ul>
+        <li>
+          <strong>{EMPRESA.nombre} no existe.</strong> Es una PyME inventada para la demostración.
+          Los datos de un SGI real son del cliente o del empleador y no van a un repositorio
+          público.
+        </li>
+        <li>
+          <strong>No hay texto de las normas acá adentro.</strong> El texto es propiedad de ISO y
+          se compra. Se usan numeración y título de cláusula, que son referencia factual; las
+          {' '}{totalPreguntas} preguntas de auditoría y las descripciones de evidencia son propias.
+        </li>
+        <li>
+          <strong>El cálculo no lo hace un modelo de lenguaje.</strong> Es una función pura y
+          testeada: cada estado de esta página viene con el motivo que lo produjo. La IA sirve
+          para redactar el informe sobre este resultado, no para decidirlo.
+        </li>
+      </ul>
+    </aside>
+
+    <section class="ficha-empresa">
+      <h2 class="titulo-seccion">La organización evaluada</h2>
+      <dl>
+        <div><dt>Organización</dt><dd>{EMPRESA.nombre} <span class="ficticia">ficticia</span></dd></div>
+        <div><dt>Actividad</dt><dd>{EMPRESA.rubro}</dd></div>
+        <div><dt>Dotación</dt><dd>{EMPRESA.dotacion} personas · {EMPRESA.sitio}</dd></div>
+        <div><dt>Alcance declarado</dt><dd>{EMPRESA.alcance}</dd></div>
+        <div><dt>Por qué certifica</dt><dd>{EMPRESA.motivo}</dd></div>
+        <div><dt>Fecha de corte</dt><dd>{corte}</dd></div>
+      </dl>
+    </section>
+
+    <section class="tablero">
+      <h2 class="titulo-seccion">Estado por norma</h2>
+      <div class="normas">
+        {resumenes.map((r) => (
+          <article class="norma" data-tono={NORMAS[r.norma].tono}>
+            <header>
+              <h3>{NORMAS[r.norma].sigla}</h3>
+              <p>{NORMAS[r.norma].nombre}</p>
+            </header>
+            <p class="avance"><span>{r.avance}</span>%</p>
+            <div class="barra" role="img" aria-label={`Avance ${r.avance} por ciento`}>
+              <div class="relleno" style={`width:${r.avance}%`}></div>
+            </div>
+            <ul class="desglose">
+              <li><b>{r.cubierto}</b> cubiertos</li>
+              <li><b>{r.parcial}</b> parciales</li>
+              <li class="malo"><b>{r.vencido}</b> vencidos</li>
+              <li class="malo"><b>{r.sin_cubrir}</b> sin cubrir</li>
+            </ul>
+            <p class="pie">sobre {r.total} requisitos auditables</p>
+          </article>
+        ))}
+      </div>
+
+      {/*
+        Es la aclaración más importante de la página y por eso no está en
+        letra chica. Un 78% suena a "casi certificamos" y es exactamente al
+        revés: para la norma no hay parciales.
+      */}
+      <p class="nota-avance">
+        Ese porcentaje es <strong>avance de implementación, no cumplimiento</strong>. Para el
+        certificador no existe el 78%: un requisito no conforme es un hallazgo, y alcanza uno
+        mayor para no certificar. El número sirve para saber cuánto falta, no para tranquilizar
+        a nadie.
+      </p>
+    </section>
+
+    <section class="plan">
+      <h2 class="titulo-seccion">Plan de auditoría interna</h2>
+      <p class="intro">
+        Los {hallazgos.length} requisitos que no están cubiertos, en el orden en que conviene
+        auditarlos: primero lo que se dejó vencer — que el sistema haya existido y se haya caído
+        se mira peor que no haberlo tenido nunca — después lo que nunca estuvo, y al final lo que
+        está a medias.
+      </p>
+
+      <div class="filtros" data-filtros>
+        <fieldset>
+          <legend>Norma</legend>
+          <button type="button" data-f="norma" data-v="todas" class="activo">Todas</button>
+          {claves.map((n) => <button type="button" data-f="norma" data-v={n}>{NORMAS[n].sigla}</button>)}
+        </fieldset>
+        <fieldset>
+          <legend>Estado</legend>
+          <button type="button" data-f="estado" data-v="todos" class="activo">Todos</button>
+          <button type="button" data-f="estado" data-v="vencido">Vencidos</button>
+          <button type="button" data-f="estado" data-v="sin_cubrir">Sin cubrir</button>
+          <button type="button" data-f="estado" data-v="parcial">Parciales</button>
+        </fieldset>
+        <p class="contador" data-contador>{hallazgos.length} de {hallazgos.length}</p>
+      </div>
+
+      <ol class="hallazgos" data-lista>
+        {hallazgos.map((c) => (
+          <li
+            class="hallazgo"
+            data-estado={c.estado}
+            data-normas={c.requisito.normas.join(' ')}
+          >
+            <header>
+              <span class="clausula">{c.requisito.clausula}</span>
+              <h3>{c.requisito.titulo}</h3>
+              <span class={`chip ${c.estado}`}>{ETIQUETA[c.estado]}</span>
+            </header>
+
+            <p class="motivo">{c.motivo}</p>
+
+            <p class="aplica">
+              {c.requisito.tronco ? (
+                <span class="tronco-tag">Tronco común · aplica a las tres normas</span>
+              ) : (
+                c.requisito.normas.map((n) => <span class="norma-tag" data-tono={NORMAS[n].tono}>{NORMAS[n].sigla}</span>)
+              )}
+            </p>
+
+            {c.faltan.length > 0 && (
+              <div class="falta">
+                <h4>Qué hay que conseguir</h4>
+                <ul>
+                  {c.requisito.evidencias
+                    .filter((e) => c.faltan.includes(e.clave))
+                    .map((e) => (
+                      <li>
+                        <span class={`tipo ${e.tipo}`}>{e.tipo}</span>
+                        {e.descripcion}
+                        {e.vigenciaMeses && <em> · se renueva cada {e.vigenciaMeses} meses</em>}
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )}
+
+            {c.caducas.length > 0 && (
+              <div class="caduca">
+                <h4>Evidencia cargada que ya no prueba</h4>
+                <ul>
+                  {c.caducas.map((e) => (
+                    <li>
+                      {e.titulo} <span class="fecha">{e.fecha}</span>
+                      <span class="dueno">{e.proceso} · {e.responsable}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <details>
+              <summary>Preguntas para la auditoría ({c.requisito.preguntas.length})</summary>
+              <ul class="preguntas">
+                {c.requisito.preguntas.map((p) => <li>{p}</li>)}
+              </ul>
+            </details>
+          </li>
+        ))}
+      </ol>
+
+      <p class="vacio" data-vacio hidden>Ningún hallazgo con esos filtros.</p>
+    </section>
+
+    <section class="matriz">
+      <h2 class="titulo-seccion">Matriz completa</h2>
+      <p class="intro">
+        Los {requisitos.length} requisitos auditables. {tronco} son del tronco común que comparten
+        las tres normas: por eso la trinorma completa cuesta {requisitos.length} y no los ~
+        {requisitos.length + tronco * 2} que costaría escribirla tres veces.
+      </p>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Cláusula</th>
+              <th scope="col">Requisito</th>
+              <th scope="col">Normas</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Por qué</th>
+            </tr>
+          </thead>
+          <tbody>
+            {coberturas.map((c) => (
+              <tr data-estado={c.estado}>
+                <td class="mono">{c.requisito.clausula}</td>
+                <td>{c.requisito.titulo}</td>
+                <td class="mono chico">
+                  {c.requisito.tronco ? 'las tres' : c.requisito.normas.map((n) => NORMAS[n].sigla).join(', ')}
+                </td>
+                <td><span class={`chip ${c.estado}`}>{ETIQUETA[c.estado]}</span></td>
+                <td class="chico">{c.motivo}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="como">
+      <h2 class="titulo-seccion">Cómo está hecho</h2>
+      <div class="columnas">
+        <article>
+          <h3>El motor no opina</h3>
+          <p>
+            <code>evaluar()</code> es una función pura: mismos argumentos, mismo resultado. Recibe
+            un requisito, la evidencia cargada y una fecha, y devuelve el estado junto con el
+            motivo y las evidencias que lo sostienen. La batería de tests corre con el runner de
+            Node, sin dependencias: <code>npm test</code>.
+          </p>
+        </article>
+        <article>
+          <h3>Documento y registro no son lo mismo</h3>
+          <p>
+            Un documento dice cómo se hace algo. Un registro prueba que se hizo, tiene fecha y
+            caduca. Confundirlos es el error que más no conformidades genera: acá {caducas} de las
+            {' '}{evidencias.length} evidencias de la demo tienen más de un año, y el motor las
+            trata como lo que son.
+          </p>
+        </article>
+        <article>
+          <h3>Vencido ≠ sin cubrir</h3>
+          <p>
+            Son dos hallazgos distintos y el sistema los separa. Que nunca hayas tenido un
+            procedimiento es una cosa; que lo hayas tenido y lo hayas dejado morir habla del
+            sistema entero, y el auditor lo lee así.
+          </p>
+        </article>
+        <article>
+          <h3>El tronco se escribe una vez</h3>
+          <p>
+            Las tres normas comparten la estructura de alto nivel. Modelando ese tronco una sola
+            vez, {tronco} de los {requisitos.length} requisitos cubren las tres a la vez. Es lo que
+            hace sostenible arrancar con la trinorma completa en lugar de ir de a una norma.
+          </p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    /*
+     * Filtrado. Todo el contenido ya está en el HTML: esto sólo esconde.
+     * Con el JS apagado se ve la lista completa, que es el estado correcto.
+     */
+    const caja = document.querySelector('[data-filtros]');
+    const lista = document.querySelector('[data-lista]');
+    const contador = document.querySelector('[data-contador]');
+    const vacio = document.querySelector('[data-vacio]');
+
+    if (caja && lista && contador && vacio) {
+      const estado = { norma: 'todas', estado: 'todos' };
+      const items = Array.from(lista.querySelectorAll<HTMLElement>('.hallazgo'));
+
+      const aplicar = () => {
+        let visibles = 0;
+        for (const li of items) {
+          const normas = (li.dataset.normas ?? '').split(' ');
+          const ok =
+            (estado.norma === 'todas' || normas.includes(estado.norma)) &&
+            (estado.estado === 'todos' || li.dataset.estado === estado.estado);
+          li.hidden = !ok;
+          if (ok) visibles++;
+        }
+        contador.textContent = `${visibles} de ${items.length}`;
+        (vacio as HTMLElement).hidden = visibles > 0;
+      };
+
+      caja.addEventListener('click', (ev) => {
+        const boton = (ev.target as HTMLElement).closest<HTMLButtonElement>('button[data-f]');
+        if (!boton) return;
+        const campo = boton.dataset.f as 'norma' | 'estado';
+        estado[campo] = boton.dataset.v!;
+        for (const otro of caja.querySelectorAll(`button[data-f="${campo}"]`)) {
+          otro.classList.toggle('activo', otro === boton);
+        }
+        aplicar();
+      });
+    }
+  </script>
+
+  <style>
+    .volver {
+      display: inline-block;
+      margin-bottom: 2.5rem;
+      font-size: 0.82rem;
+      color: var(--color-tenue);
+      text-decoration: none;
+    }
+    .volver:hover { color: var(--color-acento); }
+
+    .cabecera { margin-bottom: 3rem; }
+    .rotulo {
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-acento);
+      margin-bottom: 0.9rem;
+    }
+    .cabecera h1 {
+      font-size: clamp(1.9rem, 4.4vw, 3rem);
+      line-height: 1.1;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .tri { color: var(--color-tenue); font-weight: 400; }
+    .bajada {
+      margin-top: 1.4rem;
+      max-width: 46rem;
+      color: color-mix(in srgb, var(--color-texto) 88%, transparent);
+      line-height: 1.65;
+    }
+
+    .aviso {
+      border: 1px solid var(--color-borde);
+      border-left: 3px solid var(--color-acento);
+      background: var(--color-panel);
+      padding: 1.5rem 1.6rem;
+      margin-bottom: 3.5rem;
+      border-radius: 3px;
+    }
+    .aviso h2 {
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--color-acento);
+      margin-bottom: 1rem;
+    }
+    .aviso ul { display: grid; gap: 0.85rem; }
+    .aviso li {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--color-tenue);
+      padding-left: 1rem;
+      border-left: 1px solid var(--color-borde);
+    }
+    .aviso strong { color: var(--color-texto); font-weight: 600; }
+
+    .titulo-seccion {
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--color-tenue);
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid var(--color-borde);
+      margin-bottom: 1.6rem;
+    }
+    section { margin-bottom: 4rem; }
+    .intro {
+      color: var(--color-tenue);
+      font-size: 0.92rem;
+      line-height: 1.65;
+      max-width: 46rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .ficha-empresa dl { display: grid; gap: 0; }
+    .ficha-empresa dl > div {
+      display: grid;
+      grid-template-columns: minmax(8rem, 12rem) 1fr;
+      gap: 1rem;
+      padding: 0.72rem 0;
+      border-bottom: 1px solid var(--color-borde);
+      font-size: 0.9rem;
+    }
+    .ficha-empresa dt { color: var(--color-tenue); }
+    .ficha-empresa dd { color: var(--color-texto); }
+    .ficticia {
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-acento);
+      border: 1px solid var(--color-acento-tenue);
+      background: var(--color-acento-tenue);
+      padding: 0.1rem 0.42rem;
+      border-radius: 2px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .normas {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+      gap: 1rem;
+    }
+    .norma {
+      --c: var(--color-datos);
+      border: 1px solid var(--color-borde);
+      background: var(--color-panel);
+      padding: 1.3rem;
+      border-radius: 3px;
+      border-top: 2px solid var(--c);
+    }
+    .norma[data-tono='herramienta'] { --c: var(--color-herramienta); }
+    .norma[data-tono='acento'] { --c: var(--color-acento); }
+    .norma h3 { font-size: 1rem; font-weight: 600; }
+    .norma header p { font-size: 0.78rem; color: var(--color-tenue); }
+    .avance {
+      font-size: 2.7rem;
+      font-weight: 300;
+      line-height: 1;
+      margin: 1rem 0 0.6rem;
+      color: var(--c);
+      letter-spacing: -0.03em;
+    }
+    .avance span { font-weight: 500; }
+    .barra {
+      height: 4px;
+      background: var(--color-panel-alto);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    .relleno { height: 100%; background: var(--c); }
+    .desglose {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.35rem 0.8rem;
+      font-size: 0.76rem;
+      color: var(--color-tenue);
+    }
+    .desglose b { color: var(--color-texto); font-weight: 600; }
+    .desglose .malo b { color: var(--color-acento); }
+    .pie {
+      margin-top: 0.9rem;
+      font-size: 0.7rem;
+      color: var(--color-tenue);
+      opacity: 0.75;
+    }
+    .nota-avance {
+      margin-top: 1.4rem;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--color-tenue);
+      border-left: 2px solid var(--color-acento);
+      padding-left: 1rem;
+      max-width: 46rem;
+    }
+    .nota-avance strong { color: var(--color-texto); }
+
+    .filtros {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.4rem;
+      align-items: flex-end;
+      padding-bottom: 1.3rem;
+      margin-bottom: 1.6rem;
+      border-bottom: 1px solid var(--color-borde);
+    }
+    .filtros fieldset { border: 0; }
+    .filtros legend {
+      font-size: 0.64rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-tenue);
+      margin-bottom: 0.5rem;
+    }
+    .filtros button {
+      font: inherit;
+      font-size: 0.75rem;
+      background: transparent;
+      color: var(--color-tenue);
+      border: 1px solid var(--color-borde);
+      padding: 0.28rem 0.7rem;
+      margin-right: 0.3rem;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+    .filtros button:hover { border-color: var(--color-borde-vivo); color: var(--color-texto); }
+    .filtros button.activo {
+      color: var(--color-fondo);
+      background: var(--color-texto);
+      border-color: var(--color-texto);
+    }
+    .contador {
+      margin-left: auto;
+      font-size: 0.72rem;
+      color: var(--color-tenue);
+    }
+    /* Sin JS no hay filtros posibles, así que no se muestran botones muertos. */
+    html:not(.js-on) .filtros { display: none; }
+
+    .hallazgos { display: grid; gap: 0.8rem; list-style: none; }
+    .hallazgo {
+      border: 1px solid var(--color-borde);
+      border-left: 3px solid var(--color-borde-vivo);
+      background: var(--color-panel);
+      padding: 1.1rem 1.25rem;
+      border-radius: 3px;
+    }
+    .hallazgo[data-estado='vencido'] { border-left-color: var(--color-acento); }
+    .hallazgo[data-estado='sin_cubrir'] { border-left-color: var(--color-gestion); }
+    .hallazgo[data-estado='parcial'] { border-left-color: var(--color-ruta); }
+    .hallazgo > header {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.55rem;
+    }
+    .clausula {
+      font-size: 0.8rem;
+      color: var(--color-tenue);
+      font-variant-numeric: tabular-nums;
+      min-width: 3rem;
+    }
+    .hallazgo h3 { font-size: 0.98rem; font-weight: 600; flex: 1; }
+
+    .chip {
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.16rem 0.5rem;
+      border-radius: 2px;
+      border: 1px solid currentColor;
+      white-space: nowrap;
+    }
+    .chip.cubierto { color: var(--color-herramienta); }
+    .chip.parcial { color: var(--color-ruta); }
+    .chip.vencido { color: var(--color-acento); }
+    .chip.sin_cubrir { color: var(--color-gestion); }
+
+    .motivo { font-size: 0.85rem; color: var(--color-tenue); margin-bottom: 0.7rem; }
+
+    .aplica { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.9rem; }
+    .norma-tag, .tronco-tag {
+      font-size: 0.63rem;
+      letter-spacing: 0.06em;
+      padding: 0.14rem 0.45rem;
+      border-radius: 2px;
+      background: var(--color-panel-alto);
+      color: var(--color-tenue);
+    }
+    .norma-tag[data-tono='datos'] { color: var(--color-datos); }
+    .norma-tag[data-tono='herramienta'] { color: var(--color-herramienta); }
+    .norma-tag[data-tono='acento'] { color: var(--color-acento); }
+
+    .falta, .caduca { margin-bottom: 0.8rem; }
+    .falta h4, .caduca h4 {
+      font-size: 0.63rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-tenue);
+      margin-bottom: 0.45rem;
+    }
+    .falta ul, .caduca ul { display: grid; gap: 0.4rem; }
+    .falta li, .caduca li {
+      font-size: 0.84rem;
+      line-height: 1.5;
+      color: color-mix(in srgb, var(--color-texto) 80%, transparent);
+      padding-left: 0.85rem;
+      border-left: 1px solid var(--color-borde);
+    }
+    .falta em { color: var(--color-tenue); font-style: normal; font-size: 0.78rem; }
+    .tipo {
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.1rem 0.36rem;
+      border-radius: 2px;
+      margin-right: 0.45rem;
+      background: var(--color-panel-alto);
+      color: var(--color-tenue);
+    }
+    .tipo.registro { color: var(--color-acento); }
+    .caduca .fecha, .caduca .dueno {
+      font-size: 0.72rem;
+      color: var(--color-tenue);
+      margin-left: 0.5rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .caduca .dueno { opacity: 0.7; }
+
+    details summary {
+      font-size: 0.76rem;
+      color: var(--color-tenue);
+      cursor: pointer;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--color-borde);
+    }
+    details summary:hover { color: var(--color-acento); }
+    .preguntas { display: grid; gap: 0.5rem; margin-top: 0.75rem; }
+    .preguntas li {
+      font-size: 0.86rem;
+      line-height: 1.55;
+      color: color-mix(in srgb, var(--color-texto) 84%, transparent);
+      padding-left: 0.9rem;
+      border-left: 2px solid var(--color-acento-tenue);
+    }
+
+    .vacio { font-size: 0.88rem; color: var(--color-tenue); padding: 2rem 0; }
+
+    .scroll-x { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; min-width: 44rem; }
+    th {
+      text-align: left;
+      font-size: 0.64rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-tenue);
+      font-weight: 500;
+      padding: 0 0.7rem 0.6rem;
+      border-bottom: 1px solid var(--color-borde);
+    }
+    td { padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--color-borde); vertical-align: top; }
+    tr[data-estado='cubierto'] td { color: var(--color-tenue); }
+    .mono { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .chico { font-size: 0.76rem; color: var(--color-tenue); }
+
+    .columnas {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      gap: 1.6rem;
+    }
+    .columnas h3 {
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--color-texto);
+    }
+    .columnas p { font-size: 0.86rem; line-height: 1.62; color: var(--color-tenue); }
+    .columnas code {
+      font-size: 0.85em;
+      background: var(--color-panel-alto);
+      padding: 0.05rem 0.3rem;
+      border-radius: 2px;
+      color: var(--color-texto);
+    }
+
+    @media print {
+      .volver, .filtros, .aviso, .como { display: none; }
+      details { display: block; }
+      .hallazgo { break-inside: avoid; }
+    }
+  </style>
+</Base>
