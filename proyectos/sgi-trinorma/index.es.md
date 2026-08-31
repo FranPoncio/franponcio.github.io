@@ -17,6 +17,9 @@ kpis:
   - label: Motor
     valor: Determinístico
     nota: 'la IA redacta, no decide'
+  - label: Peso en el navegador
+    valor: '12 KB'
+    nota: 'el motor entero, comprimido'
 enlace:
   label: Ver la demostración
   url: https://franponcio.github.io/sgi/
@@ -134,6 +137,60 @@ Esto terminó jugando a favor. El valor de la herramienta nunca estuvo en el
 texto de la norma, que cualquiera compra por cien dólares. Está en saber qué
 preguntar y qué papel pedir, y eso no viene en la norma.
 
+## La máquina del tiempo
+
+Si hay una sola cosa para mirar en [la demo](/sgi/), es la barra que adelanta
+meses.
+
+Un sistema de gestión no se rompe de golpe: se vence. Nadie hace nada mal —
+simplemente pasa el tiempo y los registros dejan de probar el presente. La
+barra hace visible eso en tres segundos:
+
+| Al día de hoy | +6 meses | +12 meses |
+|---|---|---|
+| 78 / 69 / 68 % | 58 / 58 / 58 % | 40 / 40 / 37 % |
+
+Nadie tocó nada. Ninguna evidencia se borró. Sólo corrió el calendario.
+
+Ese es el argumento entero del proyecto, y es la razón por la que una
+auditoría interna anual llega siempre tarde: mide una vez por año un sistema
+que se degrada todos los días.
+
+De ahí sale la única alerta que un sistema puede dar y una auditoría
+tradicional no: **lo que está cubierto hoy y se cae en menos de tres meses**.
+Tres no es un número redondo elegido al azar — es lo que tarda en armarse de
+verdad una capacitación con evaluación de eficacia, una calibración externa o
+una revisión por la dirección con las áreas sentadas. Avisar con menos es
+avisar cuando ya no se puede hacer nada.
+
+## El motor corre en tu navegador
+
+En la demo también se puede apagar evidencia a mano. Destildás *Política
+integrada* y la cláusula 5.2 pasa de cubierta a parcial y el avance baja al
+instante.
+
+Eso no es una animación preparada: es el mismo `evaluar()` corriendo en el
+navegador. Se pudo mandar al cliente justamente por estar escrito como
+función pura — no consulta nada, no guarda nada, no necesita servidor. El
+motor completo, con el corpus de las tres normas y las plantillas, pesa 12 KB
+comprimido.
+
+Y como las plantillas de HTML son las mismas que usa el build, la página sin
+JavaScript y la interactiva no pueden decir cosas distintas. Si estuvieran
+escritas dos veces se irían separando de a poco, y nadie se daría cuenta
+porque casi nunca se miran las dos juntas.
+
+## Cómo se nombra el hallazgo
+
+El sistema propone clasificar cada hallazgo como **NC mayor**, **NC menor** u
+**observación**. Es una propuesta, no un veredicto: la norma no trae esa
+tabla, la decide el auditor mirando impacto y alcance. Lo que hace el sistema
+es que el auditor arranque de algo y lo corrija, en vez de arrancar de una
+hoja en blanco.
+
+La observación quedó reservada para lo que todavía no falló — lo cubierto que
+está por vencer — que es lo único de los tres que se puede detectar solo.
+
 ## La demostración
 
 [La demo](/sgi/) evalúa el corpus contra **Metalúrgica del Suquía S.A.**, una
@@ -158,11 +215,10 @@ que aparecen en cualquier PyME que integra tarde:
   Confundir una cosa con la otra es el error más frecuente en ambiente y en
   seguridad, y son dos requisitos separados.
 
-Todo se calcula en tiempo de compilación: no hay servidor, no hay clave de
-ningún modelo en el navegador. Como el motor es una función pura sobre datos
-conocidos, el resultado se puede resolver antes de servir la página. Los
-filtros sólo esconden lo que ya está en el HTML, así que con JavaScript
-apagado se ve la lista completa.
+La página arranca resuelta en tiempo de compilación —sin JavaScript se ve la
+foto de hoy, entera y usable— y cuando el script carga, el mismo motor toma el
+control y la vuelve interactiva. No hay servidor y no hay clave de ningún
+modelo en el navegador.
 
 ## El porcentaje que no hay que malinterpretar
 
@@ -182,9 +238,9 @@ es cumplir en un 90%, es no cumplir.
 
 Lo escribo como pendiente y no como característica, que es lo que es:
 
-- **Cargar evidencia propia.** Hoy la evidencia es la de la empresa de
-  demostración. Que una organización cargue la suya necesita un backend y
-  autenticación, y eso ya no es un portfolio.
+- **Cargar evidencia propia.** Hoy se puede apagar y prender la evidencia de
+  la empresa de demostración, pero no cargar la tuya: eso necesita un backend
+  y autenticación, y eso ya no es un portfolio.
 - **El informe redactado.** El plan de auditoría sale del motor; falta la capa
   que lo convierta en el documento que se firma y se entrega.
 - **No conformidades y acciones correctivas.** Hoy el sistema detecta el

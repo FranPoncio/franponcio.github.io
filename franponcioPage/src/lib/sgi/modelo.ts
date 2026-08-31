@@ -96,6 +96,18 @@ export interface Evidencia {
 
 export type Estado = 'cubierto' | 'parcial' | 'vencido' | 'sin_cubrir';
 
+/**
+ * Cómo se nombra el hallazgo en el informe.
+ *
+ * ES UNA PROPUESTA, NO UN VEREDICTO. La norma no trae una tabla que diga
+ * "esto es mayor y esto es menor": lo decide el auditor mirando el impacto y
+ * si la falla es aislada o sistémica. Lo que hace el sistema es proponer una
+ * clasificación coherente para que el auditor arranque de algo y la corrija,
+ * en vez de arrancar de una hoja en blanco. En la pantalla se muestra
+ * diciendo eso mismo.
+ */
+export type Clase = 'mayor' | 'menor' | 'observacion';
+
 export interface Cobertura {
   requisito: Requisito;
   estado: Estado;
@@ -107,6 +119,20 @@ export interface Cobertura {
   faltan: string[];
   /** Explicación en una línea. Es lo que se le muestra al auditor. */
   motivo: string;
+  /**
+   * Meses que faltan para que se caiga la primera evidencia que hoy sostiene
+   * este requisito. `undefined` si no hay nada que caduque (o si ya se cayó).
+   *
+   * Este número es la razón de ser del sistema. Un requisito cubierto hoy y
+   * vencido en seis semanas está, para efectos prácticos, ya perdido: nadie
+   * arma una capacitación en seis semanas mientras corre una auditoría. Verlo
+   * antes es la diferencia entre planificar y apagar un incendio.
+   */
+  mesesAlVencimiento?: number;
+  /** Cubierto, pero con algo cayéndose dentro del horizonte de aviso. */
+  porVencer: boolean;
+  /** Clasificación propuesta. `undefined` si el requisito está cubierto. */
+  clase?: Clase;
 }
 
 const MES = 30.436875 * 24 * 60 * 60 * 1000;
@@ -127,6 +153,33 @@ export function antiguedadMeses(fecha: string, hoy: Date): number {
 export function vigente(ev: Evidencia, req: RequisitoEvidencia, hoy: Date): boolean {
   if (req.vigenciaMeses === undefined) return true;
   return antiguedadMeses(ev.fecha, hoy) <= req.vigenciaMeses;
+}
+
+/**
+ * Cuántos meses antes se avisa que algo se va a caer.
+ *
+ * Tres no es un número redondo elegido al azar: es lo que tarda en armarse
+ * de verdad una capacitación con evaluación de eficacia, una calibración
+ * externa o una revisión por la dirección con las áreas sentadas. Avisar con
+ * menos es avisar cuando ya no se puede hacer nada.
+ */
+export const AVISO_MESES = 3;
+
+/**
+ * Clasificación PROPUESTA del hallazgo. La decide el auditor; esto sugiere.
+ *
+ *   sin_cubrir → mayor       el requisito no está implementado, punto.
+ *   vencido    → menor       existió y se dejó caer: falla de sostenimiento.
+ *   parcial    → menor       está implementado a medias.
+ *
+ * La observación queda para lo que todavía no falló: lo cubierto que está por
+ * vencer. Es la única de las tres que un sistema puede detectar sola y que
+ * una auditoría tradicional, hecha una vez al año, se pierde siempre.
+ */
+export function clasificar(estado: Estado): Clase | undefined {
+  if (estado === 'sin_cubrir') return 'mayor';
+  if (estado === 'vencido' || estado === 'parcial') return 'menor';
+  return undefined;
 }
 
 /**
@@ -180,7 +233,38 @@ export function evaluar(req: Requisito, evidencias: Evidencia[], hoy: Date): Cob
     motivo = `${cubiertas} de ${total} evidencias vigentes. Falta: ${faltan.join(', ')}.`;
   }
 
-  return { requisito: req, estado, aportan, caducas, faltan, motivo };
+  /*
+   * De todo lo que hoy sostiene este requisito, ¿qué se cae primero?
+   * Interesa el MÍNIMO: el requisito se desarma en cuanto falta una sola de
+   * las evidencias que pide, así que la más próxima a caducar manda.
+   */
+  let mesesAlVencimiento: number | undefined;
+  for (const pedida of req.evidencias) {
+    if (pedida.vigenciaMeses === undefined) continue;
+    const aportando = aportan[pedida.clave];
+    if (!aportando?.length) continue;
+    // Dentro de una misma clave alcanza con la más nueva: es la que aguanta.
+    const restante = Math.max(
+      ...aportando.map((e) => pedida.vigenciaMeses! - antiguedadMeses(e.fecha, hoy)),
+    );
+    if (mesesAlVencimiento === undefined || restante < mesesAlVencimiento) {
+      mesesAlVencimiento = restante;
+    }
+  }
+
+  const porVencer = estado === 'cubierto' && mesesAlVencimiento !== undefined && mesesAlVencimiento <= AVISO_MESES;
+
+  return {
+    requisito: req,
+    estado,
+    aportan,
+    caducas,
+    faltan,
+    motivo,
+    mesesAlVencimiento,
+    porVencer,
+    clase: clasificar(estado),
+  };
 }
 
 export interface Resumen {
@@ -190,6 +274,8 @@ export interface Resumen {
   parcial: number;
   vencido: number;
   sin_cubrir: number;
+  /** Cubiertos hoy, pero con algo cayéndose dentro del horizonte de aviso. */
+  por_vencer: number;
   /** Avance del proyecto de implementación, NO cumplimiento de la norma. */
   avance: number;
 }
@@ -213,6 +299,7 @@ export function resumir(coberturas: Cobertura[], norma: Norma): Resumen {
     parcial,
     vencido: contar('vencido'),
     sin_cubrir: contar('sin_cubrir'),
+    por_vencer: propias.filter((c) => c.porVencer).length,
     avance: total === 0 ? 0 : Math.round(((cubierto + parcial * 0.5) / total) * 100),
   };
 }
