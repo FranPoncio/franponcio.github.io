@@ -2,24 +2,33 @@
 /**
  * SGI TRINORMA — la demostración.
  *
- * Todo se calcula en tiempo de compilación. No hay fetch, no hay API, no hay
- * clave de ningún modelo en el navegador: se evalúa el corpus contra la
- * empresa de demostración y se imprime el resultado. El JavaScript del final
- * sólo filtra lo que ya está en el HTML, así que la página funciona entera
- * con el JS apagado.
+ * La página arranca resuelta en tiempo de compilación —sin JavaScript se ve
+ * la foto de hoy, entera y usable— y cuando el script carga, el mismo motor
+ * corre en el navegador y la vuelve interactiva.
  *
- * Que sea estático no es una limitación disimulada: el motor es una función
- * pura, y una función pura sobre datos conocidos se puede resolver antes de
- * servir la página. La parte que necesitaría un servidor —cargar TUS
- * evidencias— es justamente la que no corresponde poner en un portfolio.
+ * Que el motor se pueda mandar al cliente no es un truco: es consecuencia de
+ * haberlo escrito como función pura. No consulta nada, no guarda nada, no
+ * necesita servidor. Son unos kilobytes y adentro está toda la lógica.
+ *
+ * Las dos cosas que se pueden tocar existen para mostrar la misma idea desde
+ * dos lados:
+ *
+ *   La máquina del tiempo — adelantás meses y los registros se van venciendo
+ *   solos. El 78% se desmorona hasta 40% en un año sin que nadie haga nada
+ *   mal: simplemente pasa el tiempo. Ese es el argumento entero del proyecto.
+ *
+ *   Los interruptores de evidencia — apagás el acta de revisión por la
+ *   dirección y la cláusula 9.3 se cae al instante. Es lo que convierte la
+ *   página de "un informe sobre un sistema" en el sistema.
  */
 import Base from '../../layouts/Base.astro';
 import Nav from '../../components/Nav.astro';
 import { conBase } from '../../lib/url';
 import { requisitos } from '../../lib/sgi/normas';
 import { evidenciasDemo, EMPRESA } from '../../lib/sgi/demo';
-import { evaluar, resumir, ordenarHallazgos, NORMAS, antiguedadMeses } from '../../lib/sgi/modelo';
-import type { Norma, Estado } from '../../lib/sgi/modelo';
+import { evaluar, resumir, ordenarHallazgos, NORMAS, AVISO_MESES } from '../../lib/sgi/modelo';
+import { tarjetaNorma, tarjetaHallazgo, filaMatriz } from '../../lib/sgi/vista';
+import type { Norma } from '../../lib/sgi/modelo';
 
 const hoy = new Date();
 const evidencias = evidenciasDemo(hoy);
@@ -31,21 +40,28 @@ const resumenes = claves.map((n) => resumir(coberturas, n));
 
 const corte = hoy.toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' });
 
-const ETIQUETA: Record<Estado, string> = {
-  cubierto: 'Cubierto',
-  parcial: 'Parcial',
-  vencido: 'Vencido',
-  sin_cubrir: 'Sin cubrir',
-};
-
 const tronco = requisitos.filter((r) => r.tronco).length;
+const propias = claves.map((n) => ({
+  norma: n,
+  propios: requisitos.filter((r) => !r.tronco && r.normas.includes(n)).length,
+}));
 const totalPreguntas = requisitos.reduce((a, r) => a + r.preguntas.length, 0);
-const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).length;
+
+/*
+ * Se emiten las 45 tarjetas, no sólo los 22 hallazgos de hoy. Con la máquina
+ * del tiempo corrida, un requisito hoy cubierto puede pasar a vencido, y si
+ * su tarjeta no estuviera en el HTML habría que fabricarla en el navegador.
+ * Están todas y el script sólo decide cuáles se ven.
+ */
+const orden = new Map(hallazgos.map((c, i) => [c.requisito.id, i]));
+const todasLasTarjetas = [...coberturas].sort(
+  (a, b) => (orden.get(a.requisito.id) ?? 999) - (orden.get(b.requisito.id) ?? 999),
+);
 ---
 
 <Base
   titulo="SGI Trinorma · Francisco Poncio"
-  descripcion="Demostración de un sistema que calcula la cobertura de ISO 9001, 14001 y 45001 sobre la evidencia real de una organización y arma el plan de auditoría interna."
+  descripcion="Demostración interactiva: calcula la cobertura de ISO 9001, 14001 y 45001 sobre la evidencia de una organización, y muestra cómo se cae sola con el paso del tiempo."
   lang="es"
   alterna="/sgi/"
 >
@@ -62,6 +78,9 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
         funciona, y si esa evidencia todavía prueba algo. Esto calcula exactamente eso —
         requisito por requisito, con la cuenta a la vista — y arma el plan de auditoría interna
         a partir del resultado.
+      </p>
+      <p class="bajada invitacion">
+        Movés la barra de abajo y lo ves caerse solo. Nadie hace nada mal: pasa el tiempo.
       </p>
     </header>
 
@@ -85,11 +104,45 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
         </li>
         <li>
           <strong>El cálculo no lo hace un modelo de lenguaje.</strong> Es una función pura y
-          testeada: cada estado de esta página viene con el motivo que lo produjo. La IA sirve
+          testeada, y es la misma que corre en tu navegador cuando movés la barra. La IA sirve
           para redactar el informe sobre este resultado, no para decidirlo.
         </li>
       </ul>
     </aside>
+
+    {/* ───────────────────────── LA CONSOLA ───────────────────────── */}
+    <section class="consola" data-consola>
+      <h2 class="titulo-seccion">La máquina del tiempo</h2>
+      <p class="intro">
+        Un sistema de gestión no se rompe de golpe: se vence. Corré la barra y mirá qué queda
+        del sistema dentro de un año si nadie renueva nada.
+      </p>
+
+      <div class="mando">
+        <label for="tiempo">Adelantar</label>
+        <input type="range" id="tiempo" min="0" max="24" step="1" value="0" data-tiempo />
+        <output data-salida>hoy</output>
+      </div>
+      <p class="corte">Evaluando al <strong data-fecha>{corte}</strong></p>
+
+      <details class="evidencia">
+        <summary>Apagar evidencia a mano ({evidencias.length} cargadas)</summary>
+        <p class="ayuda">
+          Destildá una y mirá qué requisitos se caen. Es la forma más rápida de ver que el
+          resultado sale de un cálculo y no de una tabla escrita a mano.
+        </p>
+        <div class="lista-evidencia">
+          {evidencias.map((e) => (
+            <label class="item">
+              <input type="checkbox" checked data-ev={e.id} />
+              <span class="tit">{e.titulo}</span>
+              <span class="meta">{e.proceso} · <span class="f">{e.fecha}</span></span>
+            </label>
+          ))}
+        </div>
+        <button type="button" data-reset>Volver al estado original</button>
+      </details>
+    </section>
 
     <section class="ficha-empresa">
       <h2 class="titulo-seccion">La organización evaluada</h2>
@@ -99,32 +152,13 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
         <div><dt>Dotación</dt><dd>{EMPRESA.dotacion} personas · {EMPRESA.sitio}</dd></div>
         <div><dt>Alcance declarado</dt><dd>{EMPRESA.alcance}</dd></div>
         <div><dt>Por qué certifica</dt><dd>{EMPRESA.motivo}</dd></div>
-        <div><dt>Fecha de corte</dt><dd>{corte}</dd></div>
       </dl>
     </section>
 
     <section class="tablero">
       <h2 class="titulo-seccion">Estado por norma</h2>
-      <div class="normas">
-        {resumenes.map((r) => (
-          <article class="norma" data-tono={NORMAS[r.norma].tono}>
-            <header>
-              <h3>{NORMAS[r.norma].sigla}</h3>
-              <p>{NORMAS[r.norma].nombre}</p>
-            </header>
-            <p class="avance"><span>{r.avance}</span>%</p>
-            <div class="barra" role="img" aria-label={`Avance ${r.avance} por ciento`}>
-              <div class="relleno" style={`width:${r.avance}%`}></div>
-            </div>
-            <ul class="desglose">
-              <li><b>{r.cubierto}</b> cubiertos</li>
-              <li><b>{r.parcial}</b> parciales</li>
-              <li class="malo"><b>{r.vencido}</b> vencidos</li>
-              <li class="malo"><b>{r.sin_cubrir}</b> sin cubrir</li>
-            </ul>
-            <p class="pie">sobre {r.total} requisitos auditables</p>
-          </article>
-        ))}
+      <div class="normas" data-normas>
+        <Fragment set:html={resumenes.map(tarjetaNorma).join('')} />
       </div>
 
       {/*
@@ -140,13 +174,51 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
       </p>
     </section>
 
+    {/* ───────────────────── EL TRONCO COMPARTIDO ───────────────────── */}
+    <section class="arbol">
+      <h2 class="titulo-seccion">Por qué las tres normas juntas no cuestan el triple</h2>
+      <p class="intro">
+        Las tres comparten la estructura de alto nivel: capítulos 4 a 10, con los mismos títulos
+        y la misma lógica. ISO las armó así justamente para que se puedan integrar. Ese tronco se
+        modela una sola vez.
+      </p>
+      <div class="diagrama">
+        <div class="tronco-barra">
+          <span class="n">{tronco}</span>
+          <span class="t">requisitos de tronco común</span>
+          <span class="s">contexto · liderazgo · riesgos · competencia · documentación · auditoría · mejora</span>
+        </div>
+        <div class="ramas">
+          {propias.map((p) => (
+            <div class="rama" data-tono={NORMAS[p.norma].tono}>
+              <span class="palo"></span>
+              <span class="n">{p.propios}</span>
+              <span class="t">propios de {NORMAS[p.norma].sigla}</span>
+            </div>
+          ))}
+        </div>
+        <p class="cuenta">
+          <strong>{tronco} + {propias.map((p) => p.propios).join(' + ')} = {requisitos.length} requisitos</strong>{' '}
+          para las tres normas, en lugar de los {requisitos.length + tronco * 2} que costaría
+          escribirlas por separado. Y no es sólo volumen: con tres corpus paralelos, a la tercera
+          corrección de redacción uno se queda atrás y nadie se entera.
+        </p>
+      </div>
+    </section>
+
+    {/* ─────────────────── PLAN DE AUDITORÍA INTERNA ─────────────────── */}
     <section class="plan">
       <h2 class="titulo-seccion">Plan de auditoría interna</h2>
       <p class="intro">
-        Los {hallazgos.length} requisitos que no están cubiertos, en el orden en que conviene
-        auditarlos: primero lo que se dejó vencer — que el sistema haya existido y se haya caído
-        se mira peor que no haberlo tenido nunca — después lo que nunca estuvo, y al final lo que
-        está a medias.
+        Los requisitos que no están cubiertos, en el orden en que conviene auditarlos: primero lo
+        que se dejó vencer — que el sistema haya existido y se haya caído se mira peor que no
+        haberlo tenido nunca — después lo que nunca estuvo, y al final lo que está a medias.
+      </p>
+      <p class="intro sutil">
+        La clasificación en <em>NC mayor</em>, <em>NC menor</em> y <em>observación</em> es una
+        propuesta, no un veredicto: la norma no trae esa tabla, la decide el auditor mirando
+        impacto y alcance. El sistema propone para que arranque de algo y la corrija, no de una
+        hoja en blanco.
       </p>
 
       <div class="filtros" data-filtros>
@@ -157,88 +229,26 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
         </fieldset>
         <fieldset>
           <legend>Estado</legend>
-          <button type="button" data-f="estado" data-v="todos" class="activo">Todos</button>
+          <button type="button" data-f="estado" data-v="abiertos" class="activo">No cubiertos</button>
           <button type="button" data-f="estado" data-v="vencido">Vencidos</button>
           <button type="button" data-f="estado" data-v="sin_cubrir">Sin cubrir</button>
           <button type="button" data-f="estado" data-v="parcial">Parciales</button>
+          <button type="button" data-f="estado" data-v="por_vencer">Por vencer</button>
+          <button type="button" data-f="estado" data-v="todos">Todo</button>
         </fieldset>
-        <p class="contador" data-contador>{hallazgos.length} de {hallazgos.length}</p>
+        <p class="contador" data-contador>{hallazgos.length} de {requisitos.length}</p>
       </div>
 
       <ol class="hallazgos" data-lista>
-        {hallazgos.map((c) => (
-          <li
-            class="hallazgo"
-            data-estado={c.estado}
-            data-normas={c.requisito.normas.join(' ')}
-          >
-            <header>
-              <span class="clausula">{c.requisito.clausula}</span>
-              <h3>{c.requisito.titulo}</h3>
-              <span class={`chip ${c.estado}`}>{ETIQUETA[c.estado]}</span>
-            </header>
-
-            <p class="motivo">{c.motivo}</p>
-
-            <p class="aplica">
-              {c.requisito.tronco ? (
-                <span class="tronco-tag">Tronco común · aplica a las tres normas</span>
-              ) : (
-                c.requisito.normas.map((n) => <span class="norma-tag" data-tono={NORMAS[n].tono}>{NORMAS[n].sigla}</span>)
-              )}
-            </p>
-
-            {c.faltan.length > 0 && (
-              <div class="falta">
-                <h4>Qué hay que conseguir</h4>
-                <ul>
-                  {c.requisito.evidencias
-                    .filter((e) => c.faltan.includes(e.clave))
-                    .map((e) => (
-                      <li>
-                        <span class={`tipo ${e.tipo}`}>{e.tipo}</span>
-                        {e.descripcion}
-                        {e.vigenciaMeses && <em> · se renueva cada {e.vigenciaMeses} meses</em>}
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            )}
-
-            {c.caducas.length > 0 && (
-              <div class="caduca">
-                <h4>Evidencia cargada que ya no prueba</h4>
-                <ul>
-                  {c.caducas.map((e) => (
-                    <li>
-                      {e.titulo} <span class="fecha">{e.fecha}</span>
-                      <span class="dueno">{e.proceso} · {e.responsable}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <details>
-              <summary>Preguntas para la auditoría ({c.requisito.preguntas.length})</summary>
-              <ul class="preguntas">
-                {c.requisito.preguntas.map((p) => <li>{p}</li>)}
-              </ul>
-            </details>
-          </li>
-        ))}
+        <Fragment set:html={todasLasTarjetas.map(tarjetaHallazgo).join('')} />
       </ol>
 
-      <p class="vacio" data-vacio hidden>Ningún hallazgo con esos filtros.</p>
+      <p class="vacio" data-vacio hidden>Ningún requisito con esos filtros.</p>
     </section>
 
     <section class="matriz">
       <h2 class="titulo-seccion">Matriz completa</h2>
-      <p class="intro">
-        Los {requisitos.length} requisitos auditables. {tronco} son del tronco común que comparten
-        las tres normas: por eso la trinorma completa cuesta {requisitos.length} y no los ~
-        {requisitos.length + tronco * 2} que costaría escribirla tres veces.
-      </p>
+      <p class="intro">Los {requisitos.length} requisitos auditables, con la cuenta que produjo cada estado.</p>
       <div class="scroll-x">
         <table>
           <thead>
@@ -250,18 +260,8 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
               <th scope="col">Por qué</th>
             </tr>
           </thead>
-          <tbody>
-            {coberturas.map((c) => (
-              <tr data-estado={c.estado}>
-                <td class="mono">{c.requisito.clausula}</td>
-                <td>{c.requisito.titulo}</td>
-                <td class="mono chico">
-                  {c.requisito.tronco ? 'las tres' : c.requisito.normas.map((n) => NORMAS[n].sigla).join(', ')}
-                </td>
-                <td><span class={`chip ${c.estado}`}>{ETIQUETA[c.estado]}</span></td>
-                <td class="chico">{c.motivo}</td>
-              </tr>
-            ))}
+          <tbody data-matriz>
+            <Fragment set:html={coberturas.map(filaMatriz).join('')} />
           </tbody>
         </table>
       </div>
@@ -273,19 +273,20 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
         <article>
           <h3>El motor no opina</h3>
           <p>
-            <code>evaluar()</code> es una función pura: mismos argumentos, mismo resultado. Recibe
-            un requisito, la evidencia cargada y una fecha, y devuelve el estado junto con el
-            motivo y las evidencias que lo sostienen. La batería de tests corre con el runner de
-            Node, sin dependencias: <code>npm test</code>.
+            <code>evaluar()</code> es una función pura: mismos argumentos, mismo resultado.
+            Recibe un requisito, la evidencia cargada y una fecha, y devuelve el estado junto con
+            el motivo y las evidencias que lo sostienen. Por eso mismo puede correr en tu
+            navegador sin servidor: <code>npm test</code> corre la batería con el runner de Node,
+            sin dependencias.
           </p>
         </article>
         <article>
           <h3>Documento y registro no son lo mismo</h3>
           <p>
             Un documento dice cómo se hace algo. Un registro prueba que se hizo, tiene fecha y
-            caduca. Confundirlos es el error que más no conformidades genera: acá {caducas} de las
-            {' '}{evidencias.length} evidencias de la demo tienen más de un año, y el motor las
-            trata como lo que son.
+            caduca. Confundirlos es el error que más no conformidades genera, y es exactamente lo
+            que la máquina del tiempo deja ver: los documentos aguantan, los registros se caen
+            solos.
           </p>
         </article>
         <article>
@@ -297,11 +298,12 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
           </p>
         </article>
         <article>
-          <h3>El tronco se escribe una vez</h3>
+          <h3>Avisar {AVISO_MESES} meses antes</h3>
           <p>
-            Las tres normas comparten la estructura de alto nivel. Modelando ese tronco una sola
-            vez, {tronco} de los {requisitos.length} requisitos cubren las tres a la vez. Es lo que
-            hace sostenible arrancar con la trinorma completa en lugar de ir de a una norma.
+            Un requisito cubierto hoy y vencido en seis semanas está, en la práctica, perdido:
+            nadie arma una capacitación con evaluación de eficacia mientras corre una auditoría.
+            La alerta temprana es lo único de esta lista que una auditoría anual se pierde
+            siempre.
           </p>
         </article>
       </div>
@@ -310,42 +312,130 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
 
   <script>
     /*
-     * Filtrado. Todo el contenido ya está en el HTML: esto sólo esconde.
-     * Con el JS apagado se ve la lista completa, que es el estado correcto.
+     * EL MOTOR, DEL LADO DEL NAVEGADOR.
+     *
+     * Se importan exactamente los mismos módulos que usó el build. No hay una
+     * segunda implementación "para el cliente": es el mismo cálculo y las
+     * mismas plantillas, y por eso la página con JavaScript y sin él no pueden
+     * decir cosas distintas.
      */
-    const caja = document.querySelector('[data-filtros]');
-    const lista = document.querySelector('[data-lista]');
-    const contador = document.querySelector('[data-contador]');
-    const vacio = document.querySelector('[data-vacio]');
+    import { requisitos } from '../../lib/sgi/normas';
+    import { evidenciasDemo } from '../../lib/sgi/demo';
+    import { evaluar, resumir, ordenarHallazgos } from '../../lib/sgi/modelo';
+    import type { Norma } from '../../lib/sgi/modelo';
+    import { tarjetaNorma, tarjetaHallazgo, filaMatriz } from '../../lib/sgi/vista';
 
-    if (caja && lista && contador && vacio) {
-      const estado = { norma: 'todas', estado: 'todos' };
-      const items = Array.from(lista.querySelectorAll<HTMLElement>('.hallazgo'));
+    const $ = <T extends Element>(s: string) => document.querySelector<T>(s);
 
-      const aplicar = () => {
-        let visibles = 0;
-        for (const li of items) {
-          const normas = (li.dataset.normas ?? '').split(' ');
-          const ok =
-            (estado.norma === 'todas' || normas.includes(estado.norma)) &&
-            (estado.estado === 'todos' || li.dataset.estado === estado.estado);
-          li.hidden = !ok;
-          if (ok) visibles++;
-        }
-        contador.textContent = `${visibles} de ${items.length}`;
-        (vacio as HTMLElement).hidden = visibles > 0;
+    const consola = $('[data-consola]');
+    const cajaNormas = $('[data-normas]');
+    const lista = $<HTMLOListElement>('[data-lista]');
+    const matriz = $('[data-matriz]');
+    const contador = $('[data-contador]');
+    const vacio = $<HTMLElement>('[data-vacio]');
+    const salida = $('[data-salida]');
+    const fecha = $('[data-fecha]');
+    const barra = $<HTMLInputElement>('[data-tiempo]');
+    const filtros = $('[data-filtros]');
+
+    if (consola && cajaNormas && lista && matriz && contador && vacio && salida && fecha && barra && filtros) {
+      const HOY = new Date();
+      /** La base: la evidencia de la demo, con las fechas del build. */
+      const base = evidenciasDemo(HOY);
+      /** Las que el usuario apagó. Se guardan por id, no por índice. */
+      const apagadas = new Set<string>();
+      const filtro = { norma: 'todas', estado: 'abiertos' };
+      let adelanto = 0;
+
+      const fechaEvaluacion = () =>
+        new Date(Date.UTC(HOY.getUTCFullYear(), HOY.getUTCMonth() + adelanto, Math.min(HOY.getUTCDate(), 28)));
+
+      const visible = (estado: string, porVencer: boolean) => {
+        if (filtro.estado === 'todos') return true;
+        if (filtro.estado === 'abiertos') return estado !== 'cubierto';
+        if (filtro.estado === 'por_vencer') return porVencer;
+        return estado === filtro.estado;
       };
 
-      caja.addEventListener('click', (ev) => {
+      function pintar() {
+        const cuando = fechaEvaluacion();
+        const evidencias = base.filter((e) => !apagadas.has(e.id));
+        const coberturas = requisitos.map((r) => evaluar(r, evidencias, cuando));
+
+        // 1) Tablero.
+        cajaNormas!.innerHTML = (['9001', '14001', '45001'] as Norma[])
+          .map((n) => tarjetaNorma(resumir(coberturas, n)))
+          .join('');
+
+        // 2) Hallazgos, en el orden de auditoría y con lo cubierto al final.
+        const abiertos = ordenarHallazgos(coberturas);
+        const posicion = new Map(abiertos.map((c, i) => [c.requisito.id, i]));
+        const ordenadas = [...coberturas].sort(
+          (a, b) => (posicion.get(a.requisito.id) ?? 999) - (posicion.get(b.requisito.id) ?? 999),
+        );
+        lista!.innerHTML = ordenadas.map(tarjetaHallazgo).join('');
+
+        let vistos = 0;
+        for (const c of ordenadas) {
+          const li = lista!.querySelector<HTMLElement>(`[data-id="${CSS.escape(c.requisito.id)}"]`);
+          if (!li) continue;
+          const ok =
+            (filtro.norma === 'todas' || c.requisito.normas.includes(filtro.norma as Norma)) &&
+            visible(c.estado, c.porVencer);
+          li.hidden = !ok;
+          if (ok) vistos++;
+        }
+        contador!.textContent = `${vistos} de ${requisitos.length}`;
+        vacio!.hidden = vistos > 0;
+
+        // 3) Matriz.
+        matriz!.innerHTML = coberturas.map(filaMatriz).join('');
+
+        // 4) La fecha a la que se está mirando.
+        fecha!.textContent = cuando.toLocaleDateString('es-AR', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        });
+        salida!.textContent =
+          adelanto === 0 ? 'hoy' : adelanto === 1 ? '1 mes' : `${adelanto} meses`;
+      }
+
+      barra.addEventListener('input', () => {
+        adelanto = Number(barra.value);
+        pintar();
+      });
+
+      consola.addEventListener('change', (ev) => {
+        const casilla = (ev.target as HTMLElement).closest<HTMLInputElement>('input[data-ev]');
+        if (!casilla) return;
+        const id = casilla.dataset.ev!;
+        casilla.checked ? apagadas.delete(id) : apagadas.add(id);
+        pintar();
+      });
+
+      consola.querySelector('[data-reset]')?.addEventListener('click', () => {
+        apagadas.clear();
+        adelanto = 0;
+        barra.value = '0';
+        for (const c of consola.querySelectorAll<HTMLInputElement>('input[data-ev]')) c.checked = true;
+        pintar();
+      });
+
+      filtros.addEventListener('click', (ev) => {
         const boton = (ev.target as HTMLElement).closest<HTMLButtonElement>('button[data-f]');
         if (!boton) return;
         const campo = boton.dataset.f as 'norma' | 'estado';
-        estado[campo] = boton.dataset.v!;
-        for (const otro of caja.querySelectorAll(`button[data-f="${campo}"]`)) {
+        filtro[campo] = boton.dataset.v!;
+        for (const otro of filtros.querySelectorAll(`button[data-f="${campo}"]`)) {
           otro.classList.toggle('activo', otro === boton);
         }
-        aplicar();
+        pintar();
       });
+
+      // Primer pintado: deja la lista en el mismo estado que el filtro por
+      // defecto, que en el HTML del servidor sale con todo visible.
+      pintar();
     }
   </script>
 
@@ -380,6 +470,9 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
       color: color-mix(in srgb, var(--color-texto) 88%, transparent);
       line-height: 1.65;
     }
+    /* Sin JS no hay barra que mover, así que la invitación sería una mentira. */
+    .invitacion { color: var(--color-acento); font-weight: 500; }
+    html:not(.js-on) .invitacion { display: none; }
 
     .aviso {
       border: 1px solid var(--color-borde);
@@ -423,6 +516,106 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
       max-width: 46rem;
       margin-bottom: 1.8rem;
     }
+    .intro.sutil { font-size: 0.85rem; opacity: 0.85; }
+    .intro em { color: var(--color-texto); font-style: normal; }
+
+    /* ── La consola ── */
+    .consola {
+      border: 1px solid var(--color-borde-vivo);
+      background: var(--color-panel);
+      border-radius: 3px;
+      padding: 1.6rem;
+    }
+    /* Sin JS la consola no hace nada; mostrarla sería prometer de más. */
+    html:not(.js-on) .consola { display: none; }
+    .mando {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .mando label {
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-tenue);
+    }
+    .mando input[type='range'] {
+      flex: 1;
+      min-width: 12rem;
+      accent-color: var(--color-acento);
+      height: 1.4rem;
+      cursor: pointer;
+    }
+    .mando output {
+      min-width: 5.5rem;
+      text-align: right;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--color-acento);
+      font-variant-numeric: tabular-nums;
+    }
+    .corte {
+      margin-top: 0.7rem;
+      font-size: 0.8rem;
+      color: var(--color-tenue);
+    }
+    .corte strong { color: var(--color-texto); font-weight: 500; }
+
+    .evidencia { margin-top: 1.3rem; border-top: 1px solid var(--color-borde); padding-top: 1rem; }
+    .evidencia summary {
+      font-size: 0.78rem;
+      color: var(--color-tenue);
+      cursor: pointer;
+    }
+    .evidencia summary:hover { color: var(--color-acento); }
+    .ayuda {
+      font-size: 0.82rem;
+      color: var(--color-tenue);
+      line-height: 1.55;
+      margin: 0.8rem 0;
+      max-width: 42rem;
+    }
+    .lista-evidencia {
+      display: grid;
+      gap: 0.1rem;
+      max-height: 19rem;
+      overflow-y: auto;
+      border: 1px solid var(--color-borde);
+      border-radius: 3px;
+      padding: 0.5rem;
+    }
+    .item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.6rem;
+      align-items: baseline;
+      padding: 0.32rem 0.4rem;
+      border-radius: 2px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .item:hover { background: var(--color-panel-alto); }
+    .item input { accent-color: var(--color-acento); cursor: pointer; }
+    .item .tit { color: var(--color-texto); }
+    .item input:not(:checked) ~ .tit {
+      color: var(--color-tenue);
+      text-decoration: line-through;
+    }
+    .item .meta { font-size: 0.68rem; color: var(--color-tenue); white-space: nowrap; }
+    .item .f { font-variant-numeric: tabular-nums; opacity: 0.75; }
+    [data-reset] {
+      margin-top: 0.9rem;
+      font: inherit;
+      font-size: 0.75rem;
+      background: transparent;
+      color: var(--color-tenue);
+      border: 1px solid var(--color-borde);
+      padding: 0.3rem 0.8rem;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+    [data-reset]:hover { color: var(--color-texto); border-color: var(--color-borde-vivo); }
 
     .ficha-empresa dl { display: grid; gap: 0; }
     .ficha-empresa dl > div {
@@ -453,7 +646,7 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
       grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
       gap: 1rem;
     }
-    .norma {
+    :global(.norma) {
       --c: var(--color-datos);
       border: 1px solid var(--color-borde);
       background: var(--color-panel);
@@ -461,11 +654,11 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
       border-radius: 3px;
       border-top: 2px solid var(--c);
     }
-    .norma[data-tono='herramienta'] { --c: var(--color-herramienta); }
-    .norma[data-tono='acento'] { --c: var(--color-acento); }
-    .norma h3 { font-size: 1rem; font-weight: 600; }
-    .norma header p { font-size: 0.78rem; color: var(--color-tenue); }
-    .avance {
+    :global(.norma[data-tono='herramienta']) { --c: var(--color-herramienta); }
+    :global(.norma[data-tono='acento']) { --c: var(--color-acento); }
+    :global(.norma h3) { font-size: 1rem; font-weight: 600; }
+    :global(.norma header p) { font-size: 0.78rem; color: var(--color-tenue); }
+    :global(.avance) {
       font-size: 2.7rem;
       font-weight: 300;
       line-height: 1;
@@ -473,25 +666,35 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
       color: var(--c);
       letter-spacing: -0.03em;
     }
-    .avance span { font-weight: 500; }
-    .barra {
+    :global(.avance span) { font-weight: 500; }
+    :global(.barra) {
       height: 4px;
       background: var(--color-panel-alto);
       border-radius: 2px;
       overflow: hidden;
       margin-bottom: 1rem;
     }
-    .relleno { height: 100%; background: var(--c); }
-    .desglose {
+    /* La transición es lo que hace legible la caída al mover la barra. */
+    :global(.relleno) { height: 100%; background: var(--c); transition: width 0.25s ease; }
+    :global(html:not([data-mov='on']) .relleno) { transition: none; }
+    :global(.desglose) {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0.35rem 0.8rem;
       font-size: 0.76rem;
       color: var(--color-tenue);
     }
-    .desglose b { color: var(--color-texto); font-weight: 600; }
-    .desglose .malo b { color: var(--color-acento); }
-    .pie {
+    :global(.desglose b) { color: var(--color-texto); font-weight: 600; }
+    :global(.desglose .malo b) { color: var(--color-acento); }
+    :global(.norma .alerta) {
+      margin-top: 0.7rem;
+      font-size: 0.72rem;
+      color: var(--color-gestion);
+      border-top: 1px dashed var(--color-borde);
+      padding-top: 0.55rem;
+    }
+    :global(.norma .alerta b) { font-weight: 600; }
+    :global(.norma .pie) {
       margin-top: 0.9rem;
       font-size: 0.7rem;
       color: var(--color-tenue);
@@ -508,6 +711,60 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
     }
     .nota-avance strong { color: var(--color-texto); }
 
+    /* ── El diagrama del tronco ── */
+    .tronco-barra {
+      border: 1px solid var(--color-borde-vivo);
+      background: var(--color-panel);
+      border-radius: 3px;
+      padding: 1.1rem 1.3rem;
+      text-align: center;
+    }
+    .tronco-barra .n {
+      font-size: 1.8rem;
+      font-weight: 500;
+      color: var(--color-texto);
+      margin-right: 0.5rem;
+    }
+    .tronco-barra .t { font-size: 0.9rem; color: var(--color-texto); }
+    .tronco-barra .s {
+      display: block;
+      margin-top: 0.5rem;
+      font-size: 0.72rem;
+      color: var(--color-tenue);
+      letter-spacing: 0.04em;
+    }
+    .ramas {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+      gap: 1rem;
+    }
+    .rama {
+      --c: var(--color-datos);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .rama[data-tono='herramienta'] { --c: var(--color-herramienta); }
+    .rama[data-tono='acento'] { --c: var(--color-acento); }
+    .rama .palo { width: 1px; height: 1.6rem; background: var(--color-borde-vivo); }
+    .rama .n {
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: var(--c);
+      margin-top: 0.5rem;
+    }
+    .rama .t { font-size: 0.78rem; color: var(--color-tenue); }
+    .cuenta {
+      margin-top: 1.5rem;
+      font-size: 0.88rem;
+      line-height: 1.65;
+      color: var(--color-tenue);
+      max-width: 46rem;
+    }
+    .cuenta strong { color: var(--color-texto); }
+
+    /* ── Filtros y hallazgos ── */
     .filtros {
       display: flex;
       flex-wrap: wrap;
@@ -532,7 +789,7 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
       color: var(--color-tenue);
       border: 1px solid var(--color-borde);
       padding: 0.28rem 0.7rem;
-      margin-right: 0.3rem;
+      margin: 0 0.3rem 0.3rem 0;
       border-radius: 2px;
       cursor: pointer;
     }
@@ -542,41 +799,38 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
       background: var(--color-texto);
       border-color: var(--color-texto);
     }
-    .contador {
-      margin-left: auto;
-      font-size: 0.72rem;
-      color: var(--color-tenue);
-    }
-    /* Sin JS no hay filtros posibles, así que no se muestran botones muertos. */
+    .contador { margin-left: auto; font-size: 0.72rem; color: var(--color-tenue); }
     html:not(.js-on) .filtros { display: none; }
 
     .hallazgos { display: grid; gap: 0.8rem; list-style: none; }
-    .hallazgo {
+    :global(.hallazgo) {
       border: 1px solid var(--color-borde);
       border-left: 3px solid var(--color-borde-vivo);
       background: var(--color-panel);
       padding: 1.1rem 1.25rem;
       border-radius: 3px;
     }
-    .hallazgo[data-estado='vencido'] { border-left-color: var(--color-acento); }
-    .hallazgo[data-estado='sin_cubrir'] { border-left-color: var(--color-gestion); }
-    .hallazgo[data-estado='parcial'] { border-left-color: var(--color-ruta); }
-    .hallazgo > header {
+    :global(.hallazgo[data-estado='vencido']) { border-left-color: var(--color-acento); }
+    :global(.hallazgo[data-estado='sin_cubrir']) { border-left-color: var(--color-gestion); }
+    :global(.hallazgo[data-estado='parcial']) { border-left-color: var(--color-ruta); }
+    :global(.hallazgo[data-estado='cubierto']) { border-left-color: var(--color-herramienta); opacity: 0.72; }
+    :global(.hallazgo[data-vencer='1']) { border-left-color: var(--color-gestion); opacity: 1; }
+    :global(.hallazgo > header) {
       display: flex;
       align-items: baseline;
-      gap: 0.75rem;
+      gap: 0.6rem;
       flex-wrap: wrap;
       margin-bottom: 0.55rem;
     }
-    .clausula {
+    :global(.clausula) {
       font-size: 0.8rem;
       color: var(--color-tenue);
       font-variant-numeric: tabular-nums;
       min-width: 3rem;
     }
-    .hallazgo h3 { font-size: 0.98rem; font-weight: 600; flex: 1; }
+    :global(.hallazgo h3) { font-size: 0.98rem; font-weight: 600; flex: 1; }
 
-    .chip {
+    :global(.chip), :global(.clase) {
       font-size: 0.62rem;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -585,15 +839,27 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
       border: 1px solid currentColor;
       white-space: nowrap;
     }
-    .chip.cubierto { color: var(--color-herramienta); }
-    .chip.parcial { color: var(--color-ruta); }
-    .chip.vencido { color: var(--color-acento); }
-    .chip.sin_cubrir { color: var(--color-gestion); }
+    :global(.chip.cubierto) { color: var(--color-herramienta); }
+    :global(.chip.parcial) { color: var(--color-ruta); }
+    :global(.chip.vencido) { color: var(--color-acento); }
+    :global(.chip.sin_cubrir) { color: var(--color-gestion); }
+    :global(.clase) { border-style: dashed; }
+    :global(.clase.mayor) { color: var(--color-acento); }
+    :global(.clase.menor) { color: var(--color-ruta); }
+    :global(.clase.observacion) { color: var(--color-gestion); }
 
-    .motivo { font-size: 0.85rem; color: var(--color-tenue); margin-bottom: 0.7rem; }
+    :global(.motivo) { font-size: 0.85rem; color: var(--color-tenue); margin-bottom: 0.7rem; }
+    :global(.por-vencer) {
+      font-size: 0.84rem;
+      line-height: 1.55;
+      color: var(--color-gestion);
+      border-left: 2px solid var(--color-gestion);
+      padding-left: 0.8rem;
+      margin-bottom: 0.8rem;
+    }
 
-    .aplica { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.9rem; }
-    .norma-tag, .tronco-tag {
+    :global(.aplica) { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.9rem; }
+    :global(.norma-tag), :global(.tronco-tag) {
       font-size: 0.63rem;
       letter-spacing: 0.06em;
       padding: 0.14rem 0.45rem;
@@ -601,28 +867,28 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
       background: var(--color-panel-alto);
       color: var(--color-tenue);
     }
-    .norma-tag[data-tono='datos'] { color: var(--color-datos); }
-    .norma-tag[data-tono='herramienta'] { color: var(--color-herramienta); }
-    .norma-tag[data-tono='acento'] { color: var(--color-acento); }
+    :global(.norma-tag[data-tono='datos']) { color: var(--color-datos); }
+    :global(.norma-tag[data-tono='herramienta']) { color: var(--color-herramienta); }
+    :global(.norma-tag[data-tono='acento']) { color: var(--color-acento); }
 
-    .falta, .caduca { margin-bottom: 0.8rem; }
-    .falta h4, .caduca h4 {
+    :global(.falta), :global(.caduca) { margin-bottom: 0.8rem; }
+    :global(.falta h4), :global(.caduca h4) {
       font-size: 0.63rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--color-tenue);
       margin-bottom: 0.45rem;
     }
-    .falta ul, .caduca ul { display: grid; gap: 0.4rem; }
-    .falta li, .caduca li {
+    :global(.falta ul), :global(.caduca ul) { display: grid; gap: 0.4rem; }
+    :global(.falta li), :global(.caduca li) {
       font-size: 0.84rem;
       line-height: 1.5;
       color: color-mix(in srgb, var(--color-texto) 80%, transparent);
       padding-left: 0.85rem;
       border-left: 1px solid var(--color-borde);
     }
-    .falta em { color: var(--color-tenue); font-style: normal; font-size: 0.78rem; }
-    .tipo {
+    :global(.falta em) { color: var(--color-tenue); font-style: normal; font-size: 0.78rem; }
+    :global(.tipo) {
       font-size: 0.6rem;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -632,25 +898,25 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
       background: var(--color-panel-alto);
       color: var(--color-tenue);
     }
-    .tipo.registro { color: var(--color-acento); }
-    .caduca .fecha, .caduca .dueno {
+    :global(.tipo.registro) { color: var(--color-acento); }
+    :global(.caduca .fecha), :global(.caduca .dueno) {
       font-size: 0.72rem;
       color: var(--color-tenue);
       margin-left: 0.5rem;
       font-variant-numeric: tabular-nums;
     }
-    .caduca .dueno { opacity: 0.7; }
+    :global(.caduca .dueno) { opacity: 0.7; }
 
-    details summary {
+    :global(.hallazgo details summary) {
       font-size: 0.76rem;
       color: var(--color-tenue);
       cursor: pointer;
       padding-top: 0.5rem;
       border-top: 1px solid var(--color-borde);
     }
-    details summary:hover { color: var(--color-acento); }
-    .preguntas { display: grid; gap: 0.5rem; margin-top: 0.75rem; }
-    .preguntas li {
+    :global(.hallazgo details summary:hover) { color: var(--color-acento); }
+    :global(.preguntas) { display: grid; gap: 0.5rem; margin-top: 0.75rem; }
+    :global(.preguntas li) {
       font-size: 0.86rem;
       line-height: 1.55;
       color: color-mix(in srgb, var(--color-texto) 84%, transparent);
@@ -672,10 +938,14 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
       padding: 0 0.7rem 0.6rem;
       border-bottom: 1px solid var(--color-borde);
     }
-    td { padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--color-borde); vertical-align: top; }
-    tr[data-estado='cubierto'] td { color: var(--color-tenue); }
-    .mono { font-variant-numeric: tabular-nums; white-space: nowrap; }
-    .chico { font-size: 0.76rem; color: var(--color-tenue); }
+    :global(.matriz td) {
+      padding: 0.55rem 0.7rem;
+      border-bottom: 1px solid var(--color-borde);
+      vertical-align: top;
+    }
+    :global(.matriz tr[data-estado='cubierto'] td) { color: var(--color-tenue); }
+    :global(.mono) { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    :global(.chico) { font-size: 0.76rem; color: var(--color-tenue); }
 
     .columnas {
       display: grid;
@@ -698,8 +968,7 @@ const caducas = evidencias.filter((e) => antiguedadMeses(e.fecha, hoy) > 12).len
     }
 
     @media print {
-      .volver, .filtros, .aviso, .como { display: none; }
-      details { display: block; }
+      .volver, .filtros, .aviso, .como, .consola { display: none; }
       .hallazgo { break-inside: avoid; }
     }
   </style>

@@ -10,9 +10,10 @@
  */
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluar, resumir, ordenarHallazgos, vigente, antiguedadMeses } from '../modelo.ts';
+import { evaluar, resumir, ordenarHallazgos, vigente, antiguedadMeses, clasificar, AVISO_MESES } from '../modelo.ts';
 import type { Requisito, Evidencia } from '../modelo.ts';
 import { requisitos } from '../normas.ts';
+import { evidenciasDemo } from '../demo.ts';
 
 const HOY = new Date('2026-08-26T00:00:00Z');
 
@@ -238,5 +239,123 @@ describe('corpus', () => {
     for (const n of ['9001', '14001', '45001'] as const) {
       assert.ok(requisitos.filter((r) => r.normas.includes(n)).length >= 25);
     }
+  });
+});
+
+describe('vencimiento próximo y clasificación', () => {
+  const conRegistro = (vigenciaMeses: number): Requisito =>
+    req({ evidencias: [{ clave: 'reg', tipo: 'registro', descripcion: '', vigenciaMeses }] });
+
+  test('mide los meses que faltan para que se caiga la primera evidencia', () => {
+    // Registro de hace 9 meses con vigencia 12 → quedan ~3.
+    const c = evaluar(conRegistro(12), [ev({ tipo: 'registro', fecha: '2025-11-26' })], HOY);
+    assert.ok(Math.abs(c.mesesAlVencimiento! - 3) < 0.3, String(c.mesesAlVencimiento));
+  });
+
+  test('manda la evidencia que se cae PRIMERO, no la última', () => {
+    // El requisito se desarma en cuanto falta una sola de las que pide.
+    const dos = req({
+      evidencias: [
+        { clave: 'a', tipo: 'registro', descripcion: '', vigenciaMeses: 12 },
+        { clave: 'b', tipo: 'documento', descripcion: '' },
+      ],
+    });
+    const c = evaluar(dos, [ev({ id: '1', tipo: 'registro', fecha: '2026-06-26' }), ev({ id: '2', tipo: 'documento' })], HOY);
+    // Sólo el registro caduca; el documento no aporta vencimiento.
+    assert.ok(Math.abs(c.mesesAlVencimiento! - 10) < 0.3, String(c.mesesAlVencimiento));
+  });
+
+  test('dentro de una misma clave aguanta la evidencia más nueva', () => {
+    const c = evaluar(conRegistro(12), [
+      ev({ id: 'vieja', tipo: 'registro', fecha: '2025-10-26' }),
+      ev({ id: 'nueva', tipo: 'registro', fecha: '2026-07-26' }),
+    ], HOY);
+    assert.ok(c.mesesAlVencimiento! > 10, String(c.mesesAlVencimiento));
+  });
+
+  test('un requisito sin nada que caduque no reporta vencimiento', () => {
+    const c = evaluar(req({ evidencias: [{ clave: 'doc', tipo: 'documento', descripcion: '' }] }), [ev()], HOY);
+    assert.equal(c.mesesAlVencimiento, undefined);
+    assert.equal(c.porVencer, false);
+  });
+
+  test('porVencer se enciende dentro del horizonte de aviso', () => {
+    // 9,5 meses de antigüedad sobre una vigencia de 12: quedan ~2,5.
+    const c = evaluar(conRegistro(12), [ev({ tipo: 'registro', fecha: '2025-11-10' })], HOY);
+    assert.equal(c.estado, 'cubierto');
+    assert.equal(c.porVencer, true);
+  });
+
+  test('porVencer NO se enciende si todavía falta bastante', () => {
+    const c = evaluar(conRegistro(12), [ev({ tipo: 'registro', fecha: '2026-07-26' })], HOY);
+    assert.equal(c.porVencer, false);
+  });
+
+  test('lo ya vencido no cuenta como "por vencer": ya se cayó', () => {
+    // Son avisos distintos y mezclarlos taparía el hallazgo con la alerta.
+    const c = evaluar(conRegistro(12), [ev({ tipo: 'registro', fecha: '2024-01-01' })], HOY);
+    assert.equal(c.estado, 'vencido');
+    assert.equal(c.porVencer, false);
+  });
+
+  test('la clasificación propuesta sigue la regla declarada', () => {
+    assert.equal(clasificar('sin_cubrir'), 'mayor');
+    assert.equal(clasificar('vencido'), 'menor');
+    assert.equal(clasificar('parcial'), 'menor');
+    assert.equal(clasificar('cubierto'), undefined);
+  });
+
+  test('el resumen cuenta los que están por vencer', () => {
+    const r = req({ id: 'a', normas: ['9001'], evidencias: [{ clave: 'reg', tipo: 'registro', descripcion: '', vigenciaMeses: 12 }] });
+    const cobs = [evaluar(r, [ev({ cubre: ['a'], tipo: 'registro', fecha: '2025-11-10' })], HOY)];
+    assert.equal(resumir(cobs, '9001').por_vencer, 1);
+    assert.equal(resumir(cobs, '9001').cubierto, 1);
+  });
+});
+
+describe('el tiempo solo desarma el sistema', () => {
+  test('adelantar meses no puede mejorar el avance', () => {
+    // Es la propiedad que sostiene la máquina del tiempo: sin cargar
+    // evidencia nueva, el sistema sólo puede empeorar.
+    const evs = evidenciasDemo(HOY);
+    let previo = 101;
+    for (const meses of [0, 3, 6, 12, 18, 24]) {
+      const cuando = new Date(Date.UTC(HOY.getUTCFullYear(), HOY.getUTCMonth() + meses, 26));
+      const cobs = requisitos.map((r) => evaluar(r, evs, cuando));
+      const avance = resumir(cobs, '9001').avance;
+      assert.ok(avance <= previo, `a los ${meses} meses subió a ${avance} desde ${previo}`);
+      previo = avance;
+    }
+  });
+
+  test('a los 12 meses la caída es visible, que es el punto de la demo', () => {
+    const evs = evidenciasDemo(HOY);
+    const luego = new Date(Date.UTC(HOY.getUTCFullYear(), HOY.getUTCMonth() + 12, 26));
+    const ahora = resumir(requisitos.map((r) => evaluar(r, evs, HOY)), '9001').avance;
+    const despues = resumir(requisitos.map((r) => evaluar(r, evs, luego)), '9001').avance;
+    assert.ok(ahora - despues >= 25, `sólo cayó ${ahora - despues} puntos`);
+  });
+});
+
+describe('el borde del horizonte de aviso', () => {
+  const conRegistro = (vigenciaMeses: number): Requisito =>
+    req({ evidencias: [{ clave: 'reg', tipo: 'registro', descripcion: '', vigenciaMeses }] });
+
+  /*
+   * El umbral es una comparación simple `<= AVISO_MESES`, así que hay un
+   * punto exacto donde se enciende. Se fija acá para que quede claro que es
+   * una decisión y no una casualidad de redondeo: justo por dentro avisa,
+   * justo por fuera no.
+   */
+  test('justo por dentro avisa', () => {
+    const c = evaluar(conRegistro(12), [ev({ tipo: 'registro', fecha: '2025-11-01' })], HOY);
+    assert.ok(c.mesesAlVencimiento! < AVISO_MESES);
+    assert.equal(c.porVencer, true);
+  });
+
+  test('justo por fuera todavía no', () => {
+    const c = evaluar(conRegistro(12), [ev({ tipo: 'registro', fecha: '2025-12-15' })], HOY);
+    assert.ok(c.mesesAlVencimiento! > AVISO_MESES);
+    assert.equal(c.porVencer, false);
   });
 });
