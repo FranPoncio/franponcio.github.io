@@ -282,17 +282,21 @@ const estaciones = proyectos.map((p) => {
   .frente::after {
     content: '';
     position: absolute;
-    left: -3px;
-    right: -3px;
+    /* Va DENTRO del caño. Antes sobresalía 3 px de cada lado y llevaba una
+       sombra rectangular propia: con la válvula grande encima no se notaba,
+       pero al achicarla a una boquilla quedó a la vista un rectángulo de
+       bordes duros, que se lee como un error de dibujo y no como calor en el
+       metal. La luz de la punta ahora la pone la boca de la boquilla, que es
+       de donde sale el gas; acá alcanza con que el acero se vea caliente. */
+    left: 0;
+    right: 0;
     bottom: 0;
-    height: 26px;
-    border-radius: 3px;
+    height: 24px;
     background: linear-gradient(
       to bottom,
       transparent,
-      color-mix(in srgb, var(--color-acento) 42%, transparent)
+      color-mix(in srgb, var(--color-acento) 34%, transparent)
     );
-    box-shadow: 0 0 16px 2px color-mix(in srgb, var(--color-acento) 30%, transparent);
   }
   /* ── LA VÁLVULA DE LA PUNTA ───────────────────────────────────────────
      Baja con el frente porque `top` sale del mismo `--avance` que estira el
@@ -318,34 +322,43 @@ const estaciones = proyectos.map((p) => {
     position: absolute;
     left: 50%;
   }
-  /* El cuerpo, más ancho que el caño y centrado en la boca. */
+  /* LA BOQUILLA.
+     Antes acá había una válvula con volante: 38 x 24, más ancha que muchas
+     fichas y con un volante naranja que se comía la atención de todo lo que
+     pasaba al lado. Una válvula de mano tampoco es lo que va en la punta de
+     un caño que se está tendiendo — va en una junta, no en el extremo.
+
+     Ahora es lo que corresponde: el caño se ensancha apenas, se corta en
+     bisel y termina. Mide `--calibre` + 6, o sea que crece y se achica con
+     el caño en vez de tener un tamaño fijo que en pantalla chica quedaba
+     enorme.
+
+     El bisel es un `clip-path`, y por eso la sombra va con `filter:
+     drop-shadow` y no con `box-shadow`: el clip recorta la caja, sombra
+     incluida, así que un box-shadow no se vería. */
   .valvula::before {
-    top: -12px;
-    width: 38px;
-    height: 24px;
-    margin-left: -19px;
-    border-radius: 3px;
+    --boca: calc(var(--calibre) + 6px);
+    top: -5px;
+    width: var(--boca);
+    height: 12px;
+    margin-left: calc(var(--boca) / -2);
     background: var(--acero);
-    box-shadow:
-      0 0 0 1px rgba(0, 0, 0, 0.6),
-      0 5px 16px -3px rgba(0, 0, 0, 0.9);
+    clip-path: polygon(0 0, 100% 0, 78% 100%, 22% 100%);
+    filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.85));
   }
-  /* El volante. Va encendido, que es por donde sale el gas. */
+  /* La boca. Es de donde sale el gas, así que es lo único encendido: una
+     elipse fina, no un volante. */
   .valvula::after {
-    top: -9.5px;
-    width: 19px;
-    height: 19px;
-    margin-left: -9.5px;
+    --luz: calc(var(--calibre) * 0.62);
+    top: 5.5px;
+    width: var(--luz);
+    height: 3.5px;
+    margin-left: calc(var(--luz) / -2);
     border-radius: 50%;
-    border: 2.5px solid var(--color-acento);
-    background:
-      radial-gradient(circle, var(--color-acento) 0 1.6px, transparent 1.6px),
-      repeating-conic-gradient(
-        from 45deg,
-        var(--color-acento) 0 6deg,
-        transparent 6deg 90deg
-      );
-    box-shadow: 0 0 16px 1px color-mix(in srgb, var(--color-acento) 55%, transparent);
+    background: var(--color-acento);
+    box-shadow:
+      0 0 9px 1px color-mix(in srgb, var(--color-acento) 70%, transparent),
+      0 0 20px 3px color-mix(in srgb, var(--color-acento) 30%, transparent);
   }
 
   .pista {
