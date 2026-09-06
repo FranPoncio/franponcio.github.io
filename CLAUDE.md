@@ -111,6 +111,13 @@ seguí con el resto. No lo bloquees, pero tampoco lo dejes pasar en silencio.
 ## Aplicaciones
 
 Los aplicativos **no viven acá**. El portfolio lleva el caso escrito y un link
-que sale afuera; la app tiene su repo y su deploy. El SGI Trinorma se movió a
-su propio repositorio por esta razón — no volver a meter una app adentro de
-`franponcioPage/src/pages/`.
+que sale afuera; la app tiene su repo y su deploy. No volver a meter una app
+adentro de `franponcioPage/src/pages/`.
+
+| App | Repo | Vive en |
+|---|---|---|
+| SGI Trinorma | `FranPoncio/Trinorm_Sys` | https://franponcio.github.io/Trinorm_Sys/ |
+
+Ojo: la carpeta del caso en el portfolio sigue siendo `proyectos/sgi-trinorma/`
+y no se renombró — la URL del caso y el nombre del repo de la app son cosas
+distintas y no tienen por qué coincidir.

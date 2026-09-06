@@ -22,7 +22,7 @@ kpis:
     nota: 'el motor entero, comprimido'
 enlace:
   label: Ver la demostración
-  url: https://franponcio.github.io/sgi-trinorma/
+  url: https://franponcio.github.io/Trinorm_Sys/
 borrador: true
 ---
 
@@ -139,7 +139,7 @@ preguntar y qué papel pedir, y eso no viene en la norma.
 
 ## La máquina del tiempo
 
-Si hay una sola cosa para mirar en [la demo](https://franponcio.github.io/sgi-trinorma/), es la barra que adelanta
+Si hay una sola cosa para mirar en [la demo](https://franponcio.github.io/Trinorm_Sys/), es la barra que adelanta
 meses.
 
 Un sistema de gestión no se rompe de golpe: se vence. Nadie hace nada mal —
@@ -193,7 +193,7 @@ está por vencer — que es lo único de los tres que se puede detectar solo.
 
 ## La demostración
 
-[La demo](https://franponcio.github.io/sgi-trinorma/) evalúa el corpus contra **Metalúrgica del Suquía S.A.**, una
+[La demo](https://franponcio.github.io/Trinorm_Sys/) evalúa el corpus contra **Metalúrgica del Suquía S.A.**, una
 PyME cordobesa de 48 personas que no existe.
 
 Está inventada por dos razones. La primera es que los datos de un SGI real
@@ -262,7 +262,7 @@ navegación, el fondo animado y la composición de una página que se lee de
 arriba a abajo, cuando esto es una herramienta que se usa: barra fija,
 navegación al costado, densidad más alta y nada que se mueva sin motivo.
 
-Ahora tiene [su repositorio](https://github.com/FranPoncio/sgi-trinorma) y su
+Ahora tiene [su repositorio](https://github.com/FranPoncio/Trinorm_Sys) y su
 deploy, con los tests corriendo antes de publicar. Este caso cuenta por qué
 existe; la aplicación se usa allá.
 
