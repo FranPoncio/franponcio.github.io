@@ -22,7 +22,7 @@ kpis:
     nota: 'el motor entero, comprimido'
 enlace:
   label: Ver la demostración
-  url: https://franponcio.github.io/sgi/
+  url: https://franponcio.github.io/sgi-trinorma/
 borrador: true
 ---
 
@@ -139,7 +139,7 @@ preguntar y qué papel pedir, y eso no viene en la norma.
 
 ## La máquina del tiempo
 
-Si hay una sola cosa para mirar en [la demo](/sgi/), es la barra que adelanta
+Si hay una sola cosa para mirar en [la demo](https://franponcio.github.io/sgi-trinorma/), es la barra que adelanta
 meses.
 
 Un sistema de gestión no se rompe de golpe: se vence. Nadie hace nada mal —
@@ -193,7 +193,7 @@ está por vencer — que es lo único de los tres que se puede detectar solo.
 
 ## La demostración
 
-[La demo](/sgi/) evalúa el corpus contra **Metalúrgica del Suquía S.A.**, una
+[La demo](https://franponcio.github.io/sgi-trinorma/) evalúa el corpus contra **Metalúrgica del Suquía S.A.**, una
 PyME cordobesa de 48 personas que no existe.
 
 Está inventada por dos razones. La primera es que los datos de un SGI real
@@ -233,6 +233,38 @@ mucho menos para mostrárselo a un cliente como si fuera una nota.
 Un requisito se cuenta cubierto sólo si **toda** la evidencia que pide tiene un
 aporte vigente. No se promedia dentro del requisito: nueve papeles de diez no
 es cumplir en un 90%, es no cumplir.
+
+## La jornada de auditoría
+
+Un auditor no recorre cláusulas, recorre áreas: se sienta con Compras una
+mañana y con Producción a la tarde. Un listado ordenado por número de cláusula
+lo obliga a saltar de área en área, que es exactamente lo que nadie hace.
+
+Así que cada proceso abre su plan del día: qué cláusulas le tocan —en orden de
+riesgo, no de numeración—, las preguntas para hacer, la evidencia para pedir,
+quién la tiene y qué falta.
+
+Está armada como documento de trabajo y no como panel. Las preguntas van
+desplegadas porque se leen mientras se habla, cada requisito tiene su casilla
+para tildar, y la hoja imprime sin navegación y con renglones para escribir a
+mano. La mitad de las auditorías internas se siguen haciendo con una carpeta
+en la mano.
+
+Para eso el corpus necesitó un dato más: qué área responde por cada requisito.
+Va en una tabla aparte y no dentro de cada entrada, porque el corpus normativo
+es el mismo para cualquier organización y el organigrama no — el día que esto
+se use en una empresa de verdad, se cambia ese mapa y nada más.
+
+## Por qué vive en su propio repositorio
+
+Arrancó adentro de este portfolio y ahí estaba mal. Compartía la barra de
+navegación, el fondo animado y la composición de una página que se lee de
+arriba a abajo, cuando esto es una herramienta que se usa: barra fija,
+navegación al costado, densidad más alta y nada que se mueva sin motivo.
+
+Ahora tiene [su repositorio](https://github.com/FranPoncio/sgi-trinorma) y su
+deploy, con los tests corriendo antes de publicar. Este caso cuenta por qué
+existe; la aplicación se usa allá.
 
 ## Qué falta
 
