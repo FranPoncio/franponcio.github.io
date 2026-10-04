@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="es"><head><script>
+      /*
+       * EL INTERRUPTOR DE MOVIMIENTO.
+       *
+       * Por defecto manda la preferencia del sistema: si pediste reducir
+       * movimiento, el sitio no se mueve. Pero esa preferencia no tiene forma
+       * de saber que estás mirando tu propio portfolio y querés ver cómo
+       * quedó. Con el botón de la barra la prendés a mano, y esa decisión
+       * gana sobre la del sistema para vos y sólo para vos.
+       *
+       * Va INLINE y en el <head>, sin defer, por dos razones: se aplica antes
+       * del primer pintado —si no, la escena arranca quieta y pega un salto al
+       * prenderse— y los scripts de los componentes leen `data-mov` al cargar.
+       */
+      try {
+        if (localStorage.getItem('mov') === 'on') {
+          document.documentElement.dataset.mov = 'on';
+        }
+      } catch (e) {
+        /* modo privado: sin memoria, manda el sistema */
+      }
+    </script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Tablero EVM en Power BI · Francisco Poncio</title><meta name="description" content="Control de avance de obra por Earned Value Management sobre un gasoducto, armado como proyecto de texto plano — se versiona, se revisa en un PR y se regenera con un comando."><meta property="og:title" content="Tablero EVM en Power BI · Francisco Poncio"><meta property="og:description" content="Control de avance de obra por Earned Value Management sobre un gasoducto, armado como proyecto de texto plano — se versiona, se revisa en un PR y se regenera con un comando."><meta property="og:type" content="website"><meta property="og:locale" content="es_AR"><link rel="alternate" hreflang="en" href="/en/projects/evm-powerbi/"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/_astro/proyectos.BNjTjRvQ.css"><style>.carrusel[data-astro-cid-pd4bmjx6]{scrollbar-width:thin;scrollbar-color:var(--color-borde-vivo) transparent}.carrusel[data-astro-cid-pd4bmjx6]::-webkit-scrollbar{height:6px}.carrusel[data-astro-cid-pd4bmjx6]::-webkit-scrollbar-thumb{background:var(--color-borde-vivo);border-radius:3px}.carrusel[data-astro-cid-pd4bmjx6]:focus-visible{outline:2px solid var(--color-acento);outline-offset:4px}
+</style></head><body class="trama min-h-screen"><canvas id="fondo" aria-hidden="true" data-astro-cid-bjdjxntj></canvas><script type="module" src="/_astro/Fondo.astro_astro_type_script_index_0_lang.BmvMnYGi.js"></script><header class="sticky top-0 z-50 border-b border-borde/70 bg-fondo/85 backdrop-blur-md supports-[backdrop-filter]:bg-fondo/65" data-astro-cid-wpvy4v7s><nav class="mx-auto max-w-5xl px-6" aria-label="Navegación" data-astro-cid-wpvy4v7s><div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 py-3.5" data-astro-cid-wpvy4v7s><a href="/" class="font-mono text-sm font-semibold tracking-tight transition-colors hover:text-acento" data-astro-cid-wpvy4v7s>FP<span class="text-acento" data-astro-cid-wpvy4v7s>.</span></a><div class="flex items-center gap-3" data-astro-cid-wpvy4v7s><a href="/en/projects/evm-powerbi/" hreflang="en" class="rounded border border-borde px-2 py-1 font-mono text-[0.68rem] text-tenue transition-colors hover:border-acento hover:text-acento" aria-label="Ver en inglés" data-astro-cid-wpvy4v7s>EN</a><a href="mailto:franponcioo@gmail.com" class="hidden font-mono text-xs text-tenue transition-colors hover:text-acento sm:block" data-astro-cid-wpvy4v7s>Contacto</a><a href="https://github.com/FranPoncio" class="font-mono text-xs text-tenue transition-colors hover:text-acento" data-astro-cid-wpvy4v7s>GitHub ↗</a><button type="button" class="mov" hidden aria-pressed="false" title="Prender o apagar las animaciones" data-astro-cid-wpvy4v7s><span class="mov-icono" aria-hidden="true" data-astro-cid-wpvy4v7s></span><span class="mov-txt" data-astro-cid-wpvy4v7s>movimiento</span></button></div></div></nav></header><script type="module">var e=document.querySelector(`.mov`);if(e&&matchMedia(`(prefers-reduced-motion: reduce)`).matches){let t=()=>document.documentElement.dataset.mov===`on`,n=()=>e.setAttribute(`aria-pressed`,String(t()));e.hidden=!1,n(),e.addEventListener(`click`,()=>{let e=!t();e?document.documentElement.dataset.mov=`on`:delete document.documentElement.dataset.mov;try{localStorage.setItem(`mov`,e?`on`:`off`)}catch{}n(),location.reload()})}</script><header class="border-b border-borde"><div class="mx-auto max-w-3xl px-6 py-16"><a href="/" class="font-mono text-xs text-tenue transition-colors hover:text-acento">← volver al panel</a><p class="mt-8 font-mono text-xs uppercase tracking-[0.16em] text-datos">datos</p><h1 class="mt-4 text-[1.3rem] font-bold leading-[1.22] sm:text-[1.8rem]">Tablero EVM en Power BI</h1><p class="mt-5 text-[0.95rem] leading-relaxed text-tenue">Control de avance de obra por Earned Value Management sobre un gasoducto, armado como proyecto de texto plano — se versiona, se revisa en un PR y se regenera con un comando.</p><dl class="mt-9 flex flex-wrap gap-x-10 gap-y-4 font-mono text-sm"><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Período</dt><dd class="mt-1">2026</dd></div><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Rol</dt><dd class="mt-1">Modelo de datos y tablero</dd></div></dl><div class="mt-7 flex flex-wrap gap-2"><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Power BI</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">DAX</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">PBIP</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">TMDL</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">EVM</span></div><a href="https://github.com/FranPoncio/Data/tree/claude/power-bi-reports-playwright-tuqf5b/powerbi" class="mt-8 inline-block rounded border border-acento/50 px-4 py-2 font-mono text-xs text-acento transition-colors hover:bg-acento hover:text-fondo">Ver el proyecto PBIP →</a></div></header><main class="mx-auto max-w-3xl px-6 py-14"><dl class="grid gap-px bg-borde border border-borde rounded-lg overflow-hidden sm:grid-cols-2 lg:grid-cols-4"><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Medidas DAX</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">22</dd><p class="mt-1 text-xs text-tenue leading-snug">replican un motor de EVM con 41 tests</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Formato</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">PBIP</dd><p class="mt-1 text-xs text-tenue leading-snug">TMDL + PBIR, texto plano y versionable</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Paquetes</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">7</dd><p class="mt-1 text-xs text-tenue leading-snug">35 reportes de avance</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">SPI · CPI</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">0,75 · 0,90</dd><p class="mt-1 text-xs text-tenue leading-snug">a la fecha de corte, sobre datos sintéticos</p></div></dl><div class="prosa mt-14"><h2 id="el-problema">El problema</h2>
+<p>Un avance del 60 % no dice nada solo. ¿Contra qué plan? ¿A qué costo? El Earned
+Value Management resuelve eso cruzando tres magnitudes a una fecha de corte: lo
+que <strong>debería</strong> llevar gastado según el plan (PV), lo que <strong>vale</strong> lo realmente
+ejecutado (EV) y lo que <strong>efectivamente</strong> costó (AC). De ahí salen dos números
+que sí dicen algo — SPI para el plazo, CPI para el costo — y de ahí, la
+proyección de cómo va a cerrar la obra.</p>
+<h2 id="la-decisión-de-fondo-que-el-tablero-sea-texto">La decisión de fondo: que el tablero sea texto</h2>
+<p>Un <code>.pbix</code> es un binario. No se puede leer en un pull request, no se puede
+diffear, no se puede revisar. Cae en la misma trampa que el Excel que se pasa
+por mail: existe una versión buena y nadie sabe cuál es.</p>
+<p>El proyecto está en <strong>PBIP</strong>, que es el mismo tablero pero en texto plano: el
+modelo en TMDL, el informe en PBIR con un JSON por visual. Se versiona, se
+revisa y se regenera con <code>npm run powerbi</code>. Un cambio en una medida es una
+línea en un diff, no un archivo nuevo de 4 MB.</p>
+<p>Los datos van <strong>embebidos en el modelo</strong> como literales <code>#table</code> de M, y no
+apuntando a los CSV que están al lado. No es capricho: Power BI no resuelve
+rutas relativas, así que un <code>.pbip</code> enganchado a un archivo local abre sólo en
+la máquina donde se creó. Embebido abre en cualquiera, y además los datos
+aparecen en el diff.</p>
+<h2 id="las-dos-medidas-que-sostienen-a-las-otras-veinte">Las dos medidas que sostienen a las otras veinte</h2>
+<p>De las 22 medidas, hay dos que no se ven en ningún visual y sin las cuales el
+resto da mal:</p>
+<ul>
+<li><strong><code>Último corte</code></strong> — la fecha del avance más reciente, <em>ignorando los filtros
+de fecha</em>. Es el data date real de la obra.</li>
+<li><strong><code>Fecha de análisis</code></strong> — a qué fecha se evalúan PV, EV y AC. Si el visual
+filtra por tiempo (el eje de meses de la curva S) usa el fin de ese período;
+si no filtra (una tarjeta de KPI) usa el último corte.</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="dax"><code><span class="line"><span style="color:#79B8FF">Fecha</span><span style="color:#79B8FF"> de</span><span style="color:#79B8FF"> análisis</span><span style="color:#F97583"> =</span></span>
+<span class="line"><span style="color:#79B8FF">    IF</span><span style="color:#E1E4E8"> ( </span><span style="color:#79B8FF">ISCROSSFILTERED</span><span style="color:#E1E4E8"> ( </span><span style="color:#79B8FF">Calendario</span><span style="color:#E1E4E8"> ),</span></span>
+<span class="line"><span style="color:#79B8FF">         MAX</span><span style="color:#E1E4E8"> ( </span><span style="color:#79B8FF">Calendario[Fecha]</span><span style="color:#E1E4E8"> ),</span></span>
+<span class="line"><span style="color:#79B8FF">         [Último corte]</span><span style="color:#E1E4E8"> )</span></span></code></pre>
+<p>Sin esa segunda medida las tarjetas mostrarían <strong>el PV al final del proyecto en
+lugar del PV a hoy</strong> — un número enorme, perfectamente creíble y completamente
+equivocado. Es el tipo de error que no rompe nada y se detecta tarde.</p>
+<p>El PV se distribuye en el tiempo con una curva S —smoothstep de Hermite,
+<code>3t²−2t³</code>— sobre la ventana de baseline de cada paquete. EV y AC toman, para
+cada paquete, su último reporte con fecha menor o igual a la de análisis, y
+quedan en <code>BLANK</code> más allá del último corte: así la línea del gráfico <strong>se
+corta</strong> ahí en vez de desplomarse a cero, que es lo que haría creer que la obra
+se frenó.</p>
+<h2 id="cómo-se-verifica-que-las-medidas-no-mienten">Cómo se verifica que las medidas no mienten</h2>
+<p>Las medidas DAX replican un motor de EVM escrito antes en TypeScript
+(<code>evm.ts</code>, con <strong>41 tests</strong>). Traducirlo a DAX es reescribirlo, y una
+reescritura se rompe en silencio.</p>
+<p>La verificación va por un camino distinto al del tablero:
+<code>check-powerbi-data.mjs</code> calcula los indicadores <strong>en JavaScript</strong> sobre los
+mismos datos y deja la tabla de resultados esperados en el README. Si el
+tablero no muestra esos números, hay un error en las medidas. Dos
+implementaciones independientes que tienen que coincidir.</p>
+<p>A la fecha de corte, sobre los 7 paquetes y 35 reportes de avance del caso:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th style="text-align: right"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BAC</td>
+<td style="text-align: right">$23.200.000</td>
+</tr>
+<tr>
+<td>PV</td>
+<td style="text-align: right">$11.323.519</td>
+</tr>
+<tr>
+<td>EV</td>
+<td style="text-align: right">$8.456.000</td>
+</tr>
+<tr>
+<td>AC</td>
+<td style="text-align: right">$9.440.000</td>
+</tr>
+<tr>
+<td>SPI</td>
+<td style="text-align: right">0,75</td>
+</tr>
+<tr>
+<td>CPI</td>
+<td style="text-align: right">0,90</td>
+</tr>
+<tr>
+<td>EAC (BAC/CPI)</td>
+<td style="text-align: right">$25.899.716</td>
+</tr>
+<tr>
+<td>VAC</td>
+<td style="text-align: right">−$2.699.716</td>
+</tr>
+<tr>
+<td>TCPI hasta BAC</td>
+<td style="text-align: right">1,07</td>
+</tr>
+</tbody>
+</table>
+<p>La obra viene atrasada y con sobrecosto, empujada por el tendido del ducto:
+<strong>36,4 % de avance real contra 48,8 % planificado</strong>, y se proyecta cerrar $2,7 M
+por encima del presupuesto autorizado.</p>
+<p>Una diferencia de forma entre las dos implementaciones: donde el TypeScript
+devuelve <code>null</code> al dividir por cero, el DAX usa <code>DIVIDE</code>, que devuelve <code>BLANK</code>.
+Misma semántica de «indefinido» — que no es lo mismo que cero.</p>
+<h2 id="qué-se-ve">Qué se ve</h2>
+<p><strong>Resumen EVM.</strong> Seis tarjetas (BAC, PV, EV, AC, CPI, SPI), la curva S de
+planificado contra ganado contra real, las cuatro proyecciones al cierre (EAC,
+VAC, ETC, TCPI) y el desvío de costo por paquete.</p>
+<p><strong>Paquetes de trabajo.</strong> El EVM completo por paquete y dos barras con CPI y SPI,
+para ver de dónde sale el desvío. Son 19 visuales, todos generados por script.</p>
+<h2 id="lo-que-este-tablero-todavía-no-es">Lo que este tablero todavía no es</h2>
+<p>Tres cosas, y prefiero decirlas acá antes de que las descubra quien lo abra:</p>
+<ul>
+<li><strong>Los datos son sintéticos.</strong> Salen del fixture del caso GC-3, no de una obra
+real. Los números de operación de un gasoducto no son míos para publicar.</li>
+<li><strong>El historial mensual está interpolado.</strong> El fixture tiene un solo corte, y
+una curva S con un único punto de EV/AC no se puede graficar. El último corte
+reproduce el fixture exacto —eso lo verifica el script—; los anteriores son
+plausibles, no medidos.</li>
+<li><strong>El informe se generó sin poder abrirlo.</strong> El PBIR se escribió contra la
+estructura documentada del formato, pero Power BI Desktop es sólo Windows.
+El modelo semántico es la parte sólida y está verificado; de los visuales
+puedo decir que están bien formados, no que carguen.</li>
+</ul>
+<p>Y una advertencia de uso: los generadores son de ida nomás. En cuanto abrís el
+<code>.pbip</code> y guardás, Desktop reescribe los archivos con su propio formato y pasa
+a ser el dueño del informe. Sirven para arrancar y para rehacer desde cero, no
+para ir y volver.</p>
+</div><nav class="mt-20 grid gap-4 border-t border-borde pt-8 sm:grid-cols-2"><a href="/proyectos/sgi-trinorma/" class="tarjeta rounded-xl border border-borde bg-panel p-5 hover:bg-panel-alto"><p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-tenue">← Anterior</p><p class="mt-2 font-medium leading-snug">SGI Trinorma — cobertura y auditoría interna</p></a><a href="/proyectos/obra-gas/" class="tarjeta rounded-xl border border-borde bg-panel p-5 text-right hover:bg-panel-alto"><p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-tenue">Siguiente →</p><p class="mt-2 font-medium leading-snug">Gestión integral de obra — gasoductos</p></a></nav></main><script type="module">document.documentElement.classList.add(`js-on`);var e=!matchMedia(`(prefers-reduced-motion: reduce)`).matches,t=new IntersectionObserver(e=>{for(let n of e)n.isIntersecting&&(n.target.classList.add(`visible`),t.unobserve(n.target))},{rootMargin:`0px 0px -12% 0px`});for(let e of document.querySelectorAll(`.revelar`))t.observe(e);function n(e){let t=e.textContent.trim().match(/^(\D*)([\d.,]+)(.*)$/);if(!t)return;let[,n,r,i]=t,a=parseInt(r.replace(/[.,]/g,``),10);if(!isFinite(a)||a===0)return;let o=performance.now(),s=r.includes(`.`)?`.`:``;function c(t){let r=Math.min((t-o)/1100,1),l=Math.round(a*(r===1?1:1-2**(-10*r))),u=s?l.toLocaleString(`es-AR`):String(l);e.textContent=n+u+i,r<1&&requestAnimationFrame(c)}requestAnimationFrame(c)}var r=document.querySelector(`.troncal`);if(r){let e=!1,t=()=>{e=!1;let t=document.documentElement.scrollHeight-window.innerHeight;if(t<=0)return r.style.setProperty(`--avance`,`1`);let n=Math.min(Math.max(window.scrollY/t,0),1);r.style.setProperty(`--avance`,n.toFixed(4))},n=()=>{e||(e=!0,requestAnimationFrame(t))};addEventListener(`scroll`,n,{passive:!0}),addEventListener(`resize`,n,{passive:!0}),t()}var i=document.querySelectorAll(`.contador`);if(e&&i.length){let e=new IntersectionObserver(t=>{for(let r of t)r.isIntersecting&&(n(r.target),e.unobserve(r.target))},{threshold:.6});for(let t of i)e.observe(t)}</script></body></html>

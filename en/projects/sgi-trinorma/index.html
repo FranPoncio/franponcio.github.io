@@ -1,0 +1,263 @@
+<!DOCTYPE html><html lang="en"><head><script>
+      /*
+       * EL INTERRUPTOR DE MOVIMIENTO.
+       *
+       * Por defecto manda la preferencia del sistema: si pediste reducir
+       * movimiento, el sitio no se mueve. Pero esa preferencia no tiene forma
+       * de saber que estás mirando tu propio portfolio y querés ver cómo
+       * quedó. Con el botón de la barra la prendés a mano, y esa decisión
+       * gana sobre la del sistema para vos y sólo para vos.
+       *
+       * Va INLINE y en el <head>, sin defer, por dos razones: se aplica antes
+       * del primer pintado —si no, la escena arranca quieta y pega un salto al
+       * prenderse— y los scripts de los componentes leen `data-mov` al cargar.
+       */
+      try {
+        if (localStorage.getItem('mov') === 'on') {
+          document.documentElement.dataset.mov = 'on';
+        }
+      } catch (e) {
+        /* modo privado: sin memoria, manda el sistema */
+      }
+    </script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SGI Trinorma — cobertura y auditoría interna · Francisco Poncio</title><meta name="description" content="Un sistema que calcula qué requisitos de ISO 9001, 14001 y 45001 están realmente cubiertos por la evidencia de una organización, y arma el plan de auditoría interna a partir de eso."><meta property="og:title" content="SGI Trinorma — cobertura y auditoría interna · Francisco Poncio"><meta property="og:description" content="Un sistema que calcula qué requisitos de ISO 9001, 14001 y 45001 están realmente cubiertos por la evidencia de una organización, y arma el plan de auditoría interna a partir de eso."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><link rel="alternate" hreflang="es" href="/proyectos/sgi-trinorma/"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/_astro/proyectos.BNjTjRvQ.css"><style>.carrusel[data-astro-cid-pd4bmjx6]{scrollbar-width:thin;scrollbar-color:var(--color-borde-vivo) transparent}.carrusel[data-astro-cid-pd4bmjx6]::-webkit-scrollbar{height:6px}.carrusel[data-astro-cid-pd4bmjx6]::-webkit-scrollbar-thumb{background:var(--color-borde-vivo);border-radius:3px}.carrusel[data-astro-cid-pd4bmjx6]:focus-visible{outline:2px solid var(--color-acento);outline-offset:4px}
+</style></head><body class="trama min-h-screen"><canvas id="fondo" aria-hidden="true" data-astro-cid-bjdjxntj></canvas><script type="module" src="/_astro/Fondo.astro_astro_type_script_index_0_lang.BmvMnYGi.js"></script><header class="sticky top-0 z-50 border-b border-borde/70 bg-fondo/85 backdrop-blur-md supports-[backdrop-filter]:bg-fondo/65" data-astro-cid-wpvy4v7s><nav class="mx-auto max-w-5xl px-6" aria-label="Navigation" data-astro-cid-wpvy4v7s><div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 py-3.5" data-astro-cid-wpvy4v7s><a href="/en/" class="font-mono text-sm font-semibold tracking-tight transition-colors hover:text-acento" data-astro-cid-wpvy4v7s>FP<span class="text-acento" data-astro-cid-wpvy4v7s>.</span></a><div class="flex items-center gap-3" data-astro-cid-wpvy4v7s><a href="/proyectos/sgi-trinorma/" hreflang="es" class="rounded border border-borde px-2 py-1 font-mono text-[0.68rem] text-tenue transition-colors hover:border-acento hover:text-acento" aria-label="View in Spanish" data-astro-cid-wpvy4v7s>ES</a><a href="mailto:franponcioo@gmail.com" class="hidden font-mono text-xs text-tenue transition-colors hover:text-acento sm:block" data-astro-cid-wpvy4v7s>Contact</a><a href="https://github.com/FranPoncio" class="font-mono text-xs text-tenue transition-colors hover:text-acento" data-astro-cid-wpvy4v7s>GitHub ↗</a><button type="button" class="mov" hidden aria-pressed="false" title="Turn animation on or off" data-astro-cid-wpvy4v7s><span class="mov-icono" aria-hidden="true" data-astro-cid-wpvy4v7s></span><span class="mov-txt" data-astro-cid-wpvy4v7s>motion</span></button></div></div></nav></header><script type="module">var e=document.querySelector(`.mov`);if(e&&matchMedia(`(prefers-reduced-motion: reduce)`).matches){let t=()=>document.documentElement.dataset.mov===`on`,n=()=>e.setAttribute(`aria-pressed`,String(t()));e.hidden=!1,n(),e.addEventListener(`click`,()=>{let e=!t();e?document.documentElement.dataset.mov=`on`:delete document.documentElement.dataset.mov;try{localStorage.setItem(`mov`,e?`on`:`off`)}catch{}n(),location.reload()})}</script><p class="bg-acento px-6 py-2.5 text-center font-mono text-xs font-semibold text-fondo">DRAFT — fill this file in and remove `borrador: true` from the frontmatter.</p><p class="border-b border-borde bg-panel-alto px-6 py-2.5 text-center font-mono text-xs text-tenue">This case is only available in Spanish for now.</p><header class="border-b border-borde"><div class="mx-auto max-w-3xl px-6 py-16"><a href="/en/" class="font-mono text-xs text-tenue transition-colors hover:text-acento">← back to the panel</a><p class="mt-8 font-mono text-xs uppercase tracking-[0.16em] text-gestion">gestion</p><h1 class="mt-4 text-[1.3rem] font-bold leading-[1.22] sm:text-[1.8rem]">SGI Trinorma — cobertura y auditoría interna</h1><p class="mt-5 text-[0.95rem] leading-relaxed text-tenue">Un sistema que calcula qué requisitos de ISO 9001, 14001 y 45001 están realmente cubiertos por la evidencia de una organización, y arma el plan de auditoría interna a partir de eso.</p><dl class="mt-9 flex flex-wrap gap-x-10 gap-y-4 font-mono text-sm"><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Period</dt><dd class="mt-1">2026 —</dd></div><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Role</dt><dd class="mt-1">Diseño y desarrollo</dd></div></dl><div class="mt-7 flex flex-wrap gap-2"><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">ISO 9001</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">ISO 14001</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">ISO 45001</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">TypeScript</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Astro</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Auditoría interna</span></div><a href="https://franponcio.github.io/Trinorm_Sys/" class="mt-8 inline-block rounded border border-acento/50 px-4 py-2 font-mono text-xs text-acento transition-colors hover:bg-acento hover:text-fondo">Ver la demostración →</a></div></header><main class="mx-auto max-w-3xl px-6 py-14"><dl class="grid gap-px bg-borde border border-borde rounded-lg overflow-hidden sm:grid-cols-2 lg:grid-cols-4"><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Requisitos auditables</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">45</dd><p class="mt-1 text-xs text-tenue leading-snug">las tres normas, con el tronco común modelado una vez</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Preguntas de auditoría</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">98</dd><p class="mt-1 text-xs text-tenue leading-snug">escritas, no copiadas de la norma</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Motor</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">Determinístico</dd><p class="mt-1 text-xs text-tenue leading-snug">la IA redacta, no decide</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Peso en el navegador</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">12 KB</dd><p class="mt-1 text-xs text-tenue leading-snug">el motor entero, comprimido</p></div></dl><div class="prosa mt-14"><blockquote>
+<p><strong>Esto está en construcción.</strong> El motor y el corpus de las tres normas están
+escritos y testeados, y hay una demostración que corre. Lo que falta —cargar
+evidencia propia, generar el informe redactado— está descrito más abajo como
+lo que es: pendiente.</p>
+</blockquote>
+<h2 id="el-problema-que-vi">El problema que vi</h2>
+<p>Un sistema de gestión integrado se cae siempre por el mismo lado, y no es por
+donde uno esperaría. No se cae porque falten procedimientos: se cae porque los
+procedimientos existen y <strong>nadie puede demostrar que se ejecutaron</strong>.</p>
+<p>La escena se repite. Llega la auditoría, alguien abre la carpeta, y ahí está el
+procedimiento de capacitación, prolijo, firmado, versionado. El auditor no lo
+mira más de tres segundos. Pregunta otra cosa: <em>¿cuándo fue la última
+capacitación y quién la evaluó?</em> Y ahí aparece una planilla de hace diecinueve
+meses.</p>
+<p>Esa distancia —entre el documento que dice cómo se hace y el registro que
+prueba que se hizo— es todo el problema. Y es un problema de datos: qué
+evidencia tenés, a qué requisito sirve, y desde cuándo dejó de servir.</p>
+<h2 id="por-qué-no-alcanza-con-una-plantilla">Por qué no alcanza con una plantilla</h2>
+<p>Hay cien juegos de plantillas ISO dando vueltas y no resuelven nada, por una
+razón sencilla: <strong>el certificador no audita tus documentos, audita tu
+sistema</strong>. Un procedimiento perfecto para una empresa que no lo cumple no es
+un ahorro, es un hallazgo mayor servido en bandeja. Documentación genérica que
+no describe lo que la organización hace realmente es peor que no tenerla,
+porque además demuestra que se copió.</p>
+<p>Por eso este proyecto no genera plantillas. Lo que hace es más aburrido y más
+útil: lleva la cuenta de la evidencia.</p>
+<h2 id="cómo-funciona">Cómo funciona</h2>
+<p>Tres decisiones sostienen todo lo demás.</p>
+<h3 id="el-motor-no-usa-ia">El motor no usa IA</h3>
+<p>Decidir si un requisito está cubierto es una cuenta, no una opinión. La
+función que lo hace recibe un requisito, la evidencia cargada y una fecha, y
+devuelve el estado junto con el motivo y las evidencias que lo sostienen. Es
+pura: mismos argumentos, mismo resultado, siempre. Está testeada con el runner
+de Node, sin dependencias.</p>
+<p>Esto no es purismo técnico. Es que cuando el auditor pregunte <em>¿por qué dice
+68%?</em>, la respuesta tiene que ser una lista de evidencias con fecha. Un
+sistema que contesta “lo calculó un modelo” no sirve para esto.</p>
+<p>La IA entra después y en su lugar: redactar el informe sobre un resultado ya
+calculado. Redacta, no decide.</p>
+<h3 id="vencido-no-es-lo-mismo-que-sin-cubrir">Vencido no es lo mismo que sin cubrir</h3>
+<p>El motor distingue cuatro estados, y dos de ellos suelen mezclarse:</p>
+<table>
+<thead>
+<tr>
+<th>Estado</th>
+<th>Qué significa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cubierto</strong></td>
+<td>Toda la evidencia que el requisito pide existe y está vigente.</td>
+</tr>
+<tr>
+<td><strong>Parcial</strong></td>
+<td>Falta parte. Está el procedimiento pero no el registro, o al revés.</td>
+</tr>
+<tr>
+<td><strong>Vencido</strong></td>
+<td>Hay evidencia cargada, pero ninguna prueba ya nada por antigüedad.</td>
+</tr>
+<tr>
+<td><strong>Sin cubrir</strong></td>
+<td>No hay nada.</td>
+</tr>
+</tbody>
+</table>
+<p>Separar <em>vencido</em> de <em>sin cubrir</em> es deliberado. Que nunca hayas tenido un
+procedimiento es una cosa. Que lo hayas tenido, lo hayas dejado morir y nadie
+se haya dado cuenta habla del sistema entero — y el auditor lo lee exactamente
+así. Son dos hallazgos distintos y merecen dos tratamientos distintos.</p>
+<h3 id="documento-y-registro-son-cosas-distintas">Documento y registro son cosas distintas</h3>
+<p>Un documento dice cómo se hace algo: política, procedimiento, matriz. Se
+revisa cada tanto pero no caduca por uso. Un registro prueba que algo <em>se
+hizo</em>: acta, planilla firmada, informe. Tiene fecha y caduca.</p>
+<p>El modelo los trata como tipos distintos y no acepta que uno reemplace al
+otro. Tener el procedimiento de capacitación escrito no prueba que se haya
+capacitado a nadie. Hay un test que garantiza justamente eso, porque es el
+error que este sistema existe para evitar.</p>
+<h2 id="las-tres-normas-de-una-sin-morir-en-el-intento">Las tres normas de una, sin morir en el intento</h2>
+<p>Arrancar con la trinorma completa es el alcance que más proyectos mata. Acá se
+sostiene por una razón concreta: las tres normas comparten la estructura de
+alto nivel — capítulos 4 a 10, con los mismos títulos y la misma lógica. ISO
+las armó así justamente para que se puedan integrar.</p>
+<p>Ese tronco común se modela <strong>una sola vez</strong>:</p>
+<ul>
+<li><strong>21 requisitos de tronco</strong>, que cubren las tres normas a la vez.</li>
+<li><strong>24 requisitos propios</strong>: diseño y proveedores en calidad, aspectos
+ambientales y matriz legal en ambiente, peligros y participación de los
+trabajadores en seguridad.</li>
+</ul>
+<p>Total: 45 requisitos auditables en lugar de los ~88 que costaría escribirlos
+tres veces. Y no es sólo volumen: con tres corpus paralelos, a la tercera
+corrección de redacción uno de los tres se queda atrás y nadie se entera.</p>
+<h2 id="lo-que-este-repositorio-no-tiene">Lo que este repositorio no tiene</h2>
+<p><strong>No hay una sola línea del texto de las normas.</strong> El texto de ISO 9001, 14001
+y 45001 es propiedad de ISO y se compra. Un repositorio público con la 9001
+copiada adentro se baja con un pedido de retiro, y con razón.</p>
+<p>Lo que sí se usa es numeración y título de cláusula, que son referencia
+factual y están publicados en todos lados. Todo lo demás —las 98 preguntas de
+auditoría, las 88 descripciones de evidencia— está escrito desde el oficio.</p>
+<p>Esto terminó jugando a favor. El valor de la herramienta nunca estuvo en el
+texto de la norma, que cualquiera compra por cien dólares. Está en saber qué
+preguntar y qué papel pedir, y eso no viene en la norma.</p>
+<h2 id="la-máquina-del-tiempo">La máquina del tiempo</h2>
+<p>Si hay una sola cosa para mirar en <a href="https://franponcio.github.io/Trinorm_Sys/">la demo</a>, es la barra que adelanta
+meses.</p>
+<p>Un sistema de gestión no se rompe de golpe: se vence. Nadie hace nada mal —
+simplemente pasa el tiempo y los registros dejan de probar el presente. La
+barra hace visible eso en tres segundos:</p>
+<table>
+<thead>
+<tr>
+<th>Al día de hoy</th>
+<th>+6 meses</th>
+<th>+12 meses</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>78 / 69 / 68 %</td>
+<td>58 / 58 / 58 %</td>
+<td>40 / 40 / 37 %</td>
+</tr>
+</tbody>
+</table>
+<p>Nadie tocó nada. Ninguna evidencia se borró. Sólo corrió el calendario.</p>
+<p>Ese es el argumento entero del proyecto, y es la razón por la que una
+auditoría interna anual llega siempre tarde: mide una vez por año un sistema
+que se degrada todos los días.</p>
+<p>De ahí sale la única alerta que un sistema puede dar y una auditoría
+tradicional no: <strong>lo que está cubierto hoy y se cae en menos de tres meses</strong>.
+Tres no es un número redondo elegido al azar — es lo que tarda en armarse de
+verdad una capacitación con evaluación de eficacia, una calibración externa o
+una revisión por la dirección con las áreas sentadas. Avisar con menos es
+avisar cuando ya no se puede hacer nada.</p>
+<h2 id="el-motor-corre-en-tu-navegador">El motor corre en tu navegador</h2>
+<p>En la demo también se puede apagar evidencia a mano. Destildás <em>Política
+integrada</em> y la cláusula 5.2 pasa de cubierta a parcial y el avance baja al
+instante.</p>
+<p>Eso no es una animación preparada: es el mismo <code>evaluar()</code> corriendo en el
+navegador. Se pudo mandar al cliente justamente por estar escrito como
+función pura — no consulta nada, no guarda nada, no necesita servidor. El
+motor completo, con el corpus de las tres normas y las plantillas, pesa 12 KB
+comprimido.</p>
+<p>Y como las plantillas de HTML son las mismas que usa el build, la página sin
+JavaScript y la interactiva no pueden decir cosas distintas. Si estuvieran
+escritas dos veces se irían separando de a poco, y nadie se daría cuenta
+porque casi nunca se miran las dos juntas.</p>
+<h2 id="cómo-se-nombra-el-hallazgo">Cómo se nombra el hallazgo</h2>
+<p>El sistema propone clasificar cada hallazgo como <strong>NC mayor</strong>, <strong>NC menor</strong> u
+<strong>observación</strong>. Es una propuesta, no un veredicto: la norma no trae esa
+tabla, la decide el auditor mirando impacto y alcance. Lo que hace el sistema
+es que el auditor arranque de algo y lo corrija, en vez de arrancar de una
+hoja en blanco.</p>
+<p>La observación quedó reservada para lo que todavía no falló — lo cubierto que
+está por vencer — que es lo único de los tres que se puede detectar solo.</p>
+<h2 id="la-demostración">La demostración</h2>
+<p><a href="https://franponcio.github.io/Trinorm_Sys/">La demo</a> evalúa el corpus contra <strong>Metalúrgica del Suquía S.A.</strong>, una
+PyME cordobesa de 48 personas que no existe.</p>
+<p>Está inventada por dos razones. La primera es que los datos de un SGI real
+—una matriz de riesgos, un registro de incidentes— son del cliente o del
+empleador, no míos, y no van a un repositorio público. La segunda es que una
+demo con todo en verde no demuestra nada.</p>
+<p>El estado está armado para que se vea lo que el motor distingue. Calidad va
+adelante porque la empresa ya venía con 9001; ambiente va atrás; seguridad es
+la más floja. Es el orden en que pasa en la vida real, y produce los hallazgos
+que aparecen en cualquier PyME que integra tarde:</p>
+<ul>
+<li><strong>La participación de los trabajadores</strong> (45001, 5.4) sin cubrir. Es la
+cláusula más simulada de la norma, porque es la única que no se resuelve
+con un documento.</li>
+<li><strong>La revisión por la dirección</strong> vencida, no ausente: se hizo una vez y
+pasaron dieciséis meses.</li>
+<li><strong>Las matrices legales cargadas pero sin evaluación de cumplimiento.</strong>
+Confundir una cosa con la otra es el error más frecuente en ambiente y en
+seguridad, y son dos requisitos separados.</li>
+</ul>
+<p>La página arranca resuelta en tiempo de compilación —sin JavaScript se ve la
+foto de hoy, entera y usable— y cuando el script carga, el mismo motor toma el
+control y la vuelve interactiva. No hay servidor y no hay clave de ningún
+modelo en el navegador.</p>
+<h2 id="el-porcentaje-que-no-hay-que-malinterpretar">El porcentaje que no hay que malinterpretar</h2>
+<p>La demo muestra 78%, 69% y 68%. Ese número es <strong>avance de implementación, no
+cumplimiento</strong>.</p>
+<p>Para el certificador no existe el 78%. Un requisito no conforme es un
+hallazgo, y alcanza uno mayor para no certificar. El porcentaje sirve para
+saber cuánto falta y para ordenar el trabajo — no para tranquilizar a nadie, y
+mucho menos para mostrárselo a un cliente como si fuera una nota.</p>
+<p>Un requisito se cuenta cubierto sólo si <strong>toda</strong> la evidencia que pide tiene un
+aporte vigente. No se promedia dentro del requisito: nueve papeles de diez no
+es cumplir en un 90%, es no cumplir.</p>
+<h2 id="la-jornada-de-auditoría">La jornada de auditoría</h2>
+<p>Un auditor no recorre cláusulas, recorre áreas: se sienta con Compras una
+mañana y con Producción a la tarde. Un listado ordenado por número de cláusula
+lo obliga a saltar de área en área, que es exactamente lo que nadie hace.</p>
+<p>Así que cada proceso abre su plan del día: qué cláusulas le tocan —en orden de
+riesgo, no de numeración—, las preguntas para hacer, la evidencia para pedir,
+quién la tiene y qué falta.</p>
+<p>Está armada como documento de trabajo y no como panel. Las preguntas van
+desplegadas porque se leen mientras se habla, cada requisito tiene su casilla
+para tildar, y la hoja imprime sin navegación y con renglones para escribir a
+mano. La mitad de las auditorías internas se siguen haciendo con una carpeta
+en la mano.</p>
+<p>Para eso el corpus necesitó un dato más: qué área responde por cada requisito.
+Va en una tabla aparte y no dentro de cada entrada, porque el corpus normativo
+es el mismo para cualquier organización y el organigrama no — el día que esto
+se use en una empresa de verdad, se cambia ese mapa y nada más.</p>
+<h2 id="por-qué-vive-en-su-propio-repositorio">Por qué vive en su propio repositorio</h2>
+<p>Arrancó adentro de este portfolio y ahí estaba mal. Compartía la barra de
+navegación, el fondo animado y la composición de una página que se lee de
+arriba a abajo, cuando esto es una herramienta que se usa: barra fija,
+navegación al costado, densidad más alta y nada que se mueva sin motivo.</p>
+<p>Ahora tiene <a href="https://github.com/FranPoncio/Trinorm_Sys">su repositorio</a> y su
+deploy, con los tests corriendo antes de publicar. Este caso cuenta por qué
+existe; la aplicación se usa allá.</p>
+<h2 id="qué-falta">Qué falta</h2>
+<p>Lo escribo como pendiente y no como característica, que es lo que es:</p>
+<ul>
+<li><strong>Cargar evidencia propia.</strong> Hoy se puede apagar y prender la evidencia de
+la empresa de demostración, pero no cargar la tuya: eso necesita un backend
+y autenticación, y eso ya no es un portfolio.</li>
+<li><strong>El informe redactado.</strong> El plan de auditoría sale del motor; falta la capa
+que lo convierta en el documento que se firma y se entrega.</li>
+<li><strong>No conformidades y acciones correctivas.</strong> Hoy el sistema detecta el
+hallazgo. Falta el ciclo completo: causa raíz, acción, verificación de
+eficacia.</li>
+<li><strong>Requisitos legales por jurisdicción.</strong> Las matrices legales de ambiente y
+seguridad dependen de la provincia y del municipio. Eso no se resuelve con
+un corpus general.</li>
+</ul>
+<h2 id="por-qué-lo-estoy-haciendo">Por qué lo estoy haciendo</h2>
+<p>Me formé como auditor interno trinorma y lo que me quedó no fueron las
+cláusulas: fue ver cuánto trabajo real se pierde en sostener el papeleo de un
+sistema que igual no se puede demostrar. Gente competente, haciendo bien su
+trabajo, sin forma de probarlo cuando llega el que pregunta.</p>
+<p>Eso es un problema de trazabilidad de datos, no de redacción. Y es el mismo
+problema que vengo resolviendo desde el otro lado — el de los datos — en todo
+lo demás que hay en este portfolio.</p>
+</div><nav class="mt-20 grid gap-4 border-t border-borde pt-8 sm:grid-cols-2"><a href="/en/projects/pmiproject/" class="tarjeta rounded-xl border border-borde bg-panel p-5 hover:bg-panel-alto"><p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-tenue">← Previous</p><p class="mt-2 font-medium leading-snug">PMI Toolbox</p></a><a href="/en/projects/evm-powerbi/" class="tarjeta rounded-xl border border-borde bg-panel p-5 text-right hover:bg-panel-alto"><p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-tenue">Next →</p><p class="mt-2 font-medium leading-snug">Tablero EVM en Power BI</p></a></nav></main><script type="module">document.documentElement.classList.add(`js-on`);var e=!matchMedia(`(prefers-reduced-motion: reduce)`).matches,t=new IntersectionObserver(e=>{for(let n of e)n.isIntersecting&&(n.target.classList.add(`visible`),t.unobserve(n.target))},{rootMargin:`0px 0px -12% 0px`});for(let e of document.querySelectorAll(`.revelar`))t.observe(e);function n(e){let t=e.textContent.trim().match(/^(\D*)([\d.,]+)(.*)$/);if(!t)return;let[,n,r,i]=t,a=parseInt(r.replace(/[.,]/g,``),10);if(!isFinite(a)||a===0)return;let o=performance.now(),s=r.includes(`.`)?`.`:``;function c(t){let r=Math.min((t-o)/1100,1),l=Math.round(a*(r===1?1:1-2**(-10*r))),u=s?l.toLocaleString(`es-AR`):String(l);e.textContent=n+u+i,r<1&&requestAnimationFrame(c)}requestAnimationFrame(c)}var r=document.querySelector(`.troncal`);if(r){let e=!1,t=()=>{e=!1;let t=document.documentElement.scrollHeight-window.innerHeight;if(t<=0)return r.style.setProperty(`--avance`,`1`);let n=Math.min(Math.max(window.scrollY/t,0),1);r.style.setProperty(`--avance`,n.toFixed(4))},n=()=>{e||(e=!0,requestAnimationFrame(t))};addEventListener(`scroll`,n,{passive:!0}),addEventListener(`resize`,n,{passive:!0}),t()}var i=document.querySelectorAll(`.contador`);if(e&&i.length){let e=new IntersectionObserver(t=>{for(let r of t)r.isIntersecting&&(n(r.target),e.unobserve(r.target))},{threshold:.6});for(let t of i)e.observe(t)}</script></body></html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="en"><head><script>
+      /*
+       * EL INTERRUPTOR DE MOVIMIENTO.
+       *
+       * Por defecto manda la preferencia del sistema: si pediste reducir
+       * movimiento, el sitio no se mueve. Pero esa preferencia no tiene forma
+       * de saber que estás mirando tu propio portfolio y querés ver cómo
+       * quedó. Con el botón de la barra la prendés a mano, y esa decisión
+       * gana sobre la del sistema para vos y sólo para vos.
+       *
+       * Va INLINE y en el <head>, sin defer, por dos razones: se aplica antes
+       * del primer pintado —si no, la escena arranca quieta y pega un salto al
+       * prenderse— y los scripts de los componentes leen `data-mov` al cargar.
+       */
+      try {
+        if (localStorage.getItem('mov') === 'on') {
+          document.documentElement.dataset.mov = 'on';
+        }
+      } catch (e) {
+        /* modo privado: sin memoria, manda el sistema */
+      }
+    </script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>End-to-end works management — gas pipelines · Francisco Poncio</title><meta name="description" content="From the tender package to commissioning: project definition, contracting, and site supervision across mechanical, civil, electronic and environmental disciplines."><meta property="og:title" content="End-to-end works management — gas pipelines · Francisco Poncio"><meta property="og:description" content="From the tender package to commissioning: project definition, contracting, and site supervision across mechanical, civil, electronic and environmental disciplines."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><link rel="alternate" hreflang="es" href="/proyectos/obra-gas/"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/_astro/proyectos.BNjTjRvQ.css"><style>.carrusel[data-astro-cid-pd4bmjx6]{scrollbar-width:thin;scrollbar-color:var(--color-borde-vivo) transparent}.carrusel[data-astro-cid-pd4bmjx6]::-webkit-scrollbar{height:6px}.carrusel[data-astro-cid-pd4bmjx6]::-webkit-scrollbar-thumb{background:var(--color-borde-vivo);border-radius:3px}.carrusel[data-astro-cid-pd4bmjx6]:focus-visible{outline:2px solid var(--color-acento);outline-offset:4px}
+</style></head><body class="trama min-h-screen"><canvas id="fondo" aria-hidden="true" data-astro-cid-bjdjxntj></canvas><script type="module" src="/_astro/Fondo.astro_astro_type_script_index_0_lang.BmvMnYGi.js"></script><header class="sticky top-0 z-50 border-b border-borde/70 bg-fondo/85 backdrop-blur-md supports-[backdrop-filter]:bg-fondo/65" data-astro-cid-wpvy4v7s><nav class="mx-auto max-w-5xl px-6" aria-label="Navigation" data-astro-cid-wpvy4v7s><div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 py-3.5" data-astro-cid-wpvy4v7s><a href="/en/" class="font-mono text-sm font-semibold tracking-tight transition-colors hover:text-acento" data-astro-cid-wpvy4v7s>FP<span class="text-acento" data-astro-cid-wpvy4v7s>.</span></a><div class="flex items-center gap-3" data-astro-cid-wpvy4v7s><a href="/proyectos/obra-gas/" hreflang="es" class="rounded border border-borde px-2 py-1 font-mono text-[0.68rem] text-tenue transition-colors hover:border-acento hover:text-acento" aria-label="View in Spanish" data-astro-cid-wpvy4v7s>ES</a><a href="mailto:franponcioo@gmail.com" class="hidden font-mono text-xs text-tenue transition-colors hover:text-acento sm:block" data-astro-cid-wpvy4v7s>Contact</a><a href="https://github.com/FranPoncio" class="font-mono text-xs text-tenue transition-colors hover:text-acento" data-astro-cid-wpvy4v7s>GitHub ↗</a><button type="button" class="mov" hidden aria-pressed="false" title="Turn animation on or off" data-astro-cid-wpvy4v7s><span class="mov-icono" aria-hidden="true" data-astro-cid-wpvy4v7s></span><span class="mov-txt" data-astro-cid-wpvy4v7s>motion</span></button></div></div></nav></header><script type="module">var e=document.querySelector(`.mov`);if(e&&matchMedia(`(prefers-reduced-motion: reduce)`).matches){let t=()=>document.documentElement.dataset.mov===`on`,n=()=>e.setAttribute(`aria-pressed`,String(t()));e.hidden=!1,n(),e.addEventListener(`click`,()=>{let e=!t();e?document.documentElement.dataset.mov=`on`:delete document.documentElement.dataset.mov;try{localStorage.setItem(`mov`,e?`on`:`off`)}catch{}n(),location.reload()})}</script><header class="border-b border-borde"><div class="mx-auto max-w-3xl px-6 py-16"><a href="/en/" class="font-mono text-xs text-tenue transition-colors hover:text-acento">← back to the panel</a><p class="mt-8 font-mono text-xs uppercase tracking-[0.16em] text-gestion">gestion</p><h1 class="mt-4 text-[1.3rem] font-bold leading-[1.22] sm:text-[1.8rem]">End-to-end works management — gas pipelines</h1><p class="mt-5 text-[0.95rem] leading-relaxed text-tenue">From the tender package to commissioning: project definition, contracting, and site supervision across mechanical, civil, electronic and environmental disciplines.</p><dl class="mt-9 flex flex-wrap gap-x-10 gap-y-4 font-mono text-sm"><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Period</dt><dd class="mt-1">2016 — 2023</dd></div><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Role</dt><dd class="mt-1">Project Manager · Business Analyst</dd></div></dl><div class="mt-7 flex flex-wrap gap-2"><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Public tendering</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Site supervision</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Gas pipelines</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Surface facilities</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Fibre optics</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">LNG</span></div></div></header><main class="mx-auto max-w-3xl px-6 py-14"><dl class="grid gap-px bg-borde border border-borde rounded-lg overflow-hidden sm:grid-cols-2 lg:grid-cols-3"><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Years on site</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">7</dd><p class="mt-1 text-xs text-tenue leading-snug">2016 — 2023, tender to commissioning</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Disciplines</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">4</dd><p class="mt-1 text-xs text-tenue leading-snug">mechanical, civil, electronic, environmental</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Scope</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">A → Z</dd><p class="mt-1 text-xs text-tenue leading-snug">the full life of the works</p></div></dl><div class="prosa mt-14"><h2 id="context">Context</h2>
+<p>Seven years in public gas infrastructure in Córdoba, covering the full life of a
+project: <strong>before, during and after</strong>. That’s a path normally split across three
+different departments, and here it ran through one place.</p>
+<p>That’s the point of this case. Someone who writes a tender package without ever
+having supervised a site writes specifications that can’t be met. Someone who
+supervises without having written the package doesn’t know what was negotiated,
+or why.</p>
+<h2 id="before-the-works">Before the works</h2>
+<h3 id="project-definition">Project definition</h3>
+<p>Scope, route and technical solutions. This is the stage where you decide the
+things that can’t be changed later without renegotiating the contract.</p>
+<h3 id="the-tender-package">The tender package</h3>
+<p>Preparing all the documentation to go to tender: specifications, bills of
+quantities, budget, drawings. An ambiguous specification doesn’t get paid for at
+tender — it gets paid for during execution, in variation orders and in arguments
+nobody can win because the paper doesn’t say.</p>
+<h3 id="tendering-and-contracting">Tendering and contracting</h3>
+<p>Full public tendering process, bid analysis and contracting. Here traceability
+isn’t a virtue, it’s a legal requirement — and it shapes how every decision gets
+documented.</p>
+<h2 id="during-the-works">During the works</h2>
+<p>Supervision and management across four disciplines on the same route:</p>
+<ul>
+<li><strong>Mechanical.</strong> The pipeline itself: welding, non-destructive testing,
+pressure testing, backfill.</li>
+<li><strong>Civil.</strong> Surface facilities — foundations, enclosures, crossing works.</li>
+<li><strong>Electronic.</strong> Fibre optics for telemetry and control. It’s the least visible
+discipline and the one that most shapes operations afterwards: without data,
+the network runs blind.</li>
+<li><strong>Environmental.</strong> Field compliance, soil management and reinstatement.</li>
+</ul>
+<p><strong>The hard part isn’t any one of the four — it’s the sequence.</strong> Each depends on
+the previous one having finished properly, and a mechanical defect surfaces once
+the civil crew has already backfilled.</p>
+<h2 id="lng-and-plants">LNG and plants</h2>
+<p>Beyond the pipeline itself: <strong>pressure reduction stations</strong> and <strong>liquefied
+natural gas</strong> interventions, including compression at industrial plants.</p>
+<p>LNG changes the problem. It isn’t just moving gas — it’s a change of state with
+its own temperature, pressure and safety conditions. A pipeline feeding an
+industrial plant and an LNG facility share little beyond the molecule.</p>
+<h2 id="alternative-energy">Alternative energy</h2>
+<p>Environmental work on <strong>biodiesel and biogas</strong>. That’s where the energy mix is
+heading, and it shows up in the same place as traditional infrastructure: the
+existing network is what will carry whatever comes next.</p>
+<h2 id="outcome">Outcome</h2>
+<p>Seven years taking gas projects from the tender package through to
+commissioning, coordinating mechanical, civil, electronic and environmental
+work along the same route.</p>
+<p>And the part no number captures, which is the part that took the most work: none of those
+projects stalled on an argument between disciplines that the tender package
+should have settled.</p>
+<h2 id="what-i-took-from-it">What I took from it</h2>
+<p>That projects don’t fail on the technical side. They fail at the joints: between
+the specification and the execution, between one discipline and the next, between
+what was contracted and what was understood. <strong>Having stood at both ends is what
+lets you see those joints before they open.</strong></p>
+</div><nav class="mt-20 grid gap-4 border-t border-borde pt-8 sm:grid-cols-2"><a href="/en/projects/evm-powerbi/" class="tarjeta rounded-xl border border-borde bg-panel p-5 hover:bg-panel-alto"><p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-tenue">← Previous</p><p class="mt-2 font-medium leading-snug">Tablero EVM en Power BI</p></a><a href="/en/projects/rutasargentinas/" class="tarjeta rounded-xl border border-borde bg-panel p-5 text-right hover:bg-panel-alto"><p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-tenue">Next →</p><p class="mt-2 font-medium leading-snug">Rutas Argentinas</p></a></nav></main><script type="module">document.documentElement.classList.add(`js-on`);var e=!matchMedia(`(prefers-reduced-motion: reduce)`).matches,t=new IntersectionObserver(e=>{for(let n of e)n.isIntersecting&&(n.target.classList.add(`visible`),t.unobserve(n.target))},{rootMargin:`0px 0px -12% 0px`});for(let e of document.querySelectorAll(`.revelar`))t.observe(e);function n(e){let t=e.textContent.trim().match(/^(\D*)([\d.,]+)(.*)$/);if(!t)return;let[,n,r,i]=t,a=parseInt(r.replace(/[.,]/g,``),10);if(!isFinite(a)||a===0)return;let o=performance.now(),s=r.includes(`.`)?`.`:``;function c(t){let r=Math.min((t-o)/1100,1),l=Math.round(a*(r===1?1:1-2**(-10*r))),u=s?l.toLocaleString(`es-AR`):String(l);e.textContent=n+u+i,r<1&&requestAnimationFrame(c)}requestAnimationFrame(c)}var r=document.querySelector(`.troncal`);if(r){let e=!1,t=()=>{e=!1;let t=document.documentElement.scrollHeight-window.innerHeight;if(t<=0)return r.style.setProperty(`--avance`,`1`);let n=Math.min(Math.max(window.scrollY/t,0),1);r.style.setProperty(`--avance`,n.toFixed(4))},n=()=>{e||(e=!0,requestAnimationFrame(t))};addEventListener(`scroll`,n,{passive:!0}),addEventListener(`resize`,n,{passive:!0}),t()}var i=document.querySelectorAll(`.contador`);if(e&&i.length){let e=new IntersectionObserver(t=>{for(let r of t)r.isIntersecting&&(n(r.target),e.unobserve(r.target))},{threshold:.6});for(let t of i)e.observe(t)}</script></body></html>

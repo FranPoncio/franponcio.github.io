@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="en"><head><script>
+      /*
+       * EL INTERRUPTOR DE MOVIMIENTO.
+       *
+       * Por defecto manda la preferencia del sistema: si pediste reducir
+       * movimiento, el sitio no se mueve. Pero esa preferencia no tiene forma
+       * de saber que estás mirando tu propio portfolio y querés ver cómo
+       * quedó. Con el botón de la barra la prendés a mano, y esa decisión
+       * gana sobre la del sistema para vos y sólo para vos.
+       *
+       * Va INLINE y en el <head>, sin defer, por dos razones: se aplica antes
+       * del primer pintado —si no, la escena arranca quieta y pega un salto al
+       * prenderse— y los scripts de los componentes leen `data-mov` al cargar.
+       */
+      try {
+        if (localStorage.getItem('mov') === 'on') {
+          document.documentElement.dataset.mov = 'on';
+        }
+      } catch (e) {
+        /* modo privado: sin memoria, manda el sistema */
+      }
+    </script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Políticas de inventario sobre ERP y CRM · Francisco Poncio</title><meta name="description" content="Lo próximo que voy a construir — una capa de políticas de inventario sobre los datos del ERP y el CRM, para que las reglas de stock vivan escritas y no en la cabeza de alguien."><meta property="og:title" content="Políticas de inventario sobre ERP y CRM · Francisco Poncio"><meta property="og:description" content="Lo próximo que voy a construir — una capa de políticas de inventario sobre los datos del ERP y el CRM, para que las reglas de stock vivan escritas y no en la cabeza de alguien."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><link rel="alternate" hreflang="es" href="/proyectos/erp-inventario/"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/_astro/proyectos.BNjTjRvQ.css"><style>.carrusel[data-astro-cid-pd4bmjx6]{scrollbar-width:thin;scrollbar-color:var(--color-borde-vivo) transparent}.carrusel[data-astro-cid-pd4bmjx6]::-webkit-scrollbar{height:6px}.carrusel[data-astro-cid-pd4bmjx6]::-webkit-scrollbar-thumb{background:var(--color-borde-vivo);border-radius:3px}.carrusel[data-astro-cid-pd4bmjx6]:focus-visible{outline:2px solid var(--color-acento);outline-offset:4px}
+</style></head><body class="trama min-h-screen"><canvas id="fondo" aria-hidden="true" data-astro-cid-bjdjxntj></canvas><script type="module" src="/_astro/Fondo.astro_astro_type_script_index_0_lang.BmvMnYGi.js"></script><header class="sticky top-0 z-50 border-b border-borde/70 bg-fondo/85 backdrop-blur-md supports-[backdrop-filter]:bg-fondo/65" data-astro-cid-wpvy4v7s><nav class="mx-auto max-w-5xl px-6" aria-label="Navigation" data-astro-cid-wpvy4v7s><div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 py-3.5" data-astro-cid-wpvy4v7s><a href="/en/" class="font-mono text-sm font-semibold tracking-tight transition-colors hover:text-acento" data-astro-cid-wpvy4v7s>FP<span class="text-acento" data-astro-cid-wpvy4v7s>.</span></a><div class="flex items-center gap-3" data-astro-cid-wpvy4v7s><a href="/proyectos/erp-inventario/" hreflang="es" class="rounded border border-borde px-2 py-1 font-mono text-[0.68rem] text-tenue transition-colors hover:border-acento hover:text-acento" aria-label="View in Spanish" data-astro-cid-wpvy4v7s>ES</a><a href="mailto:franponcioo@gmail.com" class="hidden font-mono text-xs text-tenue transition-colors hover:text-acento sm:block" data-astro-cid-wpvy4v7s>Contact</a><a href="https://github.com/FranPoncio" class="font-mono text-xs text-tenue transition-colors hover:text-acento" data-astro-cid-wpvy4v7s>GitHub ↗</a><button type="button" class="mov" hidden aria-pressed="false" title="Turn animation on or off" data-astro-cid-wpvy4v7s><span class="mov-icono" aria-hidden="true" data-astro-cid-wpvy4v7s></span><span class="mov-txt" data-astro-cid-wpvy4v7s>motion</span></button></div></div></nav></header><script type="module">var e=document.querySelector(`.mov`);if(e&&matchMedia(`(prefers-reduced-motion: reduce)`).matches){let t=()=>document.documentElement.dataset.mov===`on`,n=()=>e.setAttribute(`aria-pressed`,String(t()));e.hidden=!1,n(),e.addEventListener(`click`,()=>{let e=!t();e?document.documentElement.dataset.mov=`on`:delete document.documentElement.dataset.mov;try{localStorage.setItem(`mov`,e?`on`:`off`)}catch{}n(),location.reload()})}</script><p class="bg-acento px-6 py-2.5 text-center font-mono text-xs font-semibold text-fondo">DRAFT — fill this file in and remove `borrador: true` from the frontmatter.</p><p class="border-b border-borde bg-panel-alto px-6 py-2.5 text-center font-mono text-xs text-tenue">This case is only available in Spanish for now.</p><header class="border-b border-borde"><div class="mx-auto max-w-3xl px-6 py-16"><a href="/en/" class="font-mono text-xs text-tenue transition-colors hover:text-acento">← back to the panel</a><p class="mt-8 font-mono text-xs uppercase tracking-[0.16em] text-herramienta">herramienta</p><h1 class="mt-4 text-[1.3rem] font-bold leading-[1.22] sm:text-[1.8rem]">Políticas de inventario sobre ERP y CRM</h1><p class="mt-5 text-[0.95rem] leading-relaxed text-tenue">Lo próximo que voy a construir — una capa de políticas de inventario sobre los datos del ERP y el CRM, para que las reglas de stock vivan escritas y no en la cabeza de alguien.</p><dl class="mt-9 flex flex-wrap gap-x-10 gap-y-4 font-mono text-sm"><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Period</dt><dd class="mt-1">2026 —</dd></div><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Role</dt><dd class="mt-1">Diseño y desarrollo</dd></div></dl><div class="mt-7 flex flex-wrap gap-2"><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">ERP</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">CRM</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">SQL</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">TypeScript</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Políticas de inventario</span></div></div></header><main class="mx-auto max-w-3xl px-6 py-14"><dl class="grid gap-px bg-borde border border-borde rounded-lg overflow-hidden sm:grid-cols-2 lg:grid-cols-3"><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Estado</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">En diseño</dd><p class="mt-1 text-xs text-tenue leading-snug">todavía no hay código</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Origen</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">2013 — 2016</dd><p class="mt-1 text-xs text-tenue leading-snug">el problema que vi en el depósito</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Alcance</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">ERP + CRM</dd><p class="mt-1 text-xs text-tenue leading-snug">stock, rotación y demanda</p></div></dl><div class="prosa mt-14"><blockquote>
+<p><strong>Este caso describe un proyecto que estoy empezando, no uno terminado.</strong> No
+hay código todavía. Está acá porque marca hacia dónde voy, y porque el
+problema que resuelve lo vi de primera mano.</p>
+</blockquote>
+<h2 id="de-dónde-sale">De dónde sale</h2>
+<p>Tres años entre <a href="/proyectos/set-logistica/">Set Logística</a> y
+<a href="/proyectos/etechlog/">E-Techlog</a>, en el mismo depósito. Dos empresas, dos
+sistemas, y el mismo problema debajo de todo:</p>
+<p><strong>Las reglas de inventario no estaban escritas en ningún lado.</strong> Cuánto stock
+mínimo tener de cada ítem, cada cuánto revisarlo, a partir de qué antigüedad un
+ítem pasa a ser stock muerto, quién autoriza darlo de baja. Todo eso existía —
+alguien lo sabía— pero vivía en la cabeza de esa persona y en su criterio del
+día.</p>
+<p>El ERP guardaba los movimientos. El CRM guardaba lo que el cliente pedía. Ningún
+sistema guardaba <strong>la política</strong>, que es lo que conecta las dos cosas.</p>
+<h2 id="qué-quiero-construir">Qué quiero construir</h2>
+<p>Una capa que se apoye en los datos que el ERP y el CRM ya tienen, y que agregue
+lo único que falta: las reglas, escritas y versionadas.</p>
+<ul>
+<li><strong>Políticas explícitas por familia de ítem.</strong> Punto de reposición, stock de
+seguridad, criterio de rotación, umbral de antigüedad. Cada regla con su
+fecha, su autor y su motivo.</li>
+<li><strong>Stock muerto detectado solo.</strong> Por rotación y antigüedad contra la política,
+no contra la intuición. Con la valorización de lo inmovilizado al lado, que es
+lo que mueve a alguien a decidir.</li>
+<li><strong>Cruce con la demanda real.</strong> El CRM sabe qué se pidió y qué se prometió; el
+ERP sabe qué había. La brecha entre las dos es donde se pierde plata, y hoy
+nadie la mira porque está repartida entre dos sistemas.</li>
+<li><strong>Una fuente de verdad por dato.</strong> Cuando dos sistemas describen el mismo
+depósito, la pregunta no es cuál está bien: es cuál manda para qué campo. Esa
+decisión tiene que estar escrita en algún lado y hoy no lo está.</li>
+</ul>
+<h2 id="la-apuesta">La apuesta</h2>
+<p>La misma que hice con <a href="/proyectos/pmiproject/">PMI Toolbox</a>, y por la misma
+razón. Ahí el problema era que la línea base se movía sola; acá es que la
+política de inventario no existe como objeto. En los dos casos <strong>la herramienta
+no calcula nada que no se pueda calcular a mano: lo que aporta es no dejar que
+la regla se mueva sin que se note.</strong></p>
+<h2 id="lo-que-falta">Lo que falta</h2>
+<p>Todo. Este caso se va a ir llenando a medida que haya algo que mostrar.</p>
+</div><nav class="mt-20 grid gap-4 border-t border-borde pt-8 sm:grid-cols-2"><a href="/en/projects/web/" class="tarjeta rounded-xl border border-borde bg-panel p-5 hover:bg-panel-alto"><p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-tenue">← Previous</p><p class="mt-2 font-medium leading-snug">Este portfolio</p></a><a href="/en/projects/bitacora/" class="tarjeta rounded-xl border border-borde bg-panel p-5 text-right hover:bg-panel-alto"><p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-tenue">Next →</p><p class="mt-2 font-medium leading-snug">Bitácora Interior</p></a></nav></main><script type="module">document.documentElement.classList.add(`js-on`);var e=!matchMedia(`(prefers-reduced-motion: reduce)`).matches,t=new IntersectionObserver(e=>{for(let n of e)n.isIntersecting&&(n.target.classList.add(`visible`),t.unobserve(n.target))},{rootMargin:`0px 0px -12% 0px`});for(let e of document.querySelectorAll(`.revelar`))t.observe(e);function n(e){let t=e.textContent.trim().match(/^(\D*)([\d.,]+)(.*)$/);if(!t)return;let[,n,r,i]=t,a=parseInt(r.replace(/[.,]/g,``),10);if(!isFinite(a)||a===0)return;let o=performance.now(),s=r.includes(`.`)?`.`:``;function c(t){let r=Math.min((t-o)/1100,1),l=Math.round(a*(r===1?1:1-2**(-10*r))),u=s?l.toLocaleString(`es-AR`):String(l);e.textContent=n+u+i,r<1&&requestAnimationFrame(c)}requestAnimationFrame(c)}var r=document.querySelector(`.troncal`);if(r){let e=!1,t=()=>{e=!1;let t=document.documentElement.scrollHeight-window.innerHeight;if(t<=0)return r.style.setProperty(`--avance`,`1`);let n=Math.min(Math.max(window.scrollY/t,0),1);r.style.setProperty(`--avance`,n.toFixed(4))},n=()=>{e||(e=!0,requestAnimationFrame(t))};addEventListener(`scroll`,n,{passive:!0}),addEventListener(`resize`,n,{passive:!0}),t()}var i=document.querySelectorAll(`.contador`);if(e&&i.length){let e=new IntersectionObserver(t=>{for(let r of t)r.isIntersecting&&(n(r.target),e.unobserve(r.target))},{threshold:.6});for(let t of i)e.observe(t)}</script></body></html>

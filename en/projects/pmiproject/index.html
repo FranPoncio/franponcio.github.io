@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="en"><head><script>
+      /*
+       * EL INTERRUPTOR DE MOVIMIENTO.
+       *
+       * Por defecto manda la preferencia del sistema: si pediste reducir
+       * movimiento, el sitio no se mueve. Pero esa preferencia no tiene forma
+       * de saber que estás mirando tu propio portfolio y querés ver cómo
+       * quedó. Con el botón de la barra la prendés a mano, y esa decisión
+       * gana sobre la del sistema para vos y sólo para vos.
+       *
+       * Va INLINE y en el <head>, sin defer, por dos razones: se aplica antes
+       * del primer pintado —si no, la escena arranca quieta y pega un salto al
+       * prenderse— y los scripts de los componentes leen `data-mov` al cargar.
+       */
+      try {
+        if (localStorage.getItem('mov') === 'on') {
+          document.documentElement.dataset.mov = 'on';
+        }
+      } catch (e) {
+        /* modo privado: sin memoria, manda el sistema */
+      }
+    </script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>PMI Toolbox · Francisco Poncio</title><meta name="description" content="App de control de proyectos con un motor completo de Earned Value Management — línea base congelada, Earned Schedule y auditoría de quién cargó cada corte."><meta property="og:title" content="PMI Toolbox · Francisco Poncio"><meta property="og:description" content="App de control de proyectos con un motor completo de Earned Value Management — línea base congelada, Earned Schedule y auditoría de quién cargó cada corte."><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><link rel="alternate" hreflang="es" href="/proyectos/pmiproject/"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/_astro/proyectos.BNjTjRvQ.css"><style>.carrusel[data-astro-cid-pd4bmjx6]{scrollbar-width:thin;scrollbar-color:var(--color-borde-vivo) transparent}.carrusel[data-astro-cid-pd4bmjx6]::-webkit-scrollbar{height:6px}.carrusel[data-astro-cid-pd4bmjx6]::-webkit-scrollbar-thumb{background:var(--color-borde-vivo);border-radius:3px}.carrusel[data-astro-cid-pd4bmjx6]:focus-visible{outline:2px solid var(--color-acento);outline-offset:4px}
+</style></head><body class="trama min-h-screen"><canvas id="fondo" aria-hidden="true" data-astro-cid-bjdjxntj></canvas><script type="module" src="/_astro/Fondo.astro_astro_type_script_index_0_lang.BmvMnYGi.js"></script><header class="sticky top-0 z-50 border-b border-borde/70 bg-fondo/85 backdrop-blur-md supports-[backdrop-filter]:bg-fondo/65" data-astro-cid-wpvy4v7s><nav class="mx-auto max-w-5xl px-6" aria-label="Navigation" data-astro-cid-wpvy4v7s><div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 py-3.5" data-astro-cid-wpvy4v7s><a href="/en/" class="font-mono text-sm font-semibold tracking-tight transition-colors hover:text-acento" data-astro-cid-wpvy4v7s>FP<span class="text-acento" data-astro-cid-wpvy4v7s>.</span></a><div class="flex items-center gap-3" data-astro-cid-wpvy4v7s><a href="/proyectos/pmiproject/" hreflang="es" class="rounded border border-borde px-2 py-1 font-mono text-[0.68rem] text-tenue transition-colors hover:border-acento hover:text-acento" aria-label="View in Spanish" data-astro-cid-wpvy4v7s>ES</a><a href="mailto:franponcioo@gmail.com" class="hidden font-mono text-xs text-tenue transition-colors hover:text-acento sm:block" data-astro-cid-wpvy4v7s>Contact</a><a href="https://github.com/FranPoncio" class="font-mono text-xs text-tenue transition-colors hover:text-acento" data-astro-cid-wpvy4v7s>GitHub ↗</a><button type="button" class="mov" hidden aria-pressed="false" title="Turn animation on or off" data-astro-cid-wpvy4v7s><span class="mov-icono" aria-hidden="true" data-astro-cid-wpvy4v7s></span><span class="mov-txt" data-astro-cid-wpvy4v7s>motion</span></button></div></div></nav></header><script type="module">var e=document.querySelector(`.mov`);if(e&&matchMedia(`(prefers-reduced-motion: reduce)`).matches){let t=()=>document.documentElement.dataset.mov===`on`,n=()=>e.setAttribute(`aria-pressed`,String(t()));e.hidden=!1,n(),e.addEventListener(`click`,()=>{let e=!t();e?document.documentElement.dataset.mov=`on`:delete document.documentElement.dataset.mov;try{localStorage.setItem(`mov`,e?`on`:`off`)}catch{}n(),location.reload()})}</script><p class="border-b border-borde bg-panel-alto px-6 py-2.5 text-center font-mono text-xs text-tenue">This case is only available in Spanish for now.</p><header class="border-b border-borde"><div class="mx-auto max-w-3xl px-6 py-16"><a href="/en/" class="font-mono text-xs text-tenue transition-colors hover:text-acento">← back to the panel</a><p class="mt-8 font-mono text-xs uppercase tracking-[0.16em] text-herramienta">herramienta</p><h1 class="mt-4 text-[1.3rem] font-bold leading-[1.22] sm:text-[1.8rem]">PMI Toolbox</h1><p class="mt-5 text-[0.95rem] leading-relaxed text-tenue">App de control de proyectos con un motor completo de Earned Value Management — línea base congelada, Earned Schedule y auditoría de quién cargó cada corte.</p><dl class="mt-9 flex flex-wrap gap-x-10 gap-y-4 font-mono text-sm"><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Period</dt><dd class="mt-1">2025 — 2026</dd></div><div><dt class="text-[0.68rem] uppercase tracking-[0.14em] text-tenue">Role</dt><dd class="mt-1">Diseño, desarrollo y pruebas</dd></div></dl><div class="mt-7 flex flex-wrap gap-2"><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">React</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">TypeScript</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Zustand</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Dexie</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Vitest</span><span class="rounded border border-borde px-2.5 py-1 font-mono text-[0.7rem] text-tenue">Tailwind</span></div><a href="https://franponcio.github.io/PMI-Toolbox/" class="mt-8 inline-block rounded border border-acento/50 px-4 py-2 font-mono text-xs text-acento transition-colors hover:bg-acento hover:text-fondo">Abrir la app →</a></div></header><main class="mx-auto max-w-3xl px-6 py-14"><dl class="grid gap-px bg-borde border border-borde rounded-lg overflow-hidden sm:grid-cols-2 lg:grid-cols-4"><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Motor</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">EVM + ES</dd><p class="mt-1 text-xs text-tenue leading-snug">PV, EV, AC, SPI, CPI, tres EAC, TCPI</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Pruebas</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">135</dd><p class="mt-1 text-xs text-tenue leading-snug">casos, sobre 15 archivos</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Código</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">6.900</dd><p class="mt-1 text-xs text-tenue leading-snug">líneas de TypeScript</p></div><div class="bg-panel px-5 py-4"><dt class="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-tenue">Backend</dt><dd class="mt-1.5 font-mono text-2xl font-semibold tabular-nums">0</dd><p class="mt-1 text-xs text-tenue leading-snug">todo en el navegador (IndexedDB)</p></div></dl><div class="prosa mt-14"><h2 id="por-qué-existe">Por qué existe</h2>
+<p>Reporté avance de obra durante siete años. La herramienta que se usa casi
+siempre es una planilla, y la planilla tiene un problema estructural: <strong>cuando
+alguien edita el plan, la línea base se mueve con él.</strong> Al mes siguiente el
+proyecto “cumple”, porque el plan contra el que se lo mide es otro.</p>
+<p>PMI Toolbox es la herramienta que me hubiera servido: un motor de Earned Value
+Management sobre una <strong>línea base que no se puede tocar sin dejar rastro</strong>.</p>
+<h2 id="las-decisiones-que-la-definen">Las decisiones que la definen</h2>
+<h3 id="la-línea-base-se-congela">La línea base se congela</h3>
+<p>Aprobás una foto del plan —presupuesto, pesos y fechas de cada paquete— y el
+desempeño se mide contra esa foto. Editar un paquete después ya no la mueve.
+Cambiar el alcance exige una <strong>versión nueva</strong> de la base, con historial y aviso
+de divergencia. Es la diferencia entre un tablero que informa y uno que
+tranquiliza.</p>
+<h3 id="el-motor-va-aparte-de-la-interfaz">El motor va aparte de la interfaz</h3>
+<p><code>src/core/</code> no sabe que existe React. Calcula PV, EV, AC, las variaciones, los
+índices, las <strong>tres variantes clásicas de EAC</strong>, ETC, VAC y TCPI, y no dibuja
+nada. Por eso se puede probar de verdad: <strong>135 casos de prueba</strong> sobre el motor,
+el import de CSV, el almacenamiento y el estado.</p>
+<h3 id="atraso-en-tiempo-no-sólo-en-plata">Atraso en tiempo, no sólo en plata</h3>
+<p>El EVM clásico dice cuánto dinero de trabajo falta, no cuándo se termina. La app
+suma <strong>Earned Schedule</strong>: traduce el avance ganado a tiempo sobre la curva S y
+proyecta una fecha de fin. Es la pregunta que hace el comité y que el EVM solo
+no contesta.</p>
+<h3 id="la-conclusión-antes-que-el-gráfico">La conclusión antes que el gráfico</h3>
+<p>Cada pantalla abre con un veredicto escrito, y arriba de todo va el panel
+<strong>“Requiere decisión”</strong>, ordenado por exposición económica y con el motivo
+explícito de cada paquete fuera de plan. Nada de donuts ni de velocímetros:
+texto, tablas y una curva S de líneas. Ningún número absoluto aparece sin su
+comparación contra el plan.</p>
+<h3 id="sin-servidor">Sin servidor</h3>
+<p>Todo vive en el navegador con IndexedDB, detrás de un puerto <code>Repository</code> con
+una cola de sincronización ya escrita. <strong>La arquitectura para multi-dispositivo
+está lista; falta el servidor</strong>, que un sitio estático no despliega. Está dicho
+en el README y no lo vendo como terminado.</p>
+<h2 id="qué-hace-en-concreto">Qué hace, en concreto</h2>
+<ul>
+<li>Multiproyecto, con WBS jerárquica y roll-up de los paquetes hoja.</li>
+<li>Cortes de avance, y el proyecto visto a cualquier fecha de corte histórica.</li>
+<li>Import de cronograma desde CSV de Excel, MS Project o P6, tolerando fechas
+<code>DD/MM/AAAA</code> y separadores de miles, con validación antes de importar.</li>
+<li>Import de avances y costos reales — el patrón ERP → EVM.</li>
+<li>Umbrales de SPI y CPI sensibles a la etapa del proyecto, criterio ISR / PMR.</li>
+<li>Bitácora de auditoría: quién cargó qué corte y cuándo.</li>
+<li>Export a CSV y reporte imprimible para comité, con riesgos, issues y próximos
+pasos.</li>
+</ul>
+<h2 id="lo-que-me-llevé">Lo que me llevé</h2>
+<p>Que el trabajo difícil de una herramienta de control no es el cálculo —el EVM
+son diez fórmulas— sino <strong>decidir qué no se puede hacer</strong>. Que la base no se
+mueva sola es una restricción, y es exactamente lo que la vuelve útil.</p>
+</div><nav class="mt-20 grid gap-4 border-t border-borde pt-8 sm:grid-cols-2"><a href="/en/projects/gasoductos/" class="tarjeta rounded-xl border border-borde bg-panel p-5 hover:bg-panel-alto"><p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-tenue">← Previous</p><p class="mt-2 font-medium leading-snug">Gas infrastructure indicators</p></a><a href="/en/projects/sgi-trinorma/" class="tarjeta rounded-xl border border-borde bg-panel p-5 text-right hover:bg-panel-alto"><p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-tenue">Next →</p><p class="mt-2 font-medium leading-snug">SGI Trinorma — cobertura y auditoría interna</p></a></nav></main><script type="module">document.documentElement.classList.add(`js-on`);var e=!matchMedia(`(prefers-reduced-motion: reduce)`).matches,t=new IntersectionObserver(e=>{for(let n of e)n.isIntersecting&&(n.target.classList.add(`visible`),t.unobserve(n.target))},{rootMargin:`0px 0px -12% 0px`});for(let e of document.querySelectorAll(`.revelar`))t.observe(e);function n(e){let t=e.textContent.trim().match(/^(\D*)([\d.,]+)(.*)$/);if(!t)return;let[,n,r,i]=t,a=parseInt(r.replace(/[.,]/g,``),10);if(!isFinite(a)||a===0)return;let o=performance.now(),s=r.includes(`.`)?`.`:``;function c(t){let r=Math.min((t-o)/1100,1),l=Math.round(a*(r===1?1:1-2**(-10*r))),u=s?l.toLocaleString(`es-AR`):String(l);e.textContent=n+u+i,r<1&&requestAnimationFrame(c)}requestAnimationFrame(c)}var r=document.querySelector(`.troncal`);if(r){let e=!1,t=()=>{e=!1;let t=document.documentElement.scrollHeight-window.innerHeight;if(t<=0)return r.style.setProperty(`--avance`,`1`);let n=Math.min(Math.max(window.scrollY/t,0),1);r.style.setProperty(`--avance`,n.toFixed(4))},n=()=>{e||(e=!0,requestAnimationFrame(t))};addEventListener(`scroll`,n,{passive:!0}),addEventListener(`resize`,n,{passive:!0}),t()}var i=document.querySelectorAll(`.contador`);if(e&&i.length){let e=new IntersectionObserver(t=>{for(let r of t)r.isIntersecting&&(n(r.target),e.unobserve(r.target))},{threshold:.6});for(let t of i)e.observe(t)}</script></body></html>
